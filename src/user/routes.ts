@@ -51,14 +51,14 @@ router.get("/:id", async (req, res) => {
     res.json(user);
 });
 
-router.post("", user({ adminsOnly: true }), async (req, res) => {
+router.post("", async (req, res) => {
     try {
         let user: User = req.body;
-        console.log(user.password);
         user.password = await argon2.hash(user.password);
         let created = await prisma.user.create({
             data: user
         });
+        delete (created as any).password ; 
         res.json(created);
     } catch (e) {
         console.log(e);
