@@ -38,7 +38,11 @@ Instalar las dependencias:
 ```sh
 npm i
 ```
-Correr el servidor: 
+Migrar la base de datos:
+```sh
+npx prisma migrate dev
 ```
+Correr el servidor: 
+```sh
 npm run dev
 ```
