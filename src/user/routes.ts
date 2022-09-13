@@ -50,7 +50,7 @@ router.get("/", async (req, res) => {
  *      get:
  *          description: returns the current authenticated user if any.
  *          parameters: 
- *              -   in: header
+ *                - in: header
  *                  name: "x-access-token"
  *                  description: Authentication access token.
  *                  required: false
@@ -66,19 +66,64 @@ router.get("/me", user({ optional: true }), async (req: Request, res: any) => {
     res.json(req.user || null);
 });
 
+/**
+ * @swagger
+ * /user/{id}:
+ *      get: 
+ *        description: returns the queried user by their id
+ *        parameters: 
+ *          - in: path
+ *            name: id
+ *            schema:
+ *            type: integer
+ *            required: true
+ *            description: numeric id of the user to fetch
+ *        responses: 
+ *            '200': 
+ *               description: the queried user. 
+ *            '404': 
+ *               description: the user was not found.
+ */
 router.get("/:id", async (req, res) => {
     let { id } = req.params;
     let user = await prisma.user.findFirst({
         where: { id: Number(id) }
     });
     if (user === null) {
-        return res.json(NOT_FOUND);
+        return res.status(404).json(NOT_FOUND);
     }
     delete (user as any).password;
     res.json(user);
 });
 
-router.post("", async (req, res) => {
+/**
+ * @swagger
+ * /user:
+ *     post: 
+ *      description: creates a new user
+ *      consumes: 
+ *          - application/json
+ *      requestBody:
+ *          required: true
+ *          content: 
+ *              application/json: 
+ *                  schema: 
+ *                      type: object
+ *                      properties: 
+ *                          email:
+ *                              type: string
+ *                          password: 
+ *                              type: string
+ *                      required: 
+ *                          - email
+ *                          - password                
+ *      responses: 
+ *          '201': 
+ *              description: a new user is created. 
+ *          '500': 
+ *              description: internal server error. Likely the user is already signed up. 
+ */
+router.post("/", async (req, res) => {
     try {
         let user: User = req.body;
         user.password = await argon2.hash(user.password);
@@ -86,7 +131,7 @@ router.post("", async (req, res) => {
             data: user
         });
         delete (created as any).password;
-        res.json(created);
+        res.status(201).json(created);
     } catch (e) {
         console.log(e);
         res.status(500);
@@ -94,6 +139,33 @@ router.post("", async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /user/login:
+ *     post: 
+ *      description: logs in to user account
+ *      consumes: 
+ *          - application/json
+ *      requestBody:
+ *          required: true
+ *          content: 
+ *              application/json: 
+ *                  schema: 
+ *                      type: object
+ *                      properties: 
+ *                          email:
+ *                              type: string
+ *                          password: 
+ *                              type: string
+ *                      required: 
+ *                          - email
+ *                          - password                
+ *      responses: 
+ *          '200': 
+ *              description: responds with the `"x-access-token"`.
+ *          '401': 
+ *              description: invalid credentials.
+ */
 router.post("/login", async (req, res) => {
     let { email, password } = req.body;
     if (typeof (email) != "string" || typeof (password) != "string") {
@@ -113,8 +185,44 @@ router.post("/login", async (req, res) => {
     }
     let token = jwt.sign({ email }, JWT_SECRET);
     res.setHeader("x-access-token", token);
-    res.send(SUCCESS);
+    res.send({ "x-access-token": token, ...SUCCESS });
 });
+
+
+/**
+ * @swagger
+ * /user/:
+ *     patch: 
+ *      description: updates user information
+ *      parameters: 
+ *        - in: header
+ *          name: "x-access-token"
+ *          description: Authentication access token.
+ *          required: true
+ *          schema:
+ *            type: string
+ *      consumes: 
+ *          - application/json
+ *      requestBody:
+ *          required: true
+ *          content: 
+ *              application/json: 
+ *                  schema: 
+ *                      type: object
+ *                      properties: 
+ *                          email:
+ *                              type: string
+ *                          password: 
+ *                              type: string
+ *                      required: 
+ *                          - email
+ *                          - password                
+ *      responses: 
+ *          '200': 
+ *              description: responds with the `"x-access-token"`.
+ *          '401': 
+ *              description: invalid credentials.
+ */
 
 router.patch("/", user(), async (req: Request, res) => {
     if (req.user != null) {
@@ -129,7 +237,8 @@ router.patch("/", user(), async (req: Request, res) => {
     }
 });
 
-router.delete("/", user(), async (req: Request, res) => {
+
+router.delete("/", user({ staffOnly: true }), async (req: Request, res) => {
     await prisma.user.delete({
         where: {
             id: Number(req.user?.id),
