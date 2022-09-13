@@ -77,7 +77,8 @@ function forbidden(res: Response, next: NextFunction, options?: Options) {
         res.status(403)
             .json({
                 status: "error",
-                error: "No tiene permiso para acceder a este recurso."
+                es: "No tiene permiso para acceder a este recurso.",
+                en: "You are not allowed to access this resource."
             });
     }
 }
@@ -89,7 +90,8 @@ function expired(res: Response, next: NextFunction, options?: Options) {
         res.status(401)
             .json({
                 status: "error",
-                error: "Su sesión ha expirado"
+                es: "Su sesión ha expirado",
+                en: "Your session has expired."
             });
     }
 }
@@ -101,7 +103,8 @@ function unauthenticated(res: Response, next: NextFunction, options?: Options,) 
         res.status(401)
             .json({
                 status: "error",
-                error: "Tienes que ingresar sesión para acceder a este recurso."
+                es: "Tienes que ingresar sesión para acceder a este recurso.",
+                en: "You must log in to access this resource."
             });
     }
 }

@@ -210,11 +210,14 @@ router.post("/login", async (req, res) => {
  *                  schema: 
  *                      type: object
  *                      properties: 
+ *                          id: 
+ *                              type: integer
  *                          email:
  *                              type: string
  *                          password: 
  *                              type: string
  *                      required: 
+ *                          - id
  *                          - email
  *                          - password                
  *      responses: 
@@ -223,15 +226,19 @@ router.post("/login", async (req, res) => {
  */
 
 router.patch("/", user(), async (req: Request, res) => {
-    if (req.user != null) {
+    // if you are staff or you are editting your own profile
+
+    if (req.user?.isStaff || req.user?.id == req.body.id) {
         let updated = await prisma.user.update({
             where: {
-                id: req.user.id,
+                id: req.body.id,
             },
-            data: user
+            data: req.body
         });
         delete (updated as any).password;
         res.json(updated);
+    } else {
+        res.status(403).json(UNAUTHORIZED);
     }
 });
 
@@ -269,10 +276,7 @@ router.delete("/:id", user({ staffOnly: true }), async (req: Request, res) => {
 });
 
 router.use((err: Error, req: any, res: any, next: any) => {
-    res.status(500).json({
-        error: "Error interno del servidor",
-        status: "error",
-    });
+    res.status(500).json(UNAUTHORIZED);
 });
 
 
@@ -282,20 +286,29 @@ const SUCCESS = {
 
 const UNREGISTERED_USER = {
     "status": "error",
-    "error": "El correo electrónico no está registrado.",
+    "es": "El correo electrónico no está registrado.",
+    "en": "The email is not registered."
 };
 
 const INCORRECT_PASSWORD = {
     "status": "error",
-    "error": "La contraseña o usuario son incorrectos.",
+    "es": "La contraseña o usuario son incorrectos.",
+    "en": "The user or password are incorrect.",
 };
 const UNKOWN_ERROR = {
     "status": "error",
-    "error": "Ocurrió un error creando el usuario.",
+    "es": "Ocurrió un error creando el usuario.",
+    "en": "An error occurred creating the user"
 };
 const NOT_FOUND = {
     "status": "error",
-    "error": "El usuario no fue encontrado.",
+    "es": "El usuario no fue encontrado.",
+    "en": "The user was not found",
+};
+const UNAUTHORIZED = {
+    "status": "error",
+    "es": "No tienes permiso para acceder a este recurso",
+    "en": "You are not allowed to access this resource",
 };
 const PUBLIC_FIELDS = {
     "email": true,
@@ -304,7 +317,8 @@ const PUBLIC_FIELDS = {
     "createdAt": true,
 };
 const BAD_REQUEST = {
-    "error": "bad request",
+    "en": "Bad request",
+    "es": "Bad request",
     "status": "error"
 };
 
