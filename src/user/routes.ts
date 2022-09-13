@@ -70,19 +70,19 @@ router.get("/me", user({ optional: true }), async (req: Request, res: any) => {
  * @swagger
  * /user/{id}:
  *      get: 
- *        description: returns the queried user by their id
+ *        description: Returns the queried user by their id
  *        parameters: 
  *          - in: path
  *            name: id
  *            schema:
  *            type: integer
  *            required: true
- *            description: numeric id of the user to fetch
+ *            description: Numeric id of the user to fetch
  *        responses: 
  *            '200': 
- *               description: the queried user. 
+ *               description: The queried user. 
  *            '404': 
- *               description: the user was not found.
+ *               description: The user was not found.
  */
 router.get("/:id", async (req, res) => {
     let { id } = req.params;
@@ -100,7 +100,7 @@ router.get("/:id", async (req, res) => {
  * @swagger
  * /user:
  *     post: 
- *      description: creates a new user
+ *      description: Creates a new user.
  *      consumes: 
  *          - application/json
  *      requestBody:
@@ -119,9 +119,9 @@ router.get("/:id", async (req, res) => {
  *                          - password                
  *      responses: 
  *          '201': 
- *              description: a new user is created. 
+ *              description: A new user is created. 
  *          '500': 
- *              description: internal server error. Likely the user is already signed up. 
+ *              description: Internal server error. Likely the user is already signed up. 
  */
 router.post("/", async (req, res) => {
     try {
@@ -143,7 +143,7 @@ router.post("/", async (req, res) => {
  * @swagger
  * /user/login:
  *     post: 
- *      description: logs in to user account
+ *      description: Logs in to user account
  *      consumes: 
  *          - application/json
  *      requestBody:
@@ -162,9 +162,9 @@ router.post("/", async (req, res) => {
  *                          - password                
  *      responses: 
  *          '200': 
- *              description: responds with the `"x-access-token"`.
+ *              description: Responds with the `"x-access-token"`.
  *          '401': 
- *              description: invalid credentials.
+ *              description: Invalid credentials.
  */
 router.post("/login", async (req, res) => {
     let { email, password } = req.body;
@@ -193,7 +193,7 @@ router.post("/login", async (req, res) => {
  * @swagger
  * /user/:
  *     patch: 
- *      description: updates user information
+ *      description: Updates user information.
  *      parameters: 
  *        - in: header
  *          name: "x-access-token"
@@ -219,9 +219,7 @@ router.post("/login", async (req, res) => {
  *                          - password                
  *      responses: 
  *          '200': 
- *              description: responds with the `"x-access-token"`.
- *          '401': 
- *              description: invalid credentials.
+ *              description: responds with the new user fields.
  */
 
 router.patch("/", user(), async (req: Request, res) => {
@@ -238,10 +236,33 @@ router.patch("/", user(), async (req: Request, res) => {
 });
 
 
-router.delete("/", user({ staffOnly: true }), async (req: Request, res) => {
+/**
+ * @swagger
+ * /user/{id}:
+ *     delete: 
+ *      description: Deletes the user. Only staff members can delete users. 
+ *      parameters: 
+ *        - in: header
+ *          name: "x-access-token"
+ *          description: Authentication access token.
+ *          required: true
+ *          schema:
+ *            type: string
+ *        - in: path
+ *          name: id
+ *          description: User id.
+ *          required: true
+ *          schema: 
+ *              type: integer  
+ *      responses: 
+ *          '200': 
+ *              description: {"status": "success"}
+ */
+router.delete("/:id", user({ staffOnly: true }), async (req: Request, res) => {
+    let { id } = req.params;
     await prisma.user.delete({
         where: {
-            id: Number(req.user?.id),
+            id: Number(id),
         }
     });
     res.json(SUCCESS);
