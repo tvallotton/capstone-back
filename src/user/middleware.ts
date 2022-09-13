@@ -21,6 +21,12 @@ interface Options {
      * admin only content. It defaults to false. 
      */
     adminsOnly?: boolean;
+
+    /**
+     * It is used to respond with a forbitten status for
+     * staff only content. It defaults to false. 
+     */
+    staffOnly?: boolean;
 }
 /**
  * This is authentication middleware, it can be used to 
@@ -63,9 +69,9 @@ async function fetchUser(token: string) {
     });
     return user || undefined;
 }
-
+// returns forbidden if admins or users only.
 function forbidden(res: Response, next: NextFunction, options?: Options) {
-    if (!options?.adminsOnly) {
+    if (!options?.adminsOnly && !options?.staffOnly) {
         next();
     } else {
         res.status(403)

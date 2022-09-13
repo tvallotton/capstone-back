@@ -2,19 +2,70 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+    provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
 }
 
 model User {
-    id        Int      @id @default(autoincrement())
-    email     String   @unique
-    password  String
-    isAdmin   Boolean  @default(false)
-    isStaff   Boolean  @default(false)
-    createdAt DateTime @default(now())
+    id          Int          @id @default(autoincrement())
+    email       String       @unique
+    password    String
+    isAdmin     Boolean      @default(false)
+    isStaff     Boolean      @default(false)
+    createdAt   DateTime     @default(now())
+    submissions Submission[]
+    borrows     Borrow[]
+}
+
+model Bicycle {
+    id      Int           @id @default(autoincrement())
+    qrCode  String        @unique
+    status  BicycleStatus
+    model   BicycleModel  @relation(fields: [modelId], references: [id])
+    modelId Int
+    borrows Borrow[]
+}
+
+model BicycleModel {
+    id       Int       @id @default(autoincrement())
+    name     String    @unique
+    // el número de bicicletas reservadas para este modelo
+    setAside Int       @default(0)
+    image    String
+    bicycles Bicycle[]
+}
+
+model Submission {
+    id       Int    @id @default(autoincrement())
+    author   User   @relation(fields: [authorId], references: [id])
+    authorId Int
+    name     String
+    lastName String
+}
+
+model Borrow {
+    id          Int      @id @default(autoincrement())
+    user        User     @relation(fields: [userId], references: [id])
+    userId      Int
+    bicycle     Bicycle  @relation(fields: [bicycleId], references: [id])
+    bicycleId   Int
+    hasFinished Boolean
+    start       DateTime @default(now())
+    end         DateTime
+}
+
+enum BicycleStatus {
+    HABILITADA // puede estar disponible o arrendada. 
+    REPARACION // no está prestada pero está averiada
+    INHABILITADA // se considera perdida/destruida
+}
+
+model Inventory {
+    id      Int @id
+    helmets Int
+    vest    Int
 }

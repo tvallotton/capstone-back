@@ -8,17 +8,28 @@ const prisma = new PrismaClient();
 const router = Router();
 
 /**
- * This is used to get a paginated list of users
- * a get request to this route should have the following 
- * format "/?skip=20&take=10". Skip corresponds to the number 
- * of users to skip, while get its the number to return. 
- * By default skip is set to 0 and `take` is set to infinity.
- * The maximum number of users that can be taken at a time is 50.
+ * @swagger
+ * /user:
+ *      get: 
+ *          description: returns the queried user models.
+ *          parameters: 
+ *              - in: query
+ *                name: take
+ *                required: false
+ *                schema: 
+ *                  type: integer
+ *                description: the number of elements to return. 
+ *              - in: query
+ *                name: skip
+ *                required: false
+ *                schema: 
+ *                  type: integer
+ *                description: the number of elements to skip before tarting to collect the result set.
  */
 router.get("/", async (req, res) => {
-    let skip = Number(req.query.skip) || 0;
-    let take = Number(req.query.take) || Infinity;
-    take = Math.min(take, 50);
+    let skip = Number(req.query.skip) || undefined;
+    let take = Number(req.query.take) || undefined;
+
     let posts = await prisma.user.findMany({
         skip,
         take,
@@ -27,11 +38,22 @@ router.get("/", async (req, res) => {
             createdAt: "desc"
         }
     });
-    res.json(posts);
+    res.json([{ "asd": 10 }]); 
+    // res.json(posts);
 });
 
 /** 
- * Returns a json with the currents user data. 
+ * @swagger
+ * /user/me: 
+ *      get:
+ *          description: returns the current authenticated user if any.
+ *          parameters: 
+ *              -   in: header
+ *                  name: "x-access-token"
+ *                  description: Authentication access token.
+ *                  required: true
+ *                  schema:
+ *                      type: string
  */
 router.get("/me", user({ optional: true }), async (req: Request, res: any) => {
     let user = req.user as any;
@@ -58,7 +80,7 @@ router.post("", async (req, res) => {
         let created = await prisma.user.create({
             data: user
         });
-        delete (created as any).password ; 
+        delete (created as any).password;
         res.json(created);
     } catch (e) {
         console.log(e);
