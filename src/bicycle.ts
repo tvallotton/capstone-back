@@ -50,6 +50,34 @@ router.get("/", user({ staffOnly: true }), async (req, res) => {
 });
 
 
+/**
+ * @swagger
+ * /bicycle: 
+ *      post: 
+ *          consumes: 
+ *              application/json
+ *          parameters: 
+ *              - in: body
+ *                name: qrCode
+ *                required: true
+ *                schema: 
+ *                  type: string
+ *              - in: body
+ *                name: status
+ *                required: true
+ *                schema: 
+ *                  type: sting
+ *              - in: body
+ *                name: model
+ *                required: true
+ *                schema: 
+ *                  type: sting
+ */
+router.post("/", user({ staffOnly: true }), async (req, res) => {
+    let { qrCode, status, model } = req.body;
+
+});
+
 
 
 
