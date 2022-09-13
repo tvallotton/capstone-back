@@ -25,6 +25,9 @@ const router = Router();
  *                schema: 
  *                  type: integer
  *                description: the number of elements to skip before tarting to collect the result set.
+ *          responses:
+ *              '200':
+ *                  description: A successful response
  */
 router.get("/", async (req, res) => {
     let skip = Number(req.query.skip) || undefined;
@@ -38,8 +41,7 @@ router.get("/", async (req, res) => {
             createdAt: "desc"
         }
     });
-    res.json([{ "asd": 10 }]); 
-    // res.json(posts);
+    res.json(posts);
 });
 
 /** 
@@ -51,9 +53,12 @@ router.get("/", async (req, res) => {
  *              -   in: header
  *                  name: "x-access-token"
  *                  description: Authentication access token.
- *                  required: true
+ *                  required: false
  *                  schema:
  *                      type: string
+ *          responses:
+ *              '200':
+ *                  description: the authenticated user or null
  */
 router.get("/me", user({ optional: true }), async (req: Request, res: any) => {
     let user = req.user as any;

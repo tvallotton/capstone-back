@@ -31,17 +31,14 @@ const prisma = new PrismaClient();
  *                required: true
  *                schema:
  *                  type: string
- *          responses: 
- *              '200': 
- *                  description: returned when the user is properly authorized.
- *                  content:
- *                       application/json
+ *          responses:
+ *              '200':
+ *                  description: the user is staff
  *              '401': 
- *                  description: returned when a user who is not staff attempts to access the enpoint
- *                  content:
- *                       application/json
- *                  
- * 
+ *                  description: the user is not logged in. 
+ *              '403': 
+ *                  description: the user doesn't have permission to access the resource. 
+ *
  */
 router.get("/", user({ staffOnly: true }), async (req, res) => {
     const { take, skip, } = req.query;

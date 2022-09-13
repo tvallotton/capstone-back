@@ -21,8 +21,16 @@ const options = {
     apis: ["**/*.ts"],
 };
 
+const swaggerOptions = {
+    customCss: '.try-out__btn { visibility: hidden; }',
+    swaggerOptions: {
+        persistAuthorization: true,
+        tryItOutEnabled: true
+    }
+};
+
 const specs = swaggerJsdoc(options);
 
-router.use("/", serve, setup(specs));
+router.use("/", serve, setup(specs, swaggerOptions));
 
 export default router; 
