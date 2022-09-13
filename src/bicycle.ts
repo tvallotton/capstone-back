@@ -55,27 +55,41 @@ router.get("/", user({ staffOnly: true }), async (req, res) => {
  * /bicycle: 
  *      post: 
  *          consumes: 
- *              application/json
- *          parameters: 
- *              - in: body
- *                name: qrCode
- *                required: true
- *                schema: 
- *                  type: string
- *              - in: body
- *                name: status
- *                required: true
- *                schema: 
- *                  type: sting
- *              - in: body
- *                name: model
- *                required: true
- *                schema: 
- *                  type: sting
+ *              - application/json
+ *          questBody:
+ *            required: true
+ *            content: 
+ *                application/json: 
+ *                    schema: 
+ *                        type: object
+ *                        properties: 
+ *                            qrCode:
+ *                                type: string
+ *                            status: 
+ *                                type: string
+ *                            model: 
+ *                                type: string
+ *                            image: 
+ *                                type: string
+ *                        required: 
+ *                            - qrCode
+ *                            - status  
+ *                            - model 
+ *          responses: 
+ *              '201': 
+ *                  description: creates the bicycle
  */
 router.post("/", user({ staffOnly: true }), async (req, res) => {
     let { qrCode, status, model } = req.body;
-
+    if (!qrCode && !status && !model) {
+        return res.status(400);
+    }
+    let created = await prisma.bicycle.create({
+        data: {
+            qrCode, status, model
+        }
+    });
+    res.status(201).json(created);
 });
 
 
