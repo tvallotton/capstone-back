@@ -18,20 +18,6 @@ app.get("/", (req, res) => {
     res.json({ "message": "hello world" });
 });
 
-/**
- * @swagger
- * /customers:
- *  get:
- *    description: Use to request all customers
- *    responses:
- *      '200':
- *        description: A successful response
- */
-app.get("/customers", (req, res) => {
-    res.status(200).send("Customer results");
-});
-
-
 app.listen(PORT, () => {
     console.log(`visit http://localhost:${PORT}/`);
 });
