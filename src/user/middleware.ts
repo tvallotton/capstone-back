@@ -63,9 +63,9 @@ export function user(options?: Options) {
 }
 
 async function fetchUser(token: string) {
-    let { email } = jwt.verify(token, JWT_SECRET, {}) as any;
+    let { id } = jwt.verify(token, JWT_SECRET, {}) as any;
     let user = await prisma.user.findFirst({
-        where: { email }
+        where: { id }
     });
     return user || undefined;
 }

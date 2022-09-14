@@ -18,7 +18,7 @@ const options = {
         },
 
     },
-    apis: ["**/*.ts"],
+    apis: ["**/*.ts", "./components.yaml",],
 };
 
 const swaggerOptions = {
@@ -34,3 +34,4 @@ const specs = swaggerJsdoc(options);
 router.use("/", serve, setup(specs, swaggerOptions));
 
 export default router; 
+

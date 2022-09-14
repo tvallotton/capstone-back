@@ -13,21 +13,18 @@ const router = Router();
  *      get: 
  *          description: returns the queried user models.
  *          parameters: 
- *              - in: query
- *                name: take
- *                required: false
- *                schema: 
- *                  type: integer
- *                description: the number of elements to return. 
- *              - in: query
- *                name: skip
- *                required: false
- *                schema: 
- *                  type: integer
- *                description: the number of elements to skip before tarting to collect the result set.
+ *            - $ref: '#/components/parameters/take'
+ *            - $ref: '#/components/parameters/skip'
  *          responses:
  *              '200':
  *                  description: A successful response
+ *                  content: 
+ *                      application/json:
+ *                          schema: 
+ *                              type: array
+ *                              items:  
+ *                                $ref: '#/components/schemas/User'
+ *                  
  */
 router.get("/", async (req, res) => {
     let skip = Number(req.query.skip) || undefined;
@@ -50,20 +47,20 @@ router.get("/", async (req, res) => {
  *      get:
  *          description: returns the current authenticated user if any.
  *          parameters: 
- *                - in: header
- *                  name: "x-access-token"
- *                  description: Authentication access token.
- *                  required: false
- *                  schema:
- *                      type: string
+ *              - $ref: '#/components/parameters/x-access-token-optional' 
  *          responses:
  *              '200':
  *                  description: the authenticated user or null
+ *                  content: 
+ *                      application/json: 
+ *                          schema: 
+ *                              $ref: '#/components/schemas/User'
+ * 
  */
 router.get("/me", user({ optional: true }), async (req: Request, res: any) => {
-    let user = req.user as any;
+    const user = req.user as any;
     delete user?.password;
-    res.json(req.user || null);
+    res.json(user || null);
 });
 
 /**
@@ -72,21 +69,16 @@ router.get("/me", user({ optional: true }), async (req: Request, res: any) => {
  *      get: 
  *        description: Returns the queried user by their id
  *        parameters: 
- *          - in: path
- *            name: id
- *            schema:
- *            type: integer
- *            required: true
- *            description: Numeric id of the user to fetch
+ *          - $ref: '#/components/parameters/userId' 
  *        responses: 
- *            '200': 
- *               description: The queried user. 
- *            '404': 
- *               description: The user was not found.
+ *          '200': 
+ *              $ref: '#/components/responses/UserResponse'
+ *          '404': 
+ *              $ref: '#/components/responses/NotFound'
  */
 router.get("/:id", async (req, res) => {
-    let { id } = req.params;
-    let user = await prisma.user.findFirst({
+    const { id } = req.params;
+    const user = await prisma.user.findFirst({
         where: { id: Number(id) }
     });
     if (user === null) {
@@ -108,26 +100,18 @@ router.get("/:id", async (req, res) => {
  *          content: 
  *              application/json: 
  *                  schema: 
- *                      type: object
- *                      properties: 
- *                          email:
- *                              type: string
- *                          password: 
- *                              type: string
- *                      required: 
- *                          - email
- *                          - password                
+ *                      $ref: '#/components/schemas/Credentials'            
  *      responses: 
  *          '201': 
- *              description: A new user is created. 
+ *              $ref: '#/components/responses/UserResponse'
  *          '500': 
  *              description: Internal server error. Likely the user is already signed up. 
  */
 router.post("/", async (req, res) => {
     try {
-        let user: User = req.body;
+        const user: User = req.body;
         user.password = await argon2.hash(user.password);
-        let created = await prisma.user.create({
+        const created = await prisma.user.create({
             data: user
         });
         delete (created as any).password;
@@ -151,39 +135,40 @@ router.post("/", async (req, res) => {
  *          content: 
  *              application/json: 
  *                  schema: 
- *                      type: object
- *                      properties: 
- *                          email:
- *                              type: string
- *                          password: 
- *                              type: string
- *                      required: 
- *                          - email
- *                          - password                
+ *                      $ref: '#/components/schemas/Credentials'               
  *      responses: 
  *          '200': 
  *              description: Responds with the `"x-access-token"`.
+ *              content: 
+ *                  application/json: 
+ *                      schema:
+ *                          $ref: '#/components/schemas/TokenResponse'
  *          '401': 
  *              description: Invalid credentials.
+ *              content: 
+ *                  application/json: 
+ *                      schema:
+ *                          $ref: '#/components/schemas/ErrorResponse'
+ *          
  */
 router.post("/login", async (req, res) => {
-    let { email, password } = req.body;
+    const { email, password } = req.body;
     if (typeof (email) != "string" || typeof (password) != "string") {
         res.status(400)
             .json(BAD_REQUEST);
         return;
     }
-    let user = await prisma.user.findFirst({ where: { email } });
+    const user = await prisma.user.findFirst({ where: { email } });
     if (user === null) {
         res.status(401);
         return res.json(UNREGISTERED_USER);
     }
-    let isCorrect = await argon2.verify(user.password, password);
+    const isCorrect = await argon2.verify(user.password, password);
     if (!isCorrect) {
         return res.status(401)
             .json(INCORRECT_PASSWORD);
     }
-    let token = jwt.sign({ email }, JWT_SECRET);
+    const token = jwt.sign({ id: user.id }, JWT_SECRET);
     res.setHeader("x-access-token", token);
     res.send({ "x-access-token": token, ...SUCCESS });
 });
@@ -195,12 +180,7 @@ router.post("/login", async (req, res) => {
  *     patch: 
  *      description: Updates user information.
  *      parameters: 
- *        - in: header
- *          name: "x-access-token"
- *          description: Authentication access token.
- *          required: true
- *          schema:
- *            type: string
+ *          - $ref: '#/components/parameters/x-access-token' 
  *      consumes: 
  *          - application/json
  *      requestBody:
@@ -208,32 +188,28 @@ router.post("/login", async (req, res) => {
  *          content: 
  *              application/json: 
  *                  schema: 
- *                      type: object
- *                      properties: 
- *                          id: 
- *                              type: integer
- *                          email:
- *                              type: string
- *                          password: 
- *                              type: string
- *                      required: 
- *                          - id
- *                          - email
- *                          - password                
+ *                      $ref: '#/components/schemas/UserInput'
  *      responses: 
  *          '200': 
- *              description: responds with the new user fields.
+ *              $ref: '#/components/responses/UserResponse'
+ *          '404': 
+ *              $ref: '#/components/responses/NotFound'
+ *          '401': 
+ *              $ref: '#/components/responses/Unauthorized'
  */
 
 router.patch("/", user(), async (req: Request, res) => {
     // if you are staff or you are editting your own profile
 
     if (req.user?.isStaff || req.user?.id == req.body.id) {
+
+        const password = req.body.password ? argon2.hash(req.body.password) : undefined;
+
         let updated = await prisma.user.update({
             where: {
                 id: req.body.id,
             },
-            data: req.body
+            data: { password, ...req.body }
         });
         delete (updated as any).password;
         res.json(updated);
@@ -249,30 +225,32 @@ router.patch("/", user(), async (req: Request, res) => {
  *     delete: 
  *      description: Deletes the user. Only staff members can delete users. 
  *      parameters: 
- *        - in: header
- *          name: "x-access-token"
- *          description: Authentication access token.
- *          required: true
- *          schema:
- *            type: string
- *        - in: path
- *          name: id
- *          description: User id.
- *          required: true
- *          schema: 
- *              type: integer  
+ *        - $ref: '#/components/parameters/userId' 
+ *        - $ref: '#/components/parameters/x-access-token' 
  *      responses: 
  *          '200': 
- *              description: {"status": "success"}
+ *              $ref: '#/components/responses/UserResponse'
+ *          '404': 
+ *              $ref: '#/components/responses/NotFound'
+ *          '401': 
+ *              $ref: '#/components/responses/Unauthorized'
+ *          '403': 
+ *              $ref: '#/components/responses/Forbidden'
  */
 router.delete("/:id", user({ staffOnly: true }), async (req: Request, res) => {
     let { id } = req.params;
-    await prisma.user.delete({
-        where: {
-            id: Number(id),
-        }
-    });
-    res.json(SUCCESS);
+    try {
+        let user = await prisma.user.delete({
+            where: {
+                id: Number(id),
+            }
+        });
+        delete (user as any).password;
+
+        res.json(user);
+    } catch (e) {
+        res.json(404).json(NOT_FOUND);
+    }
 });
 
 router.use((err: Error, req: any, res: any, next: any) => {
@@ -288,6 +266,12 @@ const UNREGISTERED_USER = {
     "status": "error",
     "es": "El correo electrónico no está registrado.",
     "en": "The email is not registered."
+};
+
+const UNAUTHENTICATED = {
+    "status": "error",
+    "en": "You are not logged in.",
+    "es": "No has ingresado sessión.",
 };
 
 const INCORRECT_PASSWORD = {
@@ -311,6 +295,7 @@ const UNAUTHORIZED = {
     "en": "You are not allowed to access this resource",
 };
 const PUBLIC_FIELDS = {
+    "id": true,
     "email": true,
     "isAdmin": true,
     "isStaff": true,

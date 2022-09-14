@@ -1,0 +1,114 @@
+components:
+  responses:
+    UserResponse:
+      description: Returns the user
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/User"
+
+    NotFound:
+      description: The resource was not found.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Unauthorized:
+      description: Returned when the user is not authenticated.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Forbidden:
+      description: Returned when the user doesn't have sufficient permissions to access the resource.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+  schemas:
+    Credentials:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+      required:
+        - email
+        - password
+    UserInput:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+      required:
+        - id
+        - email
+        - password
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        isAdmin:
+          type: boolean
+        isStaff:
+          type: boolean
+        createdAt:
+          type: string
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        es:
+          type: string
+        en:
+          type: string
+    TokenResponse:
+      type: object
+      properties:
+        x-access-token:
+          type: string
+        status:
+          type: string
+  parameters:
+    userId:
+      in: path
+      name: id
+      description: User id.
+      required: true
+      schema:
+        type: integer
+    take:
+      in: query
+      name: take
+      required: false
+      schema:
+        type: integer
+      description: the number of elements to return.
+    skip:
+      in: query
+      name: skip
+      required: false
+      schema:
+        type: integer
+      description: the number of elements to skip before tarting to collect the result set.
+    x-access-token:
+      in: header
+      name: "x-access-token"
+      description: Authentication access token.
+      required: true
+      schema:
+        type: string
+    x-access-token-optional:
+      in: header
+      name: "x-access-token"
+      description: Authentication access token.
+      required: false
+      schema:
+        type: string
