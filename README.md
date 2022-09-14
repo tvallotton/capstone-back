@@ -46,6 +46,3 @@ Correr el servidor:
 ```sh
 npm run dev
 ```
-
-# Documentación
-La documentación de los endpoints se encuentra en la ruta `/api-docs`. 

@@ -19,7 +19,7 @@ const prisma = new PrismaClient();
  *              - $ref: '#/components/parameters/x-access-token'
  *          responses:
  *              '200':
- *                  description: the user is staff
+ *                  $ref: '#/components/responses/Bicycle'
  *              '401': 
  *                 $ref: '#/components/responses/Unauthorized'
  *              '403':
