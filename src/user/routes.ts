@@ -249,7 +249,7 @@ router.delete("/:id", user({ staffOnly: true }), async (req: Request, res) => {
 
         res.json(user);
     } catch (e) {
-        res.json(404).json(NOT_FOUND);
+        res.status(404).json(NOT_FOUND);
     }
 });
 
