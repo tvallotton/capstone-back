@@ -2,6 +2,7 @@
 import { PrismaClient, User } from "@prisma/client";
 import { Router } from "express";
 import { user } from "./user/middleware";
+import errors from "./errors";
 export const router = Router();
 
 
@@ -56,9 +57,9 @@ router.get("/:id", user({ staffOnly: true }), async (req, res) => {
         const query = await prisma.bicycle.findUnique({
             where: { id: Number(id) }
         });
-        res.json(query || NOT_FOUND);
+        res.json(query || errors.BICYCLE_NOT_FOUND);
     } catch (e) {
-        res.json(NOT_FOUND);
+        res.json(errors.BICYCLE_NOT_FOUND);
     }
 });
 
@@ -68,7 +69,7 @@ router.get("/:id", user({ staffOnly: true }), async (req, res) => {
  * /bicycle: 
  *      post:
  *          parameters: 
- *              $ref:  '#/components/parameters/x-access-token'
+ *              - $ref: '#/components/parameters/x-access-token'
  *          consumes: 
  *              - application/json
  *          requestBody:
@@ -88,12 +89,17 @@ router.post("/", user({ staffOnly: true }), async (req, res) => {
     if (!qrCode && !status && !model) {
         return res.status(400);
     }
-    let created = await prisma.bicycle.create({
-        data: {
-            qrCode, status, model
-        }
-    });
-    res.status(201).json(created);
+    try {
+
+        let created = await prisma.bicycle.create({
+            data: {
+                qrCode, status, model
+            }
+        });
+        res.status(201).json(created);
+    } catch (e) {
+        res.status(400).json(errors.BAD_REQUEST);
+    }
 });
 
 
@@ -132,7 +138,7 @@ router.patch("/", user({ staffOnly: true }), async (req, res) => {
         });
         res.json(updated);
     } catch (e) {
-        res.status(404).json(NOT_FOUND);
+        res.status(404).json(errors.BICYCLE_NOT_FOUND);
     }
 });
 
@@ -157,17 +163,8 @@ router.delete("/:id", user({ staffOnly: true }), async (req, res) => {
         });
         res.json(deleted);
     } catch (e) {
-        res.status(404).json(NOT_FOUND);
+        res.status(404).json(errors.BICYCLE_NOT_FOUND);
     }
 });
-
-
-
-
-const NOT_FOUND = {
-    "status": "error",
-    "es": "La bicicleta no pudo ser encontrada.",
-    "en": "The bicycle was not found."
-};
 
 export default router; 

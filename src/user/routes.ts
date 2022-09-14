@@ -3,9 +3,10 @@ import { json, NextFunction, Router } from "express";
 import jwt from "jsonwebtoken";
 import argon2 from "argon2";
 import { JWT_SECRET, user, Request } from "./middleware";
-
+import errors from "../errors";
 const prisma = new PrismaClient();
 const router = Router();
+
 
 /**
  * @swagger
@@ -82,7 +83,7 @@ router.get("/:id", async (req, res) => {
         where: { id: Number(id) }
     });
     if (user === null) {
-        return res.status(404).json(NOT_FOUND);
+        return res.status(404).json(errors.USER_NOT_FOUND);
     }
     delete (user as any).password;
     res.json(user);
@@ -119,7 +120,7 @@ router.post("/", async (req, res) => {
     } catch (e) {
         console.log(e);
         res.status(500);
-        res.json(UNKOWN_ERROR);
+        res.json(errors.UNKOWN_ERROR);
     }
 });
 
@@ -155,18 +156,18 @@ router.post("/login", async (req, res) => {
     const { email, password } = req.body;
     if (typeof (email) != "string" || typeof (password) != "string") {
         res.status(400)
-            .json(BAD_REQUEST);
+            .json(errors.BAD_REQUEST);
         return;
     }
     const user = await prisma.user.findFirst({ where: { email } });
     if (user === null) {
         res.status(401);
-        return res.json(UNREGISTERED_USER);
+        return res.json(errors.UNREGISTERED_USER);
     }
     const isCorrect = await argon2.verify(user.password, password);
     if (!isCorrect) {
         return res.status(401)
-            .json(INCORRECT_PASSWORD);
+            .json(errors.INCORRECT_PASSWORD);
     }
     const token = jwt.sign({ id: user.id }, JWT_SECRET);
     res.setHeader("x-access-token", token);
@@ -214,7 +215,7 @@ router.patch("/", user(), async (req: Request, res) => {
         delete (updated as any).password;
         res.json(updated);
     } else {
-        res.status(403).json(UNAUTHORIZED);
+        res.status(403).json(errors.UNAUTHORIZED);
     }
 });
 
@@ -249,12 +250,12 @@ router.delete("/:id", user({ staffOnly: true }), async (req: Request, res) => {
 
         res.json(user);
     } catch (e) {
-        res.status(404).json(NOT_FOUND);
+        res.status(404).json(errors.USER_NOT_FOUND);
     }
 });
 
 router.use((err: Error, req: any, res: any, next: any) => {
-    res.status(500).json(UNAUTHORIZED);
+    res.status(500).json(errors.UNAUTHORIZED);
 });
 
 
@@ -262,49 +263,12 @@ const SUCCESS = {
     "status": "success",
 };
 
-const UNREGISTERED_USER = {
-    "status": "error",
-    "es": "El correo electrónico no está registrado.",
-    "en": "The email is not registered."
-};
-
-const UNAUTHENTICATED = {
-    "status": "error",
-    "en": "You are not logged in.",
-    "es": "No has ingresado sessión.",
-};
-
-const INCORRECT_PASSWORD = {
-    "status": "error",
-    "es": "La contraseña o usuario son incorrectos.",
-    "en": "The user or password are incorrect.",
-};
-const UNKOWN_ERROR = {
-    "status": "error",
-    "es": "Ocurrió un error creando el usuario.",
-    "en": "An error occurred creating the user"
-};
-const NOT_FOUND = {
-    "status": "error",
-    "es": "El usuario no fue encontrado.",
-    "en": "The user was not found",
-};
-const UNAUTHORIZED = {
-    "status": "error",
-    "es": "No tienes permiso para acceder a este recurso",
-    "en": "You are not allowed to access this resource",
-};
 const PUBLIC_FIELDS = {
     "id": true,
     "email": true,
     "isAdmin": true,
     "isStaff": true,
     "createdAt": true,
-};
-const BAD_REQUEST = {
-    "en": "Bad request",
-    "es": "Bad request",
-    "status": "error"
 };
 
 export default router; 
