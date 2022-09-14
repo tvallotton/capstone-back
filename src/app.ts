@@ -13,10 +13,8 @@ const app = express();
 app.use("/", express.json());
 app.use("/user/", user);
 app.use("/bicycle", bicycle);
-app.use("/api-docs", docs);
-app.get("/", (req, res) => {
-    res.json({ "message": "hello world" });
-});
+app.use("/", docs);
+
 
 app.listen(PORT, () => {
     console.log(`visit http://localhost:${PORT}/`);
