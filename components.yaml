@@ -1,12 +1,24 @@
 components:
   responses:
+    Bicycle:
+      description: Returns the bicycle
+      content: 
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Bicycle" 
+
     UserResponse:
       description: Returns the user
       content:
         application/json:
           schema:
             $ref: "#/components/schemas/User"
-
+    BadRequest: 
+      description: The parameters for this request where invalid or missing
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
     NotFound:
       description: The resource was not found.
       content:
@@ -26,6 +38,34 @@ components:
           schema:
             $ref: "#/components/schemas/ErrorResponse"
   schemas:
+    BicycleInput: 
+      type: object
+      properties:
+        qrCode:
+          type: string
+        status:
+          type: string
+        model:
+          type: string
+        image:
+          type: string
+      required:
+        - qrCode
+        - status
+        - model
+    Bicycle:
+      type: object
+      properties:
+        id: 
+          type: integer
+        qrCode:
+          type: string
+        status:
+          type: string
+        model:
+          type: string
+        image:
+          type: string
     Credentials:
       type: object
       properties:
@@ -77,6 +117,13 @@ components:
         status:
           type: string
   parameters:
+    bicycleId: 
+      in: path
+      name: id
+      description: Bicycle id.
+      required: true
+      schema:
+        type: integer
     userId:
       in: path
       name: id
