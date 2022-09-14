@@ -13,32 +13,16 @@ const prisma = new PrismaClient();
  *      get: 
  *          description: returns the queried bicycle models.
  *          parameters: 
- *              - in: query
- *                name: take
- *                required: false
- *                schema: 
- *                  type: integer
- *                description: the number of elements to return. 
- *              - in: query
- *                name: skip
- *                required: false
- *                schema: 
- *                  type: integer
- *                description: the number of elements to skip before tarting to collect the result set.
- *              - in: header
- *                name: "x-access-token"
- *                description: Authentication access token.
- *                required: true
- *                schema:
- *                  type: string
+ *              - $ref: '#/components/parameters/take'
+ *              - $ref: '#/components/parameters/skip'
+ *              - $ref: '#/components/parameters/x-access-token'
  *          responses:
  *              '200':
  *                  description: the user is staff
  *              '401': 
- *                  description: the user is not logged in. 
- *              '403': 
- *                  description: the user doesn't have permission to access the resource. 
- *
+ *                 $ref: '#/components/responses/Unauthorized'
+ *              '403':
+ *                 $ref: '#/components/responses/Forbidden'
  */
 router.get("/", user({ staffOnly: true }), async (req, res) => {
     const { take, skip, } = req.query;
