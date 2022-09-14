@@ -30,6 +30,9 @@ router.get("/", user({ staffOnly: true }), async (req, res) => {
     const query = await prisma.bicycle.findMany({
         take: Number(take) || undefined,
         skip: Number(skip) || undefined,
+        include: {
+            model: true
+        }
     });
     res.json(query);
 });
@@ -126,7 +129,7 @@ router.post("/", user({ staffOnly: true }), async (req, res) => {
  */
 router.patch("/", user({ staffOnly: true }), async (req, res) => {
     const { id, qrCode, status, model } = req.body;
-    if (!id && !qrCode && !status && !model) {
+    if (!(id && qrCode && status && model)) {
         return res.status(400);
     }
     try {

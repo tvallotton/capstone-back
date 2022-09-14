@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import argon2 from "argon2";
 import { JWT_SECRET, user, Request } from "./middleware";
 import errors from "../errors";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 const prisma = new PrismaClient();
 const router = Router();
 
@@ -71,13 +72,18 @@ router.get("/me", user({ optional: true }), async (req: Request, res: any) => {
  *        description: Returns the queried user by their id
  *        parameters: 
  *          - $ref: '#/components/parameters/userId' 
+ *          - $ref: '#/components/parameters/x-access-token' 
  *        responses: 
  *          '200': 
  *              $ref: '#/components/responses/UserResponse'
  *          '404': 
  *              $ref: '#/components/responses/NotFound'
+ *          '401': 
+ *              $ref: '#/components/responses/Unauthorized'
+ *          '403': 
+ *              $ref: '#/components/responses/Forbidden'
  */
-router.get("/:id", async (req, res) => {
+router.get("/:id", user({ staffOnly: true }), async (req, res) => {
     const { id } = req.params;
     const user = await prisma.user.findFirst({
         where: { id: Number(id) }
@@ -112,13 +118,24 @@ router.post("/", async (req, res) => {
     try {
         const user: User = req.body;
         user.password = await argon2.hash(user.password);
+        user.email = user.email.toLowerCase();
+        if (!user.email.match(/^\S+@\S+\.\S+$/)) {
+            res.status(400);
+            res.json(errors.INVALID_EMAIL);
+            return;
+        }
         const created = await prisma.user.create({
             data: user
         });
         delete (created as any).password;
         res.status(201).json(created);
     } catch (e) {
-        console.log(e);
+        const err = e as PrismaClientKnownRequestError; 
+        if (err.code =="P2002") {
+            res.status(400);
+            res.json(errors.USER_ALREADY_EXISTS);
+            return;
+        }
         res.status(500);
         res.json(errors.UNKOWN_ERROR);
     }
@@ -153,12 +170,13 @@ router.post("/", async (req, res) => {
  *          
  */
 router.post("/login", async (req, res) => {
-    const { email, password } = req.body;
+    let { email, password } = req.body;
     if (typeof (email) != "string" || typeof (password) != "string") {
         res.status(400)
             .json(errors.BAD_REQUEST);
         return;
     }
+    email = email.toLowerCase();
     const user = await prisma.user.findFirst({ where: { email } });
     if (user === null) {
         res.status(401);

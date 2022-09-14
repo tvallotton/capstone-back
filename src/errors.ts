@@ -42,6 +42,25 @@ const BAD_REQUEST = {
     "es": "Bad request",
     "status": "error"
 };
+
+const INVALID_EMAIL = {
+    "status": "error",
+    "en": "The email address is not valid",
+    "es": "El correo electrónico no es válido."
+};
+const USER_ALREADY_EXISTS = {
+    "status": "error",
+    "en": "A user with that email already exists, try signing in.",
+    "es": "Ese correo electrónico ya está registrado, intenta ingresando sesión."
+};
+const NOT_FOUND = {
+    "status": "error",
+    "es": "El recurso no fue encontrado.",
+    "en": "The resource was not found.",
+};
 export default {
-    UNREGISTERED_USER, UNAUTHENTICATED, INCORRECT_PASSWORD, UNKOWN_ERROR, BICYCLE_NOT_FOUND, USER_NOT_FOUND, UNAUTHORIZED, BAD_REQUEST
+    USER_ALREADY_EXISTS, NOT_FOUND,
+    UNREGISTERED_USER, INVALID_EMAIL, UNAUTHENTICATED,
+    INCORRECT_PASSWORD, UNKOWN_ERROR, BICYCLE_NOT_FOUND,
+    USER_NOT_FOUND, UNAUTHORIZED, BAD_REQUEST
 };
