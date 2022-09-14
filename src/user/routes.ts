@@ -28,10 +28,10 @@ const router = Router();
  *                  
  */
 router.get("/", async (req, res) => {
-    let skip = Number(req.query.skip) || undefined;
-    let take = Number(req.query.take) || undefined;
+    const skip = Number(req.query.skip) || undefined;
+    const take = Number(req.query.take) || undefined;
 
-    let posts = await prisma.user.findMany({
+    const posts = await prisma.user.findMany({
         skip,
         take,
         select: PUBLIC_FIELDS,
@@ -201,12 +201,9 @@ router.post("/login", async (req, res) => {
 
 router.patch("/", user(), async (req: Request, res) => {
     // if you are staff or you are editting your own profile
-
     if (req.user?.isStaff || req.user?.id == req.body.id) {
-
         const password = req.body.password ? argon2.hash(req.body.password) : undefined;
-
-        let updated = await prisma.user.update({
+        const updated = await prisma.user.update({
             where: {
                 id: req.body.id,
             },
@@ -239,9 +236,9 @@ router.patch("/", user(), async (req: Request, res) => {
  *              $ref: '#/components/responses/Forbidden'
  */
 router.delete("/:id", user({ staffOnly: true }), async (req: Request, res) => {
-    let { id } = req.params;
+    const { id } = req.params;
     try {
-        let user = await prisma.user.delete({
+        const user = await prisma.user.delete({
             where: {
                 id: Number(id),
             }

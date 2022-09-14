@@ -51,7 +51,7 @@ router.get("/", user({ staffOnly: true }), async (req, res) => {
 router.post("/", user(), async (req: Request, res) => {
     const userId = req.user?.id as number;
     const name = req.body.model as string;
-    let model = await prisma.bicycleModel.findUnique({ where: { name } });
+    const model = await prisma.bicycleModel.findUnique({ where: { name } });
     try {
         let created = await prisma.submission.create({
             data: {

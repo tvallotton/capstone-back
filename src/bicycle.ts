@@ -85,13 +85,13 @@ router.get("/:id", user({ staffOnly: true }), async (req, res) => {
  *                  $ref: '#/components/responses/BadRequest'
  */
 router.post("/", user({ staffOnly: true }), async (req, res) => {
-    let { qrCode, status, model } = req.body;
+    const { qrCode, status, model } = req.body;
     if (!qrCode && !status && !model) {
         return res.status(400);
     }
     try {
 
-        let created = await prisma.bicycle.create({
+        const created = await prisma.bicycle.create({
             data: {
                 qrCode, status, model
             }
@@ -125,12 +125,12 @@ router.post("/", user({ staffOnly: true }), async (req, res) => {
  *                  $ref: '#/components/responses/NotFound'
  */
 router.patch("/", user({ staffOnly: true }), async (req, res) => {
-    let { id, qrCode, status, model } = req.body;
+    const { id, qrCode, status, model } = req.body;
     if (!id && !qrCode && !status && !model) {
         return res.status(400);
     }
     try {
-        let updated = await prisma.bicycle.update({
+        const updated = await prisma.bicycle.update({
             where: { id },
             data: {
                 qrCode, status, model
@@ -156,7 +156,7 @@ router.patch("/", user({ staffOnly: true }), async (req, res) => {
  *                  $ref: '#/components/responses/NotFound'
  */
 router.delete("/:id", user({ staffOnly: true }), async (req, res) => {
-    let { id, } = req.params;
+    const { id, } = req.params;
     try {
         const deleted = await prisma.bicycle.delete({
             where: { id: Number(id) },
