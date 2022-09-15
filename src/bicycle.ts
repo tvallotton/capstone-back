@@ -42,7 +42,7 @@ router.get("/", user({ staffOnly: true }), async (req, res) => {
  * @swagger
  * /bicycle/{id}:
  *      get: 
- *          description: returns the queried bicycle models.
+ *          description: returns the queried bicycle.
  *          parameters: 
  *              - $ref: '#/components/parameters/bicycleId'
  *              - $ref: '#/components/parameters/x-access-token'
@@ -58,7 +58,10 @@ router.get("/:id", user({ staffOnly: true }), async (req, res) => {
     const { id } = req.params;
     try {
         const query = await prisma.bicycle.findUnique({
-            where: { id: Number(id) }
+            where: { id: Number(id) },
+            include: {
+                model: true
+            }
         });
         res.json(query || errors.BICYCLE_NOT_FOUND);
     } catch (e) {
@@ -92,15 +95,15 @@ router.get("/:id", user({ staffOnly: true }), async (req, res) => {
  *                 $ref: '#/components/responses/Forbidden'
  */
 router.post("/", user({ staffOnly: true }), async (req, res) => {
-    const { qrCode, status, model } = req.body;
-    if (!qrCode && !status && !model) {
+    const { qrCode, status, modelId } = req.body;
+    if (!qrCode && !status && !modelId) {
         return res.status(400);
     }
     try {
 
         const bicycle = await prisma.bicycle.create({
             data: {
-                qrCode, status, model
+                qrCode, status, modelId
             }
         });
         res.status(201).json({ "status": "success", bicycle });
@@ -132,15 +135,15 @@ router.post("/", user({ staffOnly: true }), async (req, res) => {
  *                  $ref: '#/components/responses/NotFound'
  */
 router.patch("/", user({ staffOnly: true }), async (req, res) => {
-    const { id, qrCode, status, model } = req.body;
-    if (!(id && qrCode && status && model)) {
+    const { id, qrCode, status, modelId } = req.body;
+    if (!(id && qrCode && status && modelId)) {
         return res.status(400);
     }
     try {
         const bicycle = await prisma.bicycle.update({
             where: { id },
             data: {
-                qrCode, status, model
+                qrCode, status, modelId
             }
         });
         res.json({ status: "success", bicycle });

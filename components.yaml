@@ -120,8 +120,8 @@ components:
           type: string
         status:
           type: string
-        model:
-          type: string
+        modelId:
+          type: integer
         image:
           type: string
       required:
@@ -137,8 +137,10 @@ components:
           type: string
         status:
           type: string
-        model:
-          type: string
+        model: 
+          $ref: "#/components/schemas/BicycleModel"
+        modelId:
+          type: integer
         image:
           type: string
     Credentials:

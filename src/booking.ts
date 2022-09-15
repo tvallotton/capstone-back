@@ -13,7 +13,7 @@ const prisma = new PrismaClient();
  * @swagger
  * /booking: 
  *      get: 
- *          description: Private endpoint. Returns the queried bookings.
+ *          description: Private endpoint. Returns the queried bookings. 
  *          parameters: 
  *              - $ref: '#/components/parameters/take'
  *              - $ref: '#/components/parameters/skip'
