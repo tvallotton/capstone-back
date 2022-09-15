@@ -4,6 +4,7 @@ import user from "./user/routes";
 import docs from "./docs";
 import bicycle from "./bicycle";
 import submission from "./submission";
+import bicycleModel from "./bicycle-model";
 dotenv.config();
 
 const PORT = process.env["PORT"] || 5000;
@@ -15,6 +16,7 @@ app.use("/", express.json());
 app.use("/user/", user);
 app.use("/bicycle", bicycle);
 app.use("/submission", submission);
+app.use("/bicycle-model", bicycleModel);
 app.use("/", docs);
 
 

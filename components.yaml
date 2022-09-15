@@ -1,5 +1,11 @@
 components:
   responses:
+    BicycleModel:
+      description: Returns the bicycle model.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/BicycleModel"
     Submission:
       description: Returns the submission form.
       content:
@@ -44,6 +50,22 @@ components:
           schema:
             $ref: "#/components/schemas/ErrorResponse"
   schemas:
+    BicycleModelInput: 
+      type: object
+      properties:
+        image: 
+          type: string
+        name: 
+          type: string
+    BicycleModel: 
+      type: object
+      properties:
+        id: 
+          type: integer
+        image: 
+          type: string
+        name: 
+          type: string
     Submission:
       type: object
       properties:
@@ -130,6 +152,13 @@ components:
         status:
           type: string
   parameters:
+    bicycleModelId:
+      in: path
+      name: id
+      description: The id of the bicycle model. 
+      required: true
+      schema: 
+        type: interger
     bicycleId:
       in: path
       name: id

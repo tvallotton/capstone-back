@@ -31,13 +31,13 @@ model Bicycle {
 }
 
 model BicycleModel {
-    id         Int          @id @default(autoincrement())
-    name       String       @unique
+    id          Int          @id @default(autoincrement())
+    name        String       @unique
+    description String
     // el número de bicicletas reservadas para este modelo
-    setAside   Int          @default(0)
-    image      String?
-    bicycles   Bicycle[]
-    Submission Submission[]
+    image       String?
+    bicycles    Bicycle[]
+    Submission  Submission[]
 }
 
 model Submission {

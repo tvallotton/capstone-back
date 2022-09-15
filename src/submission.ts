@@ -82,7 +82,7 @@ router.get("/mine", user(), async (req: Request, res) => {
  *                    schema: 
  *                        $ref: '#/components/schemas/Submission'
  *          responses:
- *              '200':
+ *              '201':
  *                  $ref: '#/components/responses/Submission'
  *              '401': 
  *                 $ref: '#/components/responses/Unauthorized'
@@ -98,11 +98,11 @@ router.post("/", user(), async (req: Request, res) => {
                 bicycleModelId: model?.id as number,
             }
         });
-        res.json(created);
+        res.status(201).json(created);
     }
     catch (e) {
         console.log(e);
-        res.json(errors.BAD_REQUEST);
+        res.status(400).json(errors.BAD_REQUEST);
     }
 });
 

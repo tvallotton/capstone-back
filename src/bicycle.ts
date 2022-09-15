@@ -12,7 +12,7 @@ const prisma = new PrismaClient();
  * @swagger
  * /bicycle:
  *      get: 
- *          description: returns the queried bicycle models.
+ *          description: returns the queried bicycles.
  *          parameters: 
  *              - $ref: '#/components/parameters/take'
  *              - $ref: '#/components/parameters/skip'
@@ -86,6 +86,10 @@ router.get("/:id", user({ staffOnly: true }), async (req, res) => {
  *                  $ref: '#/components/responses/Bicycle'
  *              '400': 
  *                  $ref: '#/components/responses/BadRequest'
+ *              '401': 
+ *                 $ref: '#/components/responses/Unauthorized'
+ *              '403':
+ *                 $ref: '#/components/responses/Forbidden'
  */
 router.post("/", user({ staffOnly: true }), async (req, res) => {
     const { qrCode, status, model } = req.body;
