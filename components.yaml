@@ -5,26 +5,46 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/BicycleModel"
+            type: object
+            properties:
+              status:
+                type: string
+              model:
+                $ref: "#/components/schemas/BicycleModel"
     Submission:
       description: Returns the submission form.
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/Submission"
+            type: object
+            properties:
+              status:
+                type: string
+              model:
+                $ref: "#/components/schemas/Submission"
     Bicycle:
       description: Returns the bicycle
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/Bicycle"
+            type: object
+            properties:
+              status:
+                type: string
+              bicycle:
+                $ref: "#/components/schemas/Bicycle"
 
-    UserResponse:
+    User:
       description: Returns the user
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/User"
+            type: object
+            properties:
+              status:
+                type: string
+              user:
+                $ref: "#/components/schemas/User"
     BadRequest:
       description: The parameters for this request where invalid or missing
       content:
@@ -50,21 +70,41 @@ components:
           schema:
             $ref: "#/components/schemas/ErrorResponse"
   schemas:
-    BicycleModelInput: 
+    BookingInput:
       type: object
       properties:
-        image: 
-          type: string
-        name: 
-          type: string
-    BicycleModel: 
-      type: object
-      properties:
-        id: 
+        userId:
           type: integer
-        image: 
+        bicycleId:
+          type: integer
+        hasFinished:
+          type: boolean
+    Booking:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        bicycleId:
+          type: integer
+        hasFinished:
+          type: boolean
+    BicycleModelInput:
+      type: object
+      properties:
+        image:
           type: string
-        name: 
+        name:
+          type: string
+    BicycleModel:
+      type: object
+      properties:
+        id:
+          type: integer
+        image:
+          type: string
+        name:
           type: string
     Submission:
       type: object
@@ -155,11 +195,18 @@ components:
     bicycleModelId:
       in: path
       name: id
-      description: The id of the bicycle model. 
+      description: The id of the bicycle model.
       required: true
-      schema: 
+      schema:
         type: interger
     bicycleId:
+      in: path
+      name: id
+      description: Bicycle id.
+      required: true
+      schema:
+        type: integer
+    bookingId:
       in: path
       name: id
       description: Bicycle id.

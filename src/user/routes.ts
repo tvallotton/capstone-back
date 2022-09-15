@@ -17,6 +17,7 @@ const router = Router();
  *          parameters: 
  *            - $ref: '#/components/parameters/take'
  *            - $ref: '#/components/parameters/skip'
+ *            - $ref: '#/components/parameters/x-access-token-optional' 
  *          responses:
  *              '200':
  *                  description: A successful response
@@ -28,7 +29,7 @@ const router = Router();
  *                                $ref: '#/components/schemas/User'
  *                  
  */
-router.get("/", async (req, res) => {
+router.get("/", user({ staffOnly: true }), async (req, res) => {
     const skip = Number(req.query.skip) || undefined;
     const take = Number(req.query.take) || undefined;
 
@@ -51,18 +52,14 @@ router.get("/", async (req, res) => {
  *          parameters: 
  *              - $ref: '#/components/parameters/x-access-token-optional' 
  *          responses:
- *              '200':
- *                  description: the authenticated user or null
- *                  content: 
- *                      application/json: 
- *                          schema: 
- *                              $ref: '#/components/schemas/User'
+ *              '200': 
+ *                  $ref: '#/components/responses/User'
  * 
  */
-router.get("/me", user({ optional: true }), async (req: Request, res: any) => {
+router.get("/me", user(), async (req: Request, res: any) => {
     const user = req.user as any;
     delete user?.password;
-    res.json(user || null);
+    res.json({ status: "success", user });
 });
 
 /**
@@ -75,7 +72,7 @@ router.get("/me", user({ optional: true }), async (req: Request, res: any) => {
  *          - $ref: '#/components/parameters/x-access-token' 
  *        responses: 
  *          '200': 
- *              $ref: '#/components/responses/UserResponse'
+ *              $ref: '#/components/responses/User'
  *          '404': 
  *              $ref: '#/components/responses/NotFound'
  *          '401': 
@@ -92,7 +89,7 @@ router.get("/:id", user({ staffOnly: true }), async (req, res) => {
         return res.status(404).json(errors.USER_NOT_FOUND);
     }
     delete (user as any).password;
-    res.json(user);
+    res.json({ status: "success", user });
 });
 
 /**
@@ -110,7 +107,7 @@ router.get("/:id", user({ staffOnly: true }), async (req, res) => {
  *                      $ref: '#/components/schemas/Credentials'            
  *      responses: 
  *          '201': 
- *              $ref: '#/components/responses/UserResponse'
+ *              $ref: '#/components/responses/User'
  *          '500': 
  *              description: Internal server error. Likely the user is already signed up. 
  */
@@ -128,10 +125,10 @@ router.post("/", async (req, res) => {
             data: user
         });
         delete (created as any).password;
-        res.status(201).json(created);
+        res.status(201).json({ status: "success", user: created });
     } catch (e) {
-        const err = e as PrismaClientKnownRequestError; 
-        if (err.code =="P2002") {
+        const err = e as PrismaClientKnownRequestError;
+        if (err.code == "P2002") {
             res.status(400);
             res.json(errors.USER_ALREADY_EXISTS);
             return;
@@ -187,9 +184,9 @@ router.post("/login", async (req, res) => {
         return res.status(401)
             .json(errors.INCORRECT_PASSWORD);
     }
-    const token = jwt.sign({ id: user.id }, JWT_SECRET);
+    const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: "48h"});
     res.setHeader("x-access-token", token);
-    res.send({ "x-access-token": token, ...SUCCESS });
+    res.json({ status: "success", "x-access-token": token, });
 });
 
 
@@ -210,7 +207,7 @@ router.post("/login", async (req, res) => {
  *                      $ref: '#/components/schemas/UserInput'
  *      responses: 
  *          '200': 
- *              $ref: '#/components/responses/UserResponse'
+ *              $ref: '#/components/responses/User'
  *          '404': 
  *              $ref: '#/components/responses/NotFound'
  *          '401': 
@@ -245,7 +242,7 @@ router.patch("/", user(), async (req: Request, res) => {
  *        - $ref: '#/components/parameters/x-access-token' 
  *      responses: 
  *          '200': 
- *              $ref: '#/components/responses/UserResponse'
+ *              $ref: '#/components/responses/User'
  *          '404': 
  *              $ref: '#/components/responses/NotFound'
  *          '401': 
@@ -263,7 +260,7 @@ router.delete("/:id", user({ staffOnly: true }), async (req: Request, res) => {
         });
         delete (user as any).password;
 
-        res.json(user);
+        res.json({ status: "success", user });
     } catch (e) {
         res.status(404).json(errors.USER_NOT_FOUND);
     }
@@ -274,9 +271,6 @@ router.use((err: Error, req: any, res: any, next: any) => {
 });
 
 
-const SUCCESS = {
-    "status": "success",
-};
 
 const PUBLIC_FIELDS = {
     "id": true,

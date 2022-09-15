@@ -98,12 +98,12 @@ router.post("/", user({ staffOnly: true }), async (req, res) => {
     }
     try {
 
-        const created = await prisma.bicycle.create({
+        const bicycle = await prisma.bicycle.create({
             data: {
                 qrCode, status, model
             }
         });
-        res.status(201).json(created);
+        res.status(201).json({ "status": "success", bicycle });
     } catch (e) {
         res.status(400).json(errors.BAD_REQUEST);
     }
@@ -137,13 +137,13 @@ router.patch("/", user({ staffOnly: true }), async (req, res) => {
         return res.status(400);
     }
     try {
-        const updated = await prisma.bicycle.update({
+        const bicycle = await prisma.bicycle.update({
             where: { id },
             data: {
                 qrCode, status, model
             }
         });
-        res.json(updated);
+        res.json({ status: "success", bicycle });
     } catch (e) {
         res.status(404).json(errors.BICYCLE_NOT_FOUND);
     }
@@ -165,10 +165,10 @@ router.patch("/", user({ staffOnly: true }), async (req, res) => {
 router.delete("/:id", user({ staffOnly: true }), async (req, res) => {
     const { id, } = req.params;
     try {
-        const deleted = await prisma.bicycle.delete({
+        const bicycle = await prisma.bicycle.delete({
             where: { id: Number(id) },
         });
-        res.json(deleted);
+        res.json({ "status": "success", bicycle });
     } catch (e) {
         res.status(404).json(errors.BICYCLE_NOT_FOUND);
     }

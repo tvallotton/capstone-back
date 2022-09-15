@@ -50,11 +50,14 @@ export function user(options?: Options) {
         if (typeof (token) === "string") {
             try {
                 req.user = await fetchUser(token);
-                if (!req.user?.isAdmin) {
-                    return forbidden(res, next, options);
+                if (!req.user?.isAdmin && options?.adminsOnly) {
+                    return forbidden(res);
+                } else if (!req.user?.isStaff && options?.staffOnly) {
+                    return forbidden(res);
+                } else {
+                    return next();
                 }
-                return next();
-            } catch (e) {
+            } catch (_) {
                 return expired(res, next, options);
             }
         }
@@ -70,17 +73,14 @@ async function fetchUser(token: string) {
     return user || undefined;
 }
 // returns forbidden if admins or users only.
-function forbidden(res: Response, next: NextFunction, options?: Options) {
-    if (!options?.adminsOnly && !options?.staffOnly) {
-        next();
-    } else {
-        res.status(403)
-            .json({
-                status: "error",
-                es: "No tiene permiso para acceder a este recurso.",
-                en: "You are not allowed to access this resource."
-            });
-    }
+function forbidden(res: Response) {
+    res.status(403)
+        .json({
+            status: "error",
+            es: "No tiene permiso para acceder a este recurso.",
+            en: "You are not allowed to access this resource."
+        });
+
 }
 
 function expired(res: Response, next: NextFunction, options?: Options) {

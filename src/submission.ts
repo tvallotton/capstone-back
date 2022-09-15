@@ -60,7 +60,7 @@ router.get("/mine", user(), async (req: Request, res) => {
     });
 
     if (submission) {
-        res.json(submission);
+        res.json({ status: "success", submission });
     } else {
         res.status(404).json(errors.NOT_FOUND);
     }
@@ -92,13 +92,13 @@ router.post("/", user(), async (req: Request, res) => {
     const name = req.body.model as string;
     const model = await prisma.bicycleModel.findUnique({ where: { name } });
     try {
-        let created = await prisma.submission.create({
+        let submission = await prisma.submission.create({
             data: {
                 userId,
                 bicycleModelId: model?.id as number,
             }
         });
-        res.status(201).json(created);
+        res.status(201).json({ status: "success", submission });
     }
     catch (e) {
         console.log(e);
@@ -136,7 +136,7 @@ router.patch("/", user({ staffOnly: true }), async (req: Request, res) => {
                 name: model
             }
         });
-        const updated = await prisma.submission.update({
+        const submission = await prisma.submission.update({
             where: { id },
             data: {
                 bicycleModelId: modelInstance?.id,
@@ -145,7 +145,7 @@ router.patch("/", user({ staffOnly: true }), async (req: Request, res) => {
                 model: true,
             }
         });
-        res.json(updated);
+        res.json({ status: "success", submission });
     } catch (e) {
         res.status(404).json(errors.NOT_FOUND);
     }
@@ -154,7 +154,7 @@ router.patch("/", user({ staffOnly: true }), async (req: Request, res) => {
 /** 
  * @swagger
  * /submission/{id}:
- *      get: 
+ *      delete: 
  *          description: deletes a submission from and returns it. 
  *          parameters: 
  *              - in: path
@@ -174,10 +174,10 @@ router.delete("/:id", user(), async (req: Request, res) => {
     const { id } = req.body;
     const userId = req.user?.isStaff ? undefined : req.user?.id;
     try {
-        const deleted = await prisma.submission.delete({
+        const submission = await prisma.submission.delete({
             where: { id, userId },
         });
-        res.json(deleted);
+        res.json({ status: "success", submission });
     } catch (e) {
         res.status(404).json(errors.NOT_FOUND);
     }

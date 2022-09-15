@@ -18,7 +18,7 @@ model User {
     isStaff     Boolean      @default(false)
     createdAt   DateTime     @default(now())
     submissions Submission[]
-    borrows     Borrow[]
+    bookings     Booking[]
 }
 
 model Bicycle {
@@ -27,7 +27,7 @@ model Bicycle {
     status  BicycleStatus
     model   BicycleModel  @relation(fields: [modelId], references: [id])
     modelId Int
-    borrows Borrow[]
+    bookings     Booking[]
 }
 
 model BicycleModel {
@@ -48,15 +48,14 @@ model Submission {
     bicycleModelId Int
 }
 
-model Borrow {
+model Booking {
     id          Int      @id @default(autoincrement())
     user        User     @relation(fields: [userId], references: [id])
     userId      Int
     bicycle     Bicycle  @relation(fields: [bicycleId], references: [id])
     bicycleId   Int
-    hasFinished Boolean
     start       DateTime @default(now())
-    end         DateTime
+    end         DateTime?
 }
 
 enum BicycleStatus {

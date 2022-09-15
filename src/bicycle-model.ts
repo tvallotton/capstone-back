@@ -62,7 +62,9 @@ router.get("/:id", async (req, res) => {
         const model = await prisma.bicycleModel.findUnique({
             where: { id: Number(id) }
         });
-        if (model) res.json(model);
+        if (model) {
+            res.json({ status: "success", model });
+        }
         else {
             res.status(404).json(errors.NOT_FOUND);
         }
@@ -102,7 +104,9 @@ router.post("/", user({ staffOnly: true }), async (req, res) => {
         const model = await prisma.bicycleModel.create({
             data: { name, image, description }
         });
-        res.status(201).json(model);
+        res.status(201).json({
+            status: "success", model
+        });
     } catch (e) {
         res.status(400).json(errors.BAD_REQUEST);
     }
@@ -125,19 +129,21 @@ router.post("/", user({ staffOnly: true }), async (req, res) => {
  *                        $ref: '#/components/schemas/BicycleModel'
  *          responses: 
  *              '200': 
- *                  $ref: '#/components/schemas/Bicycle'
+ *                  $ref: '#/components/responses/BicycleModel'
+ *              '400': 
+ *                  $ref: '#/components/responses/BadRequest'
  */
 router.patch("/", user({ staffOnly: true }), async (req, res) => {
-    const model: BicycleModel = req.body;
-    const id = Number(model.id);
+    const inputModel: BicycleModel = req.body;
+    const id = Number(inputModel.id);
     try {
-        const output = await prisma.bicycleModel.update({
+        const model = await prisma.bicycleModel.update({
             where: {
                 id,
             },
-            data: model
+            data: inputModel
         });
-        res.json(output);
+        res.json({ status: "success", model });
 
     } catch (e) {
         res.status(400).json(errors.BAD_REQUEST);
@@ -157,10 +163,10 @@ router.patch("/", user({ staffOnly: true }), async (req, res) => {
  *              '404': 
  *                  $ref: '#/components/responses/NotFound'
  */
-router.delete("/:id", user({staffOnly: true}), async (req, res) => {
+router.delete("/:id", user({ staffOnly: true }), async (req, res) => {
 
 
-}); 
+});
 
 
 export default router; 
