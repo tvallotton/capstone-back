@@ -62,25 +62,25 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ErrorResponse"
+            $ref: "#/components/schemas/Error"
     NotFound:
       description: The resource was not found.
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ErrorResponse"
+            $ref: "#/components/schemas/Error"
     Unauthorized:
       description: Returned when the user is not authenticated.
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ErrorResponse"
+            $ref: "#/components/schemas/Error"
     Forbidden:
       description: Returned when the user doesn't have sufficient permissions to access the resource.
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ErrorResponse"
+            $ref: "#/components/schemas/Error"
   schemas:
     BookingInput:
       type: object
@@ -89,8 +89,6 @@ components:
           type: integer
         bicycleId:
           type: integer
-        hasFinished:
-          type: boolean
     Booking:
       type: object
       properties:
@@ -100,14 +98,18 @@ components:
           type: integer
         bicycleId:
           type: integer
-        hasFinished:
-          type: boolean
+        end:
+          type: string
+        start:
+          type: string
     BicycleModelInput:
       type: object
       properties:
         image:
           type: string
         name:
+          type: string
+        description:
           type: string
     BicycleModel:
       type: object
@@ -117,6 +119,8 @@ components:
         image:
           type: string
         name:
+          type: string
+        description:
           type: string
     Submission:
       type: object
@@ -155,27 +159,14 @@ components:
           type: integer
         image:
           type: string
-    Credentials:
-      type: object
-      properties:
-        email:
-          type: string
-        password:
-          type: string
-      required:
-        - email
-        - password
     UserInput:
       type: object
       properties:
-        id:
-          type: string
         email:
           type: string
         password:
           type: string
       required:
-        - id
         - email
         - password
     User:
@@ -183,13 +174,15 @@ components:
       properties:
         id:
           type: string
+        email:
+          type: string
         isAdmin:
           type: boolean
         isStaff:
           type: boolean
         createdAt:
           type: string
-    ErrorResponse:
+    Error:
       type: object
       properties:
         status:
@@ -198,7 +191,7 @@ components:
           type: string
         en:
           type: string
-    TokenResponse:
+    Token:
       type: object
       properties:
         x-access-token:
@@ -212,7 +205,7 @@ components:
       description: The id of the bicycle model.
       required: true
       schema:
-        type: interger
+        type: integer
     bicycleId:
       in: path
       name: id

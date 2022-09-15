@@ -104,7 +104,7 @@ router.get("/:id", user({ staffOnly: true }), async (req, res) => {
  *          content: 
  *              application/json: 
  *                  schema: 
- *                      $ref: '#/components/schemas/Credentials'            
+ *                      $ref: '#/components/schemas/UserInput'            
  *      responses: 
  *          '201': 
  *              $ref: '#/components/responses/User'
@@ -150,20 +150,20 @@ router.post("/", async (req, res) => {
  *          content: 
  *              application/json: 
  *                  schema: 
- *                      $ref: '#/components/schemas/Credentials'               
+ *                      $ref: '#/components/schemas/UserInput'               
  *      responses: 
  *          '200': 
  *              description: Responds with the `"x-access-token"`.
  *              content: 
  *                  application/json: 
  *                      schema:
- *                          $ref: '#/components/schemas/TokenResponse'
+ *                          $ref: '#/components/schemas/Token'
  *          '401': 
  *              description: Invalid credentials.
  *              content: 
  *                  application/json: 
  *                      schema:
- *                          $ref: '#/components/schemas/ErrorResponse'
+ *                          $ref: '#/components/schemas/Error'
  *          
  */
 router.post("/login", async (req, res) => {
