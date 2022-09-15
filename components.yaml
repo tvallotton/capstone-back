@@ -1,5 +1,17 @@
 components:
   responses:
+    Booking:
+      description: Returns the booking.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+              booking:
+                $ref: "#/components/schemas/Booking"
+
     BicycleModel:
       description: Returns the bicycle model.
       content:
@@ -137,7 +149,7 @@ components:
           type: string
         status:
           type: string
-        model: 
+        model:
           $ref: "#/components/schemas/BicycleModel"
         modelId:
           type: integer

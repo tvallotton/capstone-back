@@ -133,7 +133,7 @@ router.get("/:id", async (req, res) => {
  *                        $ref: '#/components/schemas/BicycleModelInput'
  *          responses: 
  *              '201': 
- *                  $ref: '#/components/responses/Bicycle'
+ *                  $ref: '#/components/responses/BicycleModel'
  *              '400': 
  *                  $ref: '#/components/responses/BadRequest'
  *              '401': 
@@ -202,12 +202,22 @@ router.patch("/", user({ staffOnly: true }), async (req, res) => {
  *              - $ref: '#/components/parameters/x-access-token'
  *          responses: 
  *              '200': 
- *                  $ref: '#/components/responses/Bicycle'
+ *                  $ref: '#/components/responses/BicycleModel'
  *              '404': 
  *                  $ref: '#/components/responses/NotFound'
  */
 router.delete("/:id", user({ staffOnly: true }), async (req, res) => {
-
+    const { id } = req.params;
+    try {
+        const model = await prisma.bicycleModel.delete({
+            where: {
+                id: Number(id) || undefined
+            }
+        });
+        res.json({ status: "success", model });
+    } catch (e) {
+        res.status(404).json(errors.NOT_FOUND);
+    }
 
 });
 

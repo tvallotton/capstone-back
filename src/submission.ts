@@ -89,13 +89,13 @@ router.get("/mine", user(), async (req: Request, res) => {
  */
 router.post("/", user(), async (req: Request, res) => {
     const userId = req.user?.id as number;
-    const name = req.body.model as string;
-    const model = await prisma.bicycleModel.findUnique({ where: { name } });
+    const { bicycleModelId } = req.body;
+
     try {
         let submission = await prisma.submission.create({
             data: {
                 userId,
-                bicycleModelId: model?.id as number,
+                bicycleModelId,
             }
         });
         res.status(201).json({ status: "success", submission });
@@ -129,17 +129,12 @@ router.post("/", user(), async (req: Request, res) => {
  * 
  */
 router.patch("/", user({ staffOnly: true }), async (req: Request, res) => {
-    const { id, model } = req.body;
+    const { id, bicycleModelId } = req.body;
     try {
-        const modelInstance = await prisma.bicycleModel.findUnique({
-            where: {
-                name: model
-            }
-        });
         const submission = await prisma.submission.update({
             where: { id },
             data: {
-                bicycleModelId: modelInstance?.id,
+                bicycleModelId,
             },
             include: {
                 model: true,
