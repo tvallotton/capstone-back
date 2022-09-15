@@ -18,7 +18,7 @@ const prisma = new PrismaClient();
  *              - $ref: '#/components/parameters/skip'
  *          responses:
  *              '200':
- *                   description: Returns the bicycle model.
+ *                   description: Returns the bicycle models as an array.
  *                   content:
  *                     application/json:
  *                       schema:
@@ -31,6 +31,49 @@ router.get("/", async (req, res) => {
     const model = await prisma.bicycleModel.findMany({
         take: Number(take) || undefined,
         skip: Number(skip) || undefined,
+    });
+    res.json(model);
+});
+
+/** 
+ * @swagger
+ * /bicycle-model/available:
+ *      get: 
+ *          description: Public endpoint. Returns the bicicle models which are available to book.
+ *          parameters: 
+ *              - $ref: '#/components/parameters/take'
+ *              - $ref: '#/components/parameters/skip'
+ *          responses:
+ *              '200':
+ *                   description: Returns the bicycle models as an array.
+ *                   content:
+ *                     application/json:
+ *                       schema:
+ *                          type: array
+ *                          items: 
+ *                            $ref: "#/components/schemas/BicycleModel"
+ */
+router.get("/available", async (req, res) => {
+    const { take, skip } = req.query;
+    // this is the most complicated query so far
+    // we basically want all bicycles models where there
+    // is at least one bicycle that isn't currently booked
+    const model = await prisma.bicycleModel.findMany({
+        take: Number(take) || undefined,
+        skip: Number(skip) || undefined,
+        where: {
+            bicycles: {
+                some: {
+                    bookings: {
+                        every: {
+                            end: {
+                                not: null
+                            }
+                        }
+                    }
+                }
+            }
+        }
     });
     res.json(model);
 });
