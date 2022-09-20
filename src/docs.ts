@@ -22,7 +22,7 @@ const options = {
 };
 
 const swaggerOptions = {
-    customCss: '.try-out__btn { visibility: hidden; }',
+    customCss: ".try-out__btn { visibility: hidden; }",
     swaggerOptions: {
         persistAuthorization: true,
         tryItOutEnabled: true

@@ -1,5 +1,5 @@
 import { PrismaClient, User } from "@prisma/client";
-import { json, NextFunction, Router } from "express";
+import { Router } from "express";
 import jwt from "jsonwebtoken";
 import argon2 from "argon2";
 import { JWT_SECRET, user, Request } from "./middleware";
@@ -57,8 +57,8 @@ router.get("/", user({ staffOnly: true }), async (req, res) => {
  * 
  */
 router.get("/me", user(), async (req: Request, res: any) => {
-    const user = req.user as any;
-    delete user?.password;
+    const user = req.user;
+    delete (user as any)?.password;
     res.json({ status: "success", user });
 });
 
@@ -184,7 +184,7 @@ router.post("/login", async (req, res) => {
         return res.status(401)
             .json(errors.INCORRECT_PASSWORD);
     }
-    const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: "48h"});
+    const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: "48h" });
     res.setHeader("x-access-token", token);
     res.json({ status: "success", "x-access-token": token, });
 });
@@ -266,7 +266,7 @@ router.delete("/:id", user({ staffOnly: true }), async (req: Request, res) => {
     }
 });
 
-router.use((err: Error, req: any, res: any, next: any) => {
+router.use((err: Error, req: any, res: any) => {
     res.status(500).json(errors.UNAUTHORIZED);
 });
 

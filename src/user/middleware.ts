@@ -1,9 +1,9 @@
 import { PrismaClient, User } from "@prisma/client";
-import express, { RequestHandler, Response, NextFunction, } from "express";
+import express, { Response, NextFunction, } from "express";
 import jwt from "jsonwebtoken";
-import { nextTick } from "process";
 
-export const JWT_SECRET: string = "kXcssP7EyRHap1LNPAb9L2msigD1NT84vtC8TKItF9SI4YlXAbgfuJ5RPvkkIcKK";
+
+export const JWT_SECRET = "kXcssP7EyRHap1LNPAb9L2msigD1NT84vtC8TKItF9SI4YlXAbgfuJ5RPvkkIcKK";
 
 const prisma = new PrismaClient();
 
@@ -46,7 +46,7 @@ interface Options {
  */
 export function user(options?: Options) {
     return async function middleware(req: Request, res: Response, next: NextFunction) {
-        let token = req.headers["x-access-token"];
+        const token = req.headers["x-access-token"];
         if (typeof (token) === "string") {
             try {
                 req.user = await fetchUser(token);
@@ -66,8 +66,8 @@ export function user(options?: Options) {
 }
 
 async function fetchUser(token: string) {
-    let { id } = jwt.verify(token, JWT_SECRET, {}) as any;
-    let user = await prisma.user.findFirst({
+    const { id } = jwt.verify(token, JWT_SECRET, {}) as { id: number; };
+    const user = await prisma.user.findFirst({
         where: { id }
     });
     return user || undefined;

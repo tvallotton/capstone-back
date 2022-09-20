@@ -1,8 +1,7 @@
-import { PrismaClient, User } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { Router } from "express";
 import { user, Request } from "./user/middleware";
 import errors from "./errors";
-import { json } from "stream/consumers";
 export const router = Router();
 
 
@@ -53,7 +52,7 @@ router.get("/", user({ staffOnly: true }), async (req, res) => {
  *                 $ref: '#/components/responses/Unauthorized'
  */
 router.get("/mine", user(), async (req: Request, res) => {
-    let submission = await prisma.submission.findUnique({
+    const submission = await prisma.submission.findUnique({
         where: {
             userId: req.user?.id
         }
@@ -90,9 +89,8 @@ router.get("/mine", user(), async (req: Request, res) => {
 router.post("/", user(), async (req: Request, res) => {
     const userId = req.user?.id as number;
     const { bicycleModelId } = req.body;
-
     try {
-        let submission = await prisma.submission.create({
+        const submission = await prisma.submission.create({
             data: {
                 userId,
                 bicycleModelId,

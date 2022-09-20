@@ -1,11 +1,7 @@
-
-import { BicycleModel, Booking, PrismaClient, User } from "@prisma/client";
+import { Booking, PrismaClient } from "@prisma/client";
 import { Router } from "express";
 import { user } from "./user/middleware";
-import assert from "assert";
 import errors from "./errors";
-import { json } from "stream/consumers";
-import { limits } from "argon2";
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -43,8 +39,6 @@ router.get("/", user({ staffOnly: true }), async (req, res) => {
     });
     res.json(bookings);
 });
-
-
 
 /** 
  * @swagger
@@ -108,7 +102,6 @@ router.post("/", user({ staffOnly: true }), async (req, res) => {
     }
 });
 
-
 /**
  * @swagger
  * /booking: 
@@ -147,7 +140,6 @@ router.patch("/", user({ staffOnly: true }), async (req, res) => {
     }
 });
 
-
 /**
  * @swagger
  * /booking/terminate: 
@@ -183,7 +175,6 @@ router.patch("/", user({ staffOnly: true }), async (req, res) => {
 router.post("/terminate", async (req, res) => {
     const { qrCode, id } = req.body;
     try {
-        let updates;
         if (qrCode) {
             const { count } = await prisma.booking.updateMany({
                 where: {
@@ -209,13 +200,12 @@ router.post("/terminate", async (req, res) => {
                     end: new Date()
                 }
             });
-            res.json({ "status": "success" });
+            res.json({ "status": "success", booking });
         }
     } catch (e) {
         res.status(404).json(errors.NOT_FOUND);
     }
 });
-
 
 /**
  * @swagger
@@ -256,6 +246,5 @@ router.delete("/:id", user({ staffOnly: true }), async (req, res) => {
         res.status(404).json(errors.NOT_FOUND);
     }
 });
-
 
 export default router; 

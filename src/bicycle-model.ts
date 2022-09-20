@@ -1,5 +1,5 @@
 
-import { BicycleModel, PrismaClient, User } from "@prisma/client";
+import { BicycleModel, PrismaClient } from "@prisma/client";
 import { Router } from "express";
 import { user } from "./user/middleware";
 import errors from "./errors";
