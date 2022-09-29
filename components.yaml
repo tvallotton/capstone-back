@@ -55,6 +55,7 @@ components:
             properties:
               status:
                 type: string
+
               user:
                 $ref: "#/components/schemas/User"
     BadRequest:
@@ -182,6 +183,19 @@ components:
           type: boolean
         createdAt:
           type: string
+        name:
+          type: string
+        LastName:
+          type: string
+        BornDate:
+          type: string
+        adress:
+          type: string
+        city:
+          type: string
+        occupancy:
+          type: string
+
     Error:
       type: object
       properties:
