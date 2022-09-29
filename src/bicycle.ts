@@ -29,10 +29,26 @@ router.get("/", user({ staffOnly: true }), async (req, res) => {
     const query = await prisma.bicycle.findMany({
         take: Number(take) || undefined,
         skip: Number(skip) || undefined,
+        orderBy: {
+            id: "asc",
+        },
         include: {
-            model: true
+            model: true,
+            bookings: {
+                where: {
+                    end: null
+                }
+            }
         }
     });
+    for (const _user of query) {
+        const user = _user as any;
+        if (user.bookings.length == 1) {
+            user.status = "ARRENDADA";
+        }
+        user.activeBookings = user.bookings;
+        delete user.bookings;
+    }
     res.json(query);
 });
 

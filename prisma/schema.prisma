@@ -18,16 +18,16 @@ model User {
     isStaff     Boolean      @default(false)
     createdAt   DateTime     @default(now())
     submissions Submission[]
-    bookings     Booking[]
+    bookings    Booking[]
 }
 
 model Bicycle {
-    id      Int           @id @default(autoincrement())
-    qrCode  String        @unique
-    status  BicycleStatus
-    model   BicycleModel  @relation(fields: [modelId], references: [id])
-    modelId Int
-    bookings     Booking[]
+    id       Int           @id @default(autoincrement())
+    qrCode   String        @unique
+    status   BicycleStatus
+    model    BicycleModel  @relation(fields: [modelId], references: [id])
+    modelId  Int
+    bookings Booking[]
 }
 
 model BicycleModel {
@@ -49,17 +49,19 @@ model Submission {
 }
 
 model Booking {
-    id          Int      @id @default(autoincrement())
-    user        User     @relation(fields: [userId], references: [id])
-    userId      Int
-    bicycle     Bicycle  @relation(fields: [bicycleId], references: [id])
-    bicycleId   Int
-    start       DateTime @default(now())
-    end         DateTime?
+    id        Int       @id @default(autoincrement())
+    user      User      @relation(fields: [userId], references: [id])
+    userId    Int
+    bicycle   Bicycle   @relation(fields: [bicycleId], references: [id])
+    bicycleId Int
+    start     DateTime  @default(now())
+    end       DateTime?
 }
 
 enum BicycleStatus {
+    // ARRENDADA
     HABILITADA // puede estar disponible o arrendada. 
+    EVENTO // reservada para evento
     REPARACION // no está prestada pero está averiada
     INHABILITADA // se considera perdida/destruida
 }

@@ -6,6 +6,7 @@ import bicycle from "./bicycle";
 import submission from "./submission";
 import bicycleModel from "./bicycle-model";
 import booking from "./booking";
+import cors from "cors";
 dotenv.config();
 
 const PORT = process.env["PORT"] || 5000;
@@ -20,7 +21,7 @@ app.use("/submission", submission);
 app.use("/bicycle-model", bicycleModel);
 app.use("/booking", booking);
 app.use("/", docs);
-
+app.use(cors);
 
 app.listen(PORT, () => {
     console.log(`visit http://localhost:${PORT}/`);
