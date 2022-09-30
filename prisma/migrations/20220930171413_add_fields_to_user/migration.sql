@@ -1,0 +1,10 @@
+-- AlterEnum
+ALTER TYPE "BicycleStatus" ADD VALUE 'EVENTO';
+
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN     "BornDate" TEXT NOT NULL DEFAULT '',
+ADD COLUMN     "LastName" TEXT NOT NULL DEFAULT '',
+ADD COLUMN     "adress" TEXT NOT NULL DEFAULT '',
+ADD COLUMN     "city" TEXT NOT NULL DEFAULT '',
+ADD COLUMN     "name" TEXT NOT NULL DEFAULT '',
+ADD COLUMN     "occuppancy" TEXT NOT NULL DEFAULT '';
