@@ -14,6 +14,7 @@ const app = express();
 
 
 // middleware for parsing json objects
+app.use(cors);
 app.use("/", express.json());
 app.use("/user/", user);
 app.use("/bicycle", bicycle);
@@ -21,7 +22,6 @@ app.use("/submission", submission);
 app.use("/bicycle-model", bicycleModel);
 app.use("/booking", booking);
 app.use("/", docs);
-app.use(cors());
 
 app.listen(PORT, () => {
     console.log(`visit http://localhost:${PORT}/`);
