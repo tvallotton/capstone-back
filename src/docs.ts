@@ -18,7 +18,7 @@ const options = {
         },
 
     },
-    apis: ["**/*.ts", "./components.yaml",],
+    apis: ["**/*.ts", "/dist/*.js", "./components.yaml",],
 };
 
 const swaggerOptions = {
