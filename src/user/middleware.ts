@@ -1,9 +1,9 @@
 import { PrismaClient, User } from "@prisma/client";
 import express, { Response, NextFunction, } from "express";
 import jwt from "jsonwebtoken";
+import process from "process";
 
-
-export const JWT_SECRET = "kXcssP7EyRHap1LNPAb9L2msigD1NT84vtC8TKItF9SI4YlXAbgfuJ5RPvkkIcKK";
+export const JWT_SECRET = process.env["JWT_SECRET"] as string;
 
 const prisma = new PrismaClient();
 
