@@ -2,7 +2,7 @@ version: "3.7"
 services:
   sibico-backend:
     container_name: sibico-backend
-    command: "npm run dev"
+    command: "npm start"
     build:
       context: .
     environment:
