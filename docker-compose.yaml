@@ -3,7 +3,7 @@ services:
   sibico-backend:
     container_name: sibico-backend
     image: sibico-backend:latest
-    command: "npm start"
+    command: "npm run dev"
     build:
       context: .
     environment:

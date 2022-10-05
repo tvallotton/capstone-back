@@ -5,6 +5,10 @@ import process from "process";
 
 export const JWT_SECRET = process.env["JWT_SECRET"] as string;
 
+if (!JWT_SECRET) {
+    throw "No JWT_SECRET set."
+}
+
 const prisma = new PrismaClient();
 
 export type Request = express.Request & { user?: User; };
