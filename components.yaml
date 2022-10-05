@@ -130,6 +130,10 @@ components:
           type: integer
         userId:
           type: integer
+        user: 
+          $ref: "#/components/schemas/User"
+        model: 
+          $ref: "#/components/schemas/BicycleModel"
     BicycleInput:
       type: object
       properties:
