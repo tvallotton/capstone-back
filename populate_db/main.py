@@ -3,9 +3,10 @@ import pandas as pd
 import psycopg2
 import dotenv
 import os
+import time
 dotenv.load_dotenv()
 
-
+time.sleep(5)
 def connection():
     DATABASE_URL = os.environ["DATABASE_URL"]
     url = urlparse(DATABASE_URL)
@@ -88,7 +89,8 @@ def create_bicycles(conn, table, models):
 
 
 conn = connection()
-table = pd.read_csv("Inventario.csv")
+print(os.listdir("/home/upload"))
+table = pd.read_csv("/home/upload/Inventario.csv")
 table = table[~table["codigos"].isna()]
 table["Modelo"] = table["Modelo"].fillna("")
 models = creacte_models(conn, table)
