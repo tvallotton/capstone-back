@@ -33,7 +33,7 @@ router.get("/", user({ staffOnly: true }), async (req, res) => {
         skip: Number(skip) || undefined,
         include: {
             user: true,
-            model: true, 
+            model: true,
         }
     });
     res.json(query);
@@ -59,6 +59,10 @@ router.get("/mine", user(), async (req: Request, res) => {
     const submission = await prisma.submission.findUnique({
         where: {
             userId: req.user?.id
+        },
+        include: {
+            user: true,
+            model: true,
         }
     });
 
