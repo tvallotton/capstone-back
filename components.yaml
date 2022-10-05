@@ -168,6 +168,8 @@ components:
           type: integer
         image:
           type: string
+        booking:
+          $ref: "#/components/schemas/Booking"
     UserInput:
       type: object
       properties:

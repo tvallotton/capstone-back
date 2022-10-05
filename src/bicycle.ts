@@ -41,13 +41,13 @@ router.get("/", user({ staffOnly: true }), async (req, res) => {
             }
         }
     });
-    for (const _user of query) {
-        const user = _user as any;
-        if (user.bookings.length == 1) {
-            user.status = "ARRENDADA";
+    for (const row of query) {
+        const bike = row as any;
+        if (bike.bookings.length == 1) {
+            bike.status = "ARRENDADA";
         }
-        user.activeBookings = user.bookings;
-        delete user.bookings;
+        bike.booking = bike.bookings;
+        delete bike.bookings;
     }
     res.json(query);
 });
