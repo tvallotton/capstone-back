@@ -6,7 +6,7 @@ import os
 import time
 dotenv.load_dotenv()
 
-time.sleep(5)
+
 def connection():
     DATABASE_URL = os.environ["DATABASE_URL"]
     url = urlparse(DATABASE_URL)
@@ -34,7 +34,7 @@ def creacte_models(conn, table):
         values (%s, '', '')
         on conflict do nothing;
         """, (modelo,))
-        print(f"insert model: {modelo}")
+        
 
     cursor.execute(f"""
         select name, id from "BicycleModel"; 
@@ -84,7 +84,7 @@ def create_bicycles(conn, table, models):
 
         )
         cursor.execute(query, params)
-        print(f"insert bike: {bike['codigos']}")
+
 
 
 
@@ -95,4 +95,6 @@ table = table[~table["codigos"].isna()]
 table["Modelo"] = table["Modelo"].fillna("")
 models = creacte_models(conn, table)
 create_bicycles(conn, table, models)
+conn.commit()
+print("populated db")
 conn.close()
