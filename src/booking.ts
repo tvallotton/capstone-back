@@ -35,6 +35,10 @@ router.get("/", user({ staffOnly: true }), async (req, res) => {
         skip: Number(skip) || undefined,
         where: {
             end: activeOnly === "true" ? null : undefined
+        }, 
+        include: {
+            user: true, 
+            bicycle: true, 
         }
     });
     res.json(bookings);
@@ -57,7 +61,11 @@ router.get("/:id", async (req, res) => {
     const { id } = req.params;
     try {
         const booking = await prisma.booking.findUnique({
-            where: { id: Number(id) }
+            where: { id: Number(id) },
+            include: {
+                user: true,
+                bicycle: true,
+            }
         });
         res.json({ status: "success", booking });
     } catch (_) {
