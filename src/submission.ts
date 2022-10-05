@@ -31,6 +31,10 @@ router.get("/", user({ staffOnly: true }), async (req, res) => {
     const query = await prisma.submission.findMany({
         take: Number(take) || undefined,
         skip: Number(skip) || undefined,
+        include: {
+            user: true,
+            model: true, 
+        }
     });
     res.json(query);
 });
