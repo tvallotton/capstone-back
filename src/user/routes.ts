@@ -278,6 +278,14 @@ const PUBLIC_FIELDS = {
     "isAdmin": true,
     "isStaff": true,
     "createdAt": true,
+    "name": true,
+    "LastName": true,
+    "adress": true,
+    "city": true,
+    "BornDate": true,
+    "occuppancy": true,
+    "submissions": true,
+    "bookings": true,
 };
 
 export default router; 

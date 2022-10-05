@@ -75,12 +75,12 @@ def create_bicycles(conn, table, models):
         """
         params = (
             bike["codigos"],
-            status[bike["Unnamed: 1"]],
-            bike["ULOCK"],
-            bike["Luces"],
-            bike["FLOTA"],
-            bike["Reflectante"],
-            models[bike["Modelo"]]
+            status[bike["Unnamed: 1"]] or "",
+            bike["ULOCK"] or "",
+            bike["Luces"] or "",
+            bike["FLOTA"] or "",
+            bike["Reflectante"] or "",
+            models[bike["Modelo"]] or ""
 
         )
         cursor.execute(query, params)
@@ -93,6 +93,7 @@ print(os.listdir("/home/upload"))
 table = pd.read_csv("/home/upload/Inventario.csv")
 table = table[~table["codigos"].isna()]
 table["Modelo"] = table["Modelo"].fillna("")
+table = table.fillna("")
 models = creacte_models(conn, table)
 create_bicycles(conn, table, models)
 conn.commit()
