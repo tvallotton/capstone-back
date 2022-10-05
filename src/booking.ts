@@ -22,7 +22,13 @@ const prisma = new PrismaClient();
  *                required: false
  *          responses:
  *              '200':
- *                  $ref: '#/components/responses/Booking'
+ *                  description: A successful response
+ *                  content: 
+ *                      application/json:
+ *                          schema: 
+ *                              type: array
+ *                              items:  
+ *                                $ref: '#/components/schemas/Booking'
  *              '401': 
  *                 $ref: '#/components/responses/Unauthorized'
  *              '403':
@@ -39,7 +45,7 @@ router.get("/", user({ staffOnly: true }), async (req, res) => {
         include: {
             user: true, 
             bicycle: true, 
-        }
+        },
     });
     res.json(bookings);
 });

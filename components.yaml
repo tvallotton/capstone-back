@@ -23,6 +23,19 @@ components:
                 type: string
               model:
                 $ref: "#/components/schemas/BicycleModel"
+
+    BicycleHistory:
+      description: Returns the bicycle history.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+              model:
+                $ref: "#/components/schemas/BicycleHistory"
+
     Submission:
       description: Returns the submission form.
       content:
@@ -55,9 +68,19 @@ components:
             properties:
               status:
                 type: string
-
               user:
                 $ref: "#/components/schemas/User"
+    UserHistory:
+      description: Returns the user history
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+              user:
+                $ref: "#/components/schemas/UserHistory"
     BadRequest:
       description: The parameters for this request where invalid or missing
       content:
@@ -103,9 +126,9 @@ components:
           type: string
         start:
           type: string
-        user:
+        user: 
           $ref: "#/components/schemas/User"
-        bicycle:
+        bicycle: 
           $ref: "#/components/schemas/Bicycle"
     BicycleModelInput:
       type: object
@@ -205,7 +228,42 @@ components:
           type: string
         occupancy:
           type: string
-
+    BicycleHistoryInput:
+      type: object
+      properties:
+        bicycleId:
+          type: integer
+        description:
+          type: string
+    BicycleHistory:
+          type: object
+          properties:
+            id:
+              type: integer
+            bicycle:
+              $ref: "#/components/schemas/Bicycle"
+            bicycleId:
+              type: integer
+            description:
+              type: string     
+    UserHistoryInput:
+      type: object
+      properties:
+        userId:
+          type: integer
+        description:
+          type: string
+    UserHistory:
+          type: object
+          properties:
+            id:
+              type: integer
+            user:
+              $ref: "#/components/schemas/User"
+            userId:
+              type: integer
+            description:
+              type: string 
     Error:
       type: object
       properties:
@@ -227,6 +285,20 @@ components:
       in: path
       name: id
       description: The id of the bicycle model.
+      required: true
+      schema:
+        type: integer
+    bicycleHistoryId:
+      in: path
+      name: id
+      description: The id of the bicycle history.
+      required: true
+      schema:
+        type: integer
+    userHistoryId:
+      in: path
+      name: id
+      description: The id of the user history.
       required: true
       schema:
         type: integer

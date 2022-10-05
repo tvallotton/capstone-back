@@ -11,33 +11,35 @@ datasource db {
 }
 
 model User {
-    id          Int          @id @default(autoincrement())
-    email       String       @unique
+    id          Int           @id @default(autoincrement())
+    email       String        @unique
     password    String
-    name        String       @default("")
-    LastName    String       @default("")
-    adress      String       @default("")
-    city        String       @default("")
-    BornDate    String       @default("")
-    occuppancy  String       @default("")
-    isAdmin     Boolean      @default(false)
-    isStaff     Boolean      @default(false)
-    createdAt   DateTime     @default(now())
+    name        String        @default("")
+    LastName    String        @default("")
+    adress      String        @default("")
+    city        String        @default("")
+    BornDate    String        @default("")
+    occuppancy  String        @default("")
+    isAdmin     Boolean       @default(false)
+    isStaff     Boolean       @default(false)
+    createdAt   DateTime      @default(now())
     submissions Submission[]
     bookings    Booking[]
+    history     UserHistory[]
 }
 
 model Bicycle {
-    id        Int           @id @default(autoincrement())
-    qrCode    String        @unique
+    id        Int              @id @default(autoincrement())
+    qrCode    String           @unique
     status    BicycleStatus
-    model     BicycleModel  @relation(fields: [modelId], references: [id])
+    model     BicycleModel     @relation(fields: [modelId], references: [id])
     modelId   Int
     bookings  Booking[]
-    ulock     String        @default("")
-    lights    String        @default("")
-    fleet     String        @default("")
-    reflector String        @default("")
+    history   BicycleHistory[]
+    ulock     String           @default("")
+    lights    String           @default("")
+    fleet     String           @default("")
+    reflector String           @default("")
 }
 
 model BicycleModel {
@@ -58,6 +60,7 @@ model Submission {
     bicycleModelId Int
 }
 
+// Porque el bicycleid no es unique??
 model Booking {
     id        Int       @id @default(autoincrement())
     user      User      @relation(fields: [userId], references: [id])
@@ -66,6 +69,22 @@ model Booking {
     bicycleId Int
     start     DateTime  @default(now())
     end       DateTime?
+}
+
+model BicycleHistory {
+    id          Int      @id @default(autoincrement())
+    bicycle     Bicycle  @relation(fields: [bicycleId], references: [id], onDelete: Cascade)
+    bicycleId   Int
+    description String
+    createdAt   DateTime @default(now())
+}
+
+model UserHistory {
+    id          Int      @id @default(autoincrement())
+    user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId      Int
+    description String
+    createdAt   DateTime @default(now())
 }
 
 enum BicycleStatus {

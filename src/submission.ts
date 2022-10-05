@@ -20,7 +20,13 @@ const prisma = new PrismaClient();
  *              - $ref: '#/components/parameters/x-access-token'
  *          responses:
  *              '200':
- *                  $ref: '#/components/responses/Submission'
+ *                  description: A successful response
+ *                  content: 
+ *                      application/json:
+ *                          schema: 
+ *                              type: array
+ *                              items:  
+ *                                $ref: '#/components/schemas/Submission'
  *              '401': 
  *                 $ref: '#/components/responses/Unauthorized'
  *              '403':

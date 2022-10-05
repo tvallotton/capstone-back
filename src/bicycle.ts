@@ -18,7 +18,13 @@ const prisma = new PrismaClient();
  *              - $ref: '#/components/parameters/x-access-token'
  *          responses:
  *              '200':
- *                  $ref: '#/components/responses/Bicycle'
+ *                  description: A successful response
+ *                  content: 
+ *                      application/json:
+ *                          schema: 
+ *                              type: array
+ *                              items:  
+ *                                $ref: '#/components/schemas/Bicycle'
  *              '401': 
  *                 $ref: '#/components/responses/Unauthorized'
  *              '403':
@@ -37,8 +43,12 @@ router.get("/", user({ staffOnly: true }), async (req, res) => {
             bookings: {
                 where: {
                     end: null
+                },
+                include: {
+                    user: true
                 }
-            }
+            },
+            history: true
         }
     });
     for (const row of query) {
