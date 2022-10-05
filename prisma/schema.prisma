@@ -28,12 +28,16 @@ model User {
 }
 
 model Bicycle {
-    id       Int           @id @default(autoincrement())
-    qrCode   String        @unique
-    status   BicycleStatus
-    model    BicycleModel  @relation(fields: [modelId], references: [id])
-    modelId  Int
-    bookings Booking[]
+    id        Int           @id @default(autoincrement())
+    qrCode    String        @unique
+    status    BicycleStatus
+    model     BicycleModel  @relation(fields: [modelId], references: [id])
+    modelId   Int
+    bookings  Booking[]
+    ulock     String        @default("")
+    lights    String        @default("")
+    fleet     String        @default("")
+    reflector String        @default("")
 }
 
 model BicycleModel {
