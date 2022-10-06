@@ -5,6 +5,7 @@ services:
     command: "npm start"
     build:
       context: .
+    restart: always
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@sibico-postgres/sibico?schema=public
     env_file: .env

@@ -150,6 +150,13 @@ components:
           type: string
         description:
           type: string
+    SubmissionInput:
+      type: object
+      properties:
+        bicycleModelId:
+          type: integer
+        userId:
+          type: integer
     Submission:
       type: object
       properties:
@@ -161,6 +168,8 @@ components:
           $ref: "#/components/schemas/User"
         model:
           $ref: "#/components/schemas/BicycleModel"
+        createdAt:
+          type: string
     BicycleInput:
       type: object
       properties:

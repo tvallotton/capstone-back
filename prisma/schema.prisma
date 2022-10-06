@@ -58,6 +58,7 @@ model Submission {
     model          BicycleModel @relation(fields: [bicycleModelId], references: [id])
     userId         Int          @unique
     bicycleModelId Int
+    createdAt      DateTime     @default(now())
 }
 
 // Porque el bicycleid no es unique??

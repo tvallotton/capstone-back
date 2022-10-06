@@ -93,7 +93,7 @@ router.get("/mine", user(), async (req: Request, res) => {
  *            content: 
  *                application/json: 
  *                    schema: 
- *                        $ref: '#/components/schemas/Submission'
+ *                        $ref: '#/components/schemas/SubmissionInput'
  *          responses:
  *              '201':
  *                  $ref: '#/components/responses/Submission'
@@ -130,7 +130,7 @@ router.post("/", user(), async (req: Request, res) => {
  *            content: 
  *                application/json: 
  *                    schema: 
- *                        $ref: '#/components/schemas/Submission'
+ *                        $ref: '#/components/schemas/SubmissionInput'
  *          responses: 
  *              '200': 
  *                  $ref: '#/components/responses/Submission'
