@@ -266,7 +266,7 @@ router.delete("/:id", user({ staffOnly: true }), async (req: Request, res) => {
     }
 });
 
-router.use((err: Error, req: any, res: any, next: any) => {
+router.use((_err: Error, _req: any, res: any, _next: any) => {
     res.status(500).json(errors.UNAUTHORIZED);
 });
 

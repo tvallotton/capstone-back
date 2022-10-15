@@ -1,4 +1,4 @@
-import { UserHistory, PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { Router } from "express";
 import { user } from "./user/middleware";
 import errors from "./errors";
@@ -102,7 +102,7 @@ router.delete("/:id", user({ staffOnly: true }), async (req, res) => {
         const history = await prisma.userHistory.delete({
             where: {
                 id: Number(id) || undefined
-            }, 
+            },
             include: {
                 user: true
             }
