@@ -33,7 +33,7 @@ components:
             properties:
               status:
                 type: string
-              model:
+              bicycleHistory:
                 $ref: "#/components/schemas/BicycleHistory"
 
     Submission:
