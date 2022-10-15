@@ -16,7 +16,7 @@ model User {
     password    String
     name        String        @default("")
     lastName    String        @default("")
-    adress      String        @default("")
+    address      String        @default("")
     city        String        @default("")
     birthday    DateTime?
     occuppancy  String        @default("")

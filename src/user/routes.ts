@@ -280,7 +280,7 @@ const PUBLIC_FIELDS = {
     "createdAt": true,
     "name": true,
     "LastName": true,
-    "adress": true,
+    "address": true,
     "city": true,
     "BornDate": true,
     "occuppancy": true,
