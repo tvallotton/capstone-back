@@ -227,11 +227,11 @@ components:
           type: string
         name:
           type: string
-        LastName:
+        lastName:
           type: string
-        BornDate:
+        birthday:
           type: string
-        adress:
+        address:
           type: string
         city:
           type: string
