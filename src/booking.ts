@@ -25,10 +25,15 @@ const prisma = new PrismaClient();
  *                  description: A successful response
  *                  content: 
  *                      application/json:
- *                          schema: 
- *                              type: array
- *                              items:  
- *                                $ref: '#/components/schemas/Booking'
+ *                          schema:
+ *                              type: object
+ *                              properties: 
+ *                                  status: 
+ *                                      type: string
+ *                                  booking:
+ *                                      type: array
+ *                                      items: 
+ *                                        $ref: '#/components/schemas/Booking'
  *              '401': 
  *                 $ref: '#/components/responses/Unauthorized'
  *              '403':
@@ -41,10 +46,10 @@ router.get("/", user({ staffOnly: true }), async (req, res) => {
         skip: Number(skip) || undefined,
         where: {
             end: activeOnly === "true" ? null : undefined
-        }, 
+        },
         include: {
-            user: true, 
-            bicycle: true, 
+            user: true,
+            bicycle: true,
         },
     });
     res.json(bookings);

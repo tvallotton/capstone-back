@@ -21,10 +21,15 @@ const prisma = new PrismaClient();
  *                  description: A successful response
  *                  content: 
  *                      application/json:
- *                          schema: 
- *                              type: array
- *                              items:  
- *                                $ref: '#/components/schemas/Bicycle'
+ *                          schema:
+ *                              type: object
+ *                              properties: 
+ *                                  status: 
+ *                                      type: string
+ *                                  bicycles:
+ *                                      type: array
+ *                                      items: 
+ *                                        $ref: '#/components/schemas/Bicycle'
  *              '401': 
  *                 $ref: '#/components/responses/Unauthorized'
  *              '403':

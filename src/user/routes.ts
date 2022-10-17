@@ -23,10 +23,15 @@ const router = Router();
  *                  description: A successful response
  *                  content: 
  *                      application/json:
- *                          schema: 
- *                              type: array
- *                              items:  
- *                                $ref: '#/components/schemas/User'
+ *                          schema:
+ *                              type: object
+ *                              properties: 
+ *                                  status: 
+ *                                      type: string
+ *                                  users:
+ *                                      type: array
+ *                                      items: 
+ *                                        $ref: '#/components/schemas/User'
  *                  
  */
 router.get("/", user({ staffOnly: true }), async (req, res) => {
