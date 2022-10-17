@@ -126,9 +126,9 @@ components:
           type: string
         start:
           type: string
-        user: 
+        user:
           $ref: "#/components/schemas/User"
-        bicycle: 
+        bicycle:
           $ref: "#/components/schemas/Bicycle"
     BicycleModelInput:
       type: object
