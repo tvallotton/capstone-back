@@ -22,17 +22,22 @@ const prisma = new PrismaClient();
  *                   content:
  *                     application/json:
  *                       schema:
- *                          type: array
- *                          items: 
- *                            $ref: "#/components/schemas/BicycleModel"
+ *                          type: object
+ *                          properties: 
+ *                              status: 
+ *                                  type: string
+ *                              models:
+ *                                  type: array
+ *                                  items: 
+ *                                    $ref: "#/components/schemas/BicycleModel"
  */
 router.get("/", async (req, res) => {
     const { take, skip } = req.query;
-    const model = await prisma.bicycleModel.findMany({
+    const models = await prisma.bicycleModel.findMany({
         take: Number(take) || undefined,
         skip: Number(skip) || undefined,
     });
-    res.json(model);
+    res.json({ models, status: "success" });
 });
 
 /** 
@@ -49,16 +54,21 @@ router.get("/", async (req, res) => {
  *                   content:
  *                     application/json:
  *                       schema:
- *                          type: array
- *                          items: 
- *                            $ref: "#/components/schemas/BicycleModel"
+ *                          type: object
+ *                          properties: 
+ *                              status: 
+ *                                  type: string
+ *                              models:
+ *                                  type: array
+ *                                  items: 
+ *                                    $ref: "#/components/schemas/BicycleModel"
  */
 router.get("/available", async (req, res) => {
     const { take, skip } = req.query;
     // this is the most complicated query so far
     // we basically want all bicycles models where there
     // is at least one bicycle that isn't currently booked
-    const model = await prisma.bicycleModel.findMany({
+    const models = await prisma.bicycleModel.findMany({
         take: Number(take) || undefined,
         skip: Number(skip) || undefined,
         where: {
@@ -75,7 +85,7 @@ router.get("/available", async (req, res) => {
             }
         }
     });
-    res.json(model);
+    res.json({ models, status: "success" });
 });
 
 

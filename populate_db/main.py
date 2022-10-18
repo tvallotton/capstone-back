@@ -2,9 +2,16 @@ from urllib.parse import urlparse
 import pandas as pd
 import psycopg2
 import dotenv
+import requests
 import os
 import time
 dotenv.load_dotenv()
+
+res = requests.post("http://sibico-backend:5000/user/", data={
+    "email": "tvallotton@uc.cl",
+    "password": "asd123",
+})
+print("response: ", res.json())
 
 
 def connection():
@@ -34,7 +41,6 @@ def creacte_models(conn, table):
         values (%s, '', '')
         on conflict do nothing;
         """, (modelo,))
-        
 
     cursor.execute(f"""
         select name, id from "BicycleModel"; 
@@ -84,8 +90,6 @@ def create_bicycles(conn, table, models):
 
         )
         cursor.execute(query, params)
-
-
 
 
 conn = connection()

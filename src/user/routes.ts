@@ -23,10 +23,15 @@ const router = Router();
  *                  description: A successful response
  *                  content: 
  *                      application/json:
- *                          schema: 
- *                              type: array
- *                              items:  
- *                                $ref: '#/components/schemas/User'
+ *                          schema:
+ *                              type: object
+ *                              properties: 
+ *                                  status: 
+ *                                      type: string
+ *                                  users:
+ *                                      type: array
+ *                                      items: 
+ *                                        $ref: '#/components/schemas/User'
  *                  
  */
 router.get("/", user({ staffOnly: true }), async (req, res) => {
@@ -266,7 +271,7 @@ router.delete("/:id", user({ staffOnly: true }), async (req: Request, res) => {
     }
 });
 
-router.use((err: Error, req: any, res: any, next: any) => {
+router.use((_err: Error, _req: any, res: any, _next: any) => {
     res.status(500).json(errors.UNAUTHORIZED);
 });
 
@@ -280,7 +285,7 @@ const PUBLIC_FIELDS = {
     "createdAt": true,
     "name": true,
     "LastName": true,
-    "adress": true,
+    "address": true,
     "city": true,
     "BornDate": true,
     "occuppancy": true,

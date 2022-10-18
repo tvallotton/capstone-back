@@ -1,4 +1,4 @@
-import { UserHistory, PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { Router } from "express";
 import { user } from "./user/middleware";
 import errors from "./errors";
@@ -7,12 +7,58 @@ const router = Router();
 const prisma = new PrismaClient();
 
 
+/** 
+ * @swagger
+ * /user/history/{id}:
+ *      get: 
+ *          description: Returns the history of the queried user. 
+ *          parameters: 
+ *              - $ref: "#/components/parameters/take"
+ *              - $ref: "#/components/parameters/skip"
+ *              - $ref: "#/components/parameters/userId"
+ *              - $ref: "#/components/parameters/x-access-token"
+ *          responses:
+ *              "200":
+ *                  description: Returns the history of the queried user as an array.
+ *                  content:
+ *                      application/json: 
+ *                          schema: 
+ *                              type: object
+ *                              properties: 
+ *                                  status: 
+ *                                      type: string
+ *                                  history: 
+ *                                      type: array
+ *                                      items: 
+ *                                          $ref: "#/components/schemas/UserHistory"
+ *              "401": 
+ *                  $ref: "#/components/responses/Unauthorized"
+ *              "403":
+ *                   $ref: "#/components/responses/Forbidden"
+ *              "404":
+ *                   $ref: "#/components/responses/NotFound"
+ */
+router.get("/:userId", user({ staffOnly: true }), async (req, res) => {
+    const { take, skip } = req.query;
+    const { userId } = req.params;
+    const history = await prisma.userHistory.findMany({
+        include: {
+            user: true
+        },
+        take: Number(take) || undefined,
+        skip: Number(skip) || undefined,
+        where: { userId: Number(userId) }
+
+    });
+    res.json(history);
+});
+
 /**
  * @swagger
  * /user/history: 
  *      post:
  *          parameters: 
- *              - $ref: '#/components/parameters/x-access-token'
+ *              - $ref: "#/components/parameters/x-access-token"
  *          consumes: 
  *              - application/json
  *          requestBody:
@@ -20,16 +66,16 @@ const prisma = new PrismaClient();
  *            content: 
  *                application/json: 
  *                    schema: 
- *                        $ref: '#/components/schemas/UserHistoryInput'
+ *                        $ref: "#/components/schemas/UserHistoryInput"
  *          responses: 
- *              '201': 
- *                  $ref: '#/components/responses/UserHistory'
- *              '400': 
- *                  $ref: '#/components/responses/BadRequest'
- *              '401': 
- *                 $ref: '#/components/responses/Unauthorized'
- *              '403':
- *                 $ref: '#/components/responses/Forbidden'
+ *              "201": 
+ *                  $ref: "#/components/responses/UserHistory"
+ *              "400": 
+ *                  $ref: "#/components/responses/BadRequest"
+ *              "401": 
+ *                 $ref: "#/components/responses/Unauthorized"
+ *              "403":
+ *                 $ref: "#/components/responses/Forbidden"
  */
 router.post("/", user({ staffOnly: true }), async (req, res) => {
     const { userId, description } = req.body;
@@ -47,40 +93,6 @@ router.post("/", user({ staffOnly: true }), async (req, res) => {
 });
 
 
-/** 
- * @swagger
- * /user/history/{id}:
- *      get: 
- *          description: Returns the history of the queried user. 
- *          parameters: 
- *              - $ref: '#/components/parameters/take'
- *              - $ref: '#/components/parameters/skip'
-  *              - $ref: '#/components/parameters/userId'
- *              - $ref: '#/components/parameters/x-access-token'
- *          responses:
- *              '200':
- *                   description: Returns the history of the queried user as an array.
- *                   content:
- *                     application/json:
- *                       schema:
- *                          type: array
- *                          items: 
- *                            $ref: "#/components/schemas/UserHistory"
- */
-router.get("/:userId", user({ staffOnly: true }), async (req, res) => {
-    const { take, skip } = req.query;
-    const { userId } = req.params;
-    const history = await prisma.userHistory.findMany({
-        include: {
-            user: true
-        },
-        take: Number(take) || undefined,
-        skip: Number(skip) || undefined,
-        where: { userId: Number(userId) }
-
-    });
-    res.json(history);
-});
 
 
 /**
@@ -88,13 +100,13 @@ router.get("/:userId", user({ staffOnly: true }), async (req, res) => {
  * /user/history/{id}: 
  *      delete: 
  *          parameters: 
- *              - $ref: '#/components/parameters/userHistoryId'
- *              - $ref: '#/components/parameters/x-access-token'
+ *              - $ref: "#/components/parameters/userHistoryId"
+ *              - $ref: "#/components/parameters/x-access-token"
  *          responses: 
- *              '200': 
- *                  $ref: '#/components/responses/UserHistory'
- *              '404': 
- *                  $ref: '#/components/responses/NotFound'
+ *              "200": 
+ *                  $ref: "#/components/responses/UserHistory"
+ *              "404": 
+ *                  $ref: "#/components/responses/NotFound"
  */
 router.delete("/:id", user({ staffOnly: true }), async (req, res) => {
     const { id } = req.params;
@@ -102,7 +114,7 @@ router.delete("/:id", user({ staffOnly: true }), async (req, res) => {
         const history = await prisma.userHistory.delete({
             where: {
                 id: Number(id) || undefined
-            }, 
+            },
             include: {
                 user: true
             }
