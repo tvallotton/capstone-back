@@ -7,7 +7,8 @@ import os
 import time
 dotenv.load_dotenv()
 
-res = requests.post("http://sibico-backend:5000/user/", data={
+time.sleep(2)
+res = requests.post("http://sibico-backend:5001/user/", data={
     "email": "tvallotton@uc.cl",
     "password": "asd123",
 })
