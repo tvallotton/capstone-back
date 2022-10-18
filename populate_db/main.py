@@ -8,7 +8,7 @@ import time
 dotenv.load_dotenv()
 
 time.sleep(2)
-res = requests.post("http://sibico-backend:5001/user/", data={
+res = requests.post("http://sibico-backend:5001/user/", json={
     "email": "tvallotton@uc.cl",
     "password": "asd123",
 })
@@ -94,6 +94,11 @@ def create_bicycles(conn, table, models):
 
 
 conn = connection()
+
+cursor = conn.cursor()
+cursor.execute(
+    'update "User" set "isAdmin" = true, "isStaff" = true where email = \'tvallotton@uc.cl\';')
+
 print(os.listdir("/home/upload"))
 table = pd.read_csv("/home/upload/Inventario.csv")
 table = table[~table["codigos"].isna()]
