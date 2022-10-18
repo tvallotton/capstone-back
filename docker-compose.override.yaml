@@ -1,7 +1,11 @@
 version: "3.7"
 services:
   sibico-backend:
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://postgres:postgres@sibico-postgres/sibico?schema=public
     env_file: .env
+    restart: "no"
     volumes:
       - ./:/usr/src/app
       - node_modules:/usr/src/app/node_modules
