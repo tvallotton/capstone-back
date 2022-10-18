@@ -24,7 +24,6 @@ services:
       - POSTGRES_DB=sibico
     volumes:
       - postgres-data:/var/lib/postgresql/data
-
   populate-db:
     container_name: populate-db
     build: populate_db
