@@ -1,0 +1,11 @@
+version: "3.7"
+services:
+  sibico-backend:
+    env_file: .env
+    volumes:
+      - ./:/usr/src/app
+      - node_modules:/usr/src/app/node_modules
+      - dist:/usr/src/app/dist
+volumes:
+  node_modules: {}
+  dist: {}
