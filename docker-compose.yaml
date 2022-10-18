@@ -10,7 +10,7 @@ services:
       - NODE_ENV=production
       - DATABASE_URL=postgresql://postgres:postgres@sibico-postgres/sibico?schema=public
     ports:
-      - 5001:5001
+      - 5000:5000
     depends_on:
       - sibico-postgres
   sibico-postgres:

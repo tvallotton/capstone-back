@@ -45,6 +45,9 @@ router.get("/", async (req, res) => {
  * /bicycle-model/available:
  *      get: 
  *          description: Public endpoint. Returns the bicicle models which are available to book.
+ *          parameters: 
+ *              - $ref: '#/components/parameters/take'
+ *              - $ref: '#/components/parameters/skip'
  *          responses:
  *              '200':
  *                   description: Returns the bicycle models as an array.
@@ -61,31 +64,27 @@ router.get("/", async (req, res) => {
  *                                    $ref: "#/components/schemas/BicycleModel"
  */
 router.get("/available", async (req, res) => {
-    const unbooked = await prisma.bicycle.groupBy({
-        by: ["modelId"],
-        _count: {
-            modelId: true,
-        },
+    const { take, skip } = req.query;
+    // this is the most complicated query so far
+    // we basically want all bicycles models where there
+    // is at least one bicycle that isn't currently booked
+    const models = await prisma.bicycleModel.findMany({
+        take: Number(take) || undefined,
+        skip: Number(skip) || undefined,
         where: {
-            bookings: {
-                every: {
-                    end: {
-                        not: null
+            bicycles: {
+                some: {
+                    bookings: {
+                        every: {
+                            end: {
+                                not: null
+                            }
+                        }
                     }
                 }
-
             }
         }
     });
-    const submitted = await prisma.submission.groupBy({
-        by: ["bicycleModelId"],
-        _count: {
-            bicycleModelId: true,
-        }
-    });
-
-    unbooked.map(model => );
-
     res.json({ models, status: "success" });
 });
 
