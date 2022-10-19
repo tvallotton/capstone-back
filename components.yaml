@@ -212,6 +212,13 @@ components:
       required:
         - email
         - password
+    UserAuthInput:
+      type: object
+      properties:
+        code:
+          type: string
+      required:
+        - code
     User:
       type: object
       properties:

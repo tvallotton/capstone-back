@@ -5,8 +5,27 @@ import argon2 from "argon2";
 import { JWT_SECRET, user, Request } from "./middleware";
 import errors from "../errors";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
+import dotenv from "dotenv";
+const nodemailer = require('nodemailer');
+
 const prisma = new PrismaClient();
 const router = Router();
+dotenv.config();
+
+const mailUser = process.env["MAILUSER"];
+const mailpass = process.env["MAILPASS"];
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: mailUser,
+        pass: mailpass,
+    },
+    tls: {
+        rejectUnauthorized: false,
+    }
+});
+
+
 
 
 /**
@@ -111,12 +130,13 @@ router.get("/:id", user({ staffOnly: true }), async (req, res) => {
  *          '500': 
  *              description: Internal server error. Likely the user is already signed up. 
  */
-router.post("/", async (req, res) => {
+
+ router.post("/", async (req, res) => {
     try {
         const user: User = req.body;
         user.password = await argon2.hash(user.password);
         user.email = user.email.toLowerCase();
-        if (!user.email.match(/^\S+@\S+\.\S+$/)) {
+        if (!user.email.match(/^\S+@\S+\.\S+$/)) { // arreglar con puc.uc.cl
             res.status(400);
             res.json(errors.INVALID_EMAIL);
             return;
@@ -125,7 +145,24 @@ router.post("/", async (req, res) => {
             data: user
         });
         delete (created as any).password;
+        var codigoVerif = await argon2.hash(user.email); /// crear hash corto para clave de verificacion. Quizas es mejor hacerlo con createAt, por es null aqui
+        var codigoVerif = codigoVerif.slice(-6)
+        console.log("codigo: ",codigoVerif)
+
+        transporter.sendMail({
+            to: "rizquierdop1@gmail.com",
+            from: "cacaski17@gmail.com",
+            subject: "Autentificacion sibico",
+            text: `Su código de autorización para ${created.email} es el siguiente:\n ${codigoVerif} \n \n Para iniciar sesión, debe de ingresarlo en www.emol.com`
+        },function(err:any ,success:any){
+            if(err) {
+                console.log(err)
+            }
+        })
+        
         res.status(201).json({ status: "success", user: created });
+
+
     } catch (e) {
         const err = e as PrismaClientKnownRequestError;
         if (err.code == "P2002") {
@@ -179,6 +216,10 @@ router.post("/login", async (req, res) => {
         res.status(401);
         return res.json(errors.UNREGISTERED_USER);
     }
+    if (user.isAuth == false) {
+        res.status(401);
+        return res.json(errors.UNAUTH);  ///arreglar error
+    }
     const isCorrect = await argon2.verify(user.password, password);
     if (!isCorrect) {
         return res.status(401)
@@ -189,6 +230,56 @@ router.post("/login", async (req, res) => {
     res.json({ status: "success", "x-access-token": token, });
 });
 
+
+
+/**
+ * @swagger
+ * /auth/{id}:
+ *     post: 
+ *      description: Authenticate a new user.
+ *      parameters: 
+ *          - $ref: '#/components/parameters/userId'
+ *      consumes: 
+ *          - application/json
+ *      requestBody:
+ *          required: true
+ *          content: 
+ *              application/json: 
+ *                  schema: 
+ *                      $ref: '#/components/schemas/UserAuthInput'            
+ *      responses: 
+ *          '204': 
+ *              description: Correct authentication of the user
+ *          '401': 
+ *              description: Email or code are incorrect
+ *          '500': 
+ *              description: Internal server error. Likely the user is already signed up. 
+ */
+
+router.post("/auth/:id", async (req, res) => {
+    const { id } = req.params;
+    const { code } = req.body;
+    console.log(id,code)
+
+    const user = await prisma.user.findFirst({where: { id: Number(id) }});
+    console.log(user)
+    if (user === null) {
+        res.status(401);
+        return res.json(errors.UNREGISTERED_USER);
+    }
+    var codeOriginal = await argon2.hash(user.email); /// crear hash corto para clave de verificacion. Quizas es mejor hacerlo con createAt, por es null aqui
+    var codeOriginal = codeOriginal.slice(-6)
+
+    
+    if (!(codeOriginal == code)) {
+        return res.status(401)
+            .json(errors.INCORRECT_PASSWORD); //arreglar error
+    }
+    
+    user.isAuth = true;
+    console.log("autentificado")
+    res.status(204)
+});
 
 /**
  * @swagger
