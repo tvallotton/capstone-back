@@ -38,7 +38,7 @@ router.get("/", user({ staffOnly: true }), async (req, res) => {
     const skip = Number(req.query.skip) || undefined;
     const take = Number(req.query.take) || undefined;
 
-    const posts = await prisma.user.findMany({
+    const users = await prisma.user.findMany({
         skip,
         take,
         select: PUBLIC_FIELDS,
@@ -46,7 +46,7 @@ router.get("/", user({ staffOnly: true }), async (req, res) => {
             createdAt: "desc"
         }
     });
-    res.json(posts);
+    res.json({ users, status: "success" });
 });
 
 /** 

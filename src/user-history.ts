@@ -50,7 +50,7 @@ router.get("/:userId", user({ staffOnly: true }), async (req, res) => {
         where: { userId: Number(userId) }
 
     });
-    res.json(history);
+    res.json({ history, status: "success" });
 });
 
 /**
