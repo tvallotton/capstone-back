@@ -8,11 +8,14 @@ import time
 dotenv.load_dotenv()
 
 time.sleep(2)
-res = requests.post("http://sibico-backend:5001/user/", json={
-    "email": "tvallotton@uc.cl",
-    "password": "asd123",
-})
-print("response: ", res.json())
+try:
+    res = requests.post("http://sibico-backend:5001/user/", json={
+        "email": "tvallotton@uc.cl",
+        "password": "asd123",
+    })
+    print("response: ", res.json())
+except:
+    pass
 
 
 def connection():
