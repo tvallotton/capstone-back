@@ -202,6 +202,14 @@ components:
           type: string
         booking:
           $ref: "#/components/schemas/Booking"
+        ulock:
+          type: string
+        lights:
+          type: string
+        fleet:
+          type: string
+        reflector:
+          type: string
     UserInput:
       type: object
       properties:
@@ -245,16 +253,16 @@ components:
         description:
           type: string
     BicycleHistory:
-          type: object
-          properties:
-            id:
-              type: integer
-            bicycle:
-              $ref: "#/components/schemas/Bicycle"
-            bicycleId:
-              type: integer
-            description:
-              type: string     
+      type: object
+      properties:
+        id:
+          type: integer
+        bicycle:
+          $ref: "#/components/schemas/Bicycle"
+        bicycleId:
+          type: integer
+        description:
+          type: string
     UserHistoryInput:
       type: object
       properties:
@@ -263,16 +271,16 @@ components:
         description:
           type: string
     UserHistory:
-          type: object
-          properties:
-            id:
-              type: integer
-            user:
-              $ref: "#/components/schemas/User"
-            userId:
-              type: integer
-            description:
-              type: string 
+      type: object
+      properties:
+        id:
+          type: integer
+        user:
+          $ref: "#/components/schemas/User"
+        userId:
+          type: integer
+        description:
+          type: string
     Error:
       type: object
       properties:
