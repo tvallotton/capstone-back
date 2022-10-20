@@ -145,18 +145,18 @@ router.get("/:id", user({ staffOnly: true }), async (req, res) => {
             data: user
         });
         delete (created as any).password;
-        var codigoVerif = await argon2.hash(user.email); /// crear hash corto para clave de verificacion. Quizas es mejor hacerlo con createAt, por es null aqui
-        var codigoVerif = codigoVerif.slice(-6)
-        console.log("codigo: ",codigoVerif)
+        var token = await argon2.hash(user.email); /// crear hash corto para clave de verificacion. Quizas es mejor hacerlo con createAt, por es null aqui
+        token = token.slice(-6)
+
 
         transporter.sendMail({
-            to: "rizquierdop1@gmail.com",
-            from: "cacaski17@gmail.com",
-            subject: "Autentificacion sibico",
-            text: `Su código de autorización para ${created.email} es el siguiente:\n ${codigoVerif} \n \n Para iniciar sesión, debe de ingresarlo en www.emol.com`
+            to: created.email,
+            from: mailUser,
+            subject: "Autentificacion Sibico",
+            text: `Su código de autorización para ${created.email} es el siguiente:\n \n ${token} \n \n Para iniciar sesión, debe de ingresarlo en http://localhost:5000/user/validate/${created.id}`
         },function(err:any ,success:any){
             if(err) {
-                console.log(err)
+                res.status(500).json({status: "Error de sendmailer"})
             }
         })
         
@@ -216,9 +216,9 @@ router.post("/login", async (req, res) => {
         res.status(401);
         return res.json(errors.UNREGISTERED_USER);
     }
-    if (user.isAuth == false) {
+    if (user.isValidated == false) {
         res.status(401);
-        return res.json(errors.UNAUTH);  ///arreglar error
+        return res.json(errors.UNVALIDATED);  ///arreglar error
     }
     const isCorrect = await argon2.verify(user.password, password);
     if (!isCorrect) {
@@ -234,9 +234,9 @@ router.post("/login", async (req, res) => {
 
 /**
  * @swagger
- * /auth/{id}:
+ * /user/validate/{id}:
  *     post: 
- *      description: Authenticate a new user.
+ *      description: Validate a new user.
  *      parameters: 
  *          - $ref: '#/components/parameters/userId'
  *      consumes: 
@@ -246,39 +246,44 @@ router.post("/login", async (req, res) => {
  *          content: 
  *              application/json: 
  *                  schema: 
- *                      $ref: '#/components/schemas/UserAuthInput'            
+ *                      $ref: '#/components/schemas/UserValidateInput'            
  *      responses: 
- *          '204': 
- *              description: Correct authentication of the user
+ *          '201': 
+ *              description: Correct validation of the user
  *          '401': 
- *              description: Email or code are incorrect
+ *              description: Validation code is incorrect
  *          '500': 
  *              description: Internal server error. Likely the user is already signed up. 
  */
 
-router.post("/auth/:id", async (req, res) => {
+router.post("/validate/:id", async (req, res) => {
     const { id } = req.params;
-    const { code } = req.body;
-    console.log(id,code)
+    const { token } = req.body;
+    try{
+        const user = await prisma.user.findFirst({
+            where: { id: Number(id) }
+        });
 
-    const user = await prisma.user.findFirst({where: { id: Number(id) }});
-    console.log(user)
-    if (user === null) {
-        res.status(401);
-        return res.json(errors.UNREGISTERED_USER);
-    }
-    var codeOriginal = await argon2.hash(user.email); /// crear hash corto para clave de verificacion. Quizas es mejor hacerlo con createAt, por es null aqui
-    var codeOriginal = codeOriginal.slice(-6)
+        if (user==null){
+            res.status(401)
+        }else{
+            var token2 = await argon2.hash(user.email); /// crear hash corto para clave de verificacion. Quizas es mejor hacerlo con createAt, por es null aqui
+            token2 = token.slice(-6)
+            const update = await prisma.user.update({
+                data: {
+                    isValidated: true,
+                },
+                where:{
+                    id: Number(id),
+                }
+            });
+            res.status(201).json(update);
+        }
 
-    
-    if (!(codeOriginal == code)) {
-        return res.status(401)
-            .json(errors.INCORRECT_PASSWORD); //arreglar error
+    } catch(e) {
+        res.status(401)
     }
-    
-    user.isAuth = true;
-    console.log("autentificado")
-    res.status(204)
+
 });
 
 /**

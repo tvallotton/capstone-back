@@ -212,13 +212,13 @@ components:
       required:
         - email
         - password
-    UserAuthInput:
+    UserValidateInput:
       type: object
       properties:
-        code:
+        token:
           type: string
       required:
-        - code
+        - token
     User:
       type: object
       properties:

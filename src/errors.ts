@@ -10,7 +10,7 @@ const UNAUTHENTICATED = {
     "en": "You are not logged in.",
     "es": "No has ingresado sessión.",
 };
-const UNAUTH = {
+const UNVALIDATED = {
     "status": "error",
     "en": "You have not enter the code send to your email .",
     "es": "No has ingresado el codigo que se mando a tu email.",
@@ -66,5 +66,5 @@ export default {
     USER_ALREADY_EXISTS, NOT_FOUND,
     UNREGISTERED_USER, INVALID_EMAIL, UNAUTHENTICATED,
     INCORRECT_PASSWORD, UNKOWN_ERROR, BICYCLE_NOT_FOUND,
-    USER_NOT_FOUND, UNAUTHORIZED, BAD_REQUEST, UNAUTH
+    USER_NOT_FOUND, UNAUTHORIZED, BAD_REQUEST, UNVALIDATED
 };
