@@ -12,8 +12,8 @@ const UNAUTHENTICATED = {
 };
 const UNVALIDATED = {
     "status": "error",
-    "en": "You have not enter the code send to your email .",
-    "es": "No has ingresado el codigo que se mando a tu email.",
+    "en": "You must validate your email account before logging in.",
+    "es": "Debes validar tu correo electrónico antes de iniciar sessión.",
 };
 const INCORRECT_PASSWORD = {
     "status": "error",

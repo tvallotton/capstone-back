@@ -1,7 +1,8 @@
 #!/bin/bash
 
 npx prisma migrate deploy
-if [ NODE_ENV = 'development' ]
+echo $NODE_ENV
+if [ $NODE_ENV = 'development' ]
 then
     npm run dev
 else

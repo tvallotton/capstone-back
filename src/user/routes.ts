@@ -1,12 +1,12 @@
 import { PrismaClient, User } from "@prisma/client";
 import { Router } from "express";
-import jwt from "jsonwebtoken";
+import jwt, { JsonWebTokenError } from "jsonwebtoken";
 import argon2 from "argon2";
 import { JWT_SECRET, user, Request } from "./middleware";
 import errors from "../errors";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
+import nodemailer from "nodemailer";
 import dotenv from "dotenv";
-const nodemailer = require('nodemailer');
 
 const prisma = new PrismaClient();
 const router = Router();
@@ -15,7 +15,7 @@ dotenv.config();
 const mailUser = process.env["MAILUSER"];
 const mailpass = process.env["MAILPASS"];
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    service: "gmail",
     auth: {
         user: mailUser,
         pass: mailpass,
@@ -136,12 +136,12 @@ router.get("/:id", user({ staffOnly: true }), async (req, res) => {
  *              description: Internal server error. Likely the user is already signed up. 
  */
 
- router.post("/", async (req, res) => {
+router.post("/", async (req, res) => {
     try {
         const user: User = req.body;
         user.password = await argon2.hash(user.password);
         user.email = user.email.toLowerCase();
-        if (!user.email.match(/^\S+@\S+\.\S+$/)) { // arreglar con puc.uc.cl
+        if (!user.email.match(/^\S+@(?:\S+\.)?(?:puc|uc)\.cl$/)) {
             res.status(400);
             res.json(errors.INVALID_EMAIL);
             return;
@@ -150,21 +150,19 @@ router.get("/:id", user({ staffOnly: true }), async (req, res) => {
             data: user
         });
         delete (created as any).password;
-        var token = await argon2.hash(user.email); /// crear hash corto para clave de verificacion. Quizas es mejor hacerlo con createAt, por es null aqui
-        token = token.slice(-6)
-
+        const token = jwt.sign({ userId: user.id, }, JWT_SECRET, { expiresIn: "1h" });
 
         transporter.sendMail({
             to: created.email,
             from: mailUser,
             subject: "Autentificacion Sibico",
             text: `Su código de autorización para ${created.email} es el siguiente:\n \n ${token} \n \n Para iniciar sesión, debe de ingresarlo en http://localhost:5000/user/validate/${created.id}`
-        },function(err:any ,success:any){
-            if(err) {
-                res.status(500).json({status: "Error de sendmailer"})
+        }, function (err: any) {
+            if (err) {
+                res.status(500).json({ status: "Error de sendmailer" });
             }
-        })
-        
+        });
+
         res.status(201).json({ status: "success", user: created });
 
 
@@ -211,24 +209,27 @@ router.get("/:id", user({ staffOnly: true }), async (req, res) => {
 router.post("/login", async (req, res) => {
     let { email, password } = req.body;
     if (typeof (email) != "string" || typeof (password) != "string") {
-        res.status(400)
-            .json(errors.BAD_REQUEST);
+        res.status(400);
+        res.json(errors.BAD_REQUEST);
         return;
     }
     email = email.toLowerCase();
     const user = await prisma.user.findFirst({ where: { email } });
     if (user === null) {
         res.status(401);
-        return res.json(errors.UNREGISTERED_USER);
+        res.json(errors.UNREGISTERED_USER);
+        return;
     }
-    if (user.isValidated == false) {
+    if (!user.isValidated) {
         res.status(401);
-        return res.json(errors.UNVALIDATED);  ///arreglar error
+        res.json(errors.UNVALIDATED);
+        return;
     }
     const isCorrect = await argon2.verify(user.password, password);
     if (!isCorrect) {
-        return res.status(401)
-            .json(errors.INCORRECT_PASSWORD);
+        res.status(401);
+        res.json(errors.INCORRECT_PASSWORD);
+        return;
     }
     const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: "48h" });
     res.setHeader("x-access-token", token);
@@ -239,11 +240,11 @@ router.post("/login", async (req, res) => {
 
 /**
  * @swagger
- * /user/validate/{id}:
+ * /user/validate/:
  *     post: 
  *      description: Validate a new user.
  *      parameters: 
- *          - $ref: '#/components/parameters/userId'
+ *      
  *      consumes: 
  *          - application/json
  *      requestBody:
@@ -253,42 +254,32 @@ router.post("/login", async (req, res) => {
  *                  schema: 
  *                      $ref: '#/components/schemas/UserValidateInput'            
  *      responses: 
- *          '201': 
+ *          '200': 
  *              description: Correct validation of the user
  *          '401': 
  *              description: Validation code is incorrect
  *          '500': 
  *              description: Internal server error. Likely the user is already signed up. 
  */
-
-router.post("/validate/:id", async (req, res) => {
-    const { id } = req.params;
+router.post("/validate", async (req, res) => {
     const { token } = req.body;
-    try{
-        const user = await prisma.user.findFirst({
-            where: { id: Number(id) }
+    try {
+        const { userId: id } = jwt.verify(token, JWT_SECRET, {}) as { userId: number; };
+        const user = await prisma.user.update({
+            data: { isValidated: true, },
+            where: { id },
         });
+        delete (user as any).password;
+        res.json({ status: "success", user });
 
-        if (user==null){
-            res.status(401)
-        }else{
-            var token2 = await argon2.hash(user.email); /// crear hash corto para clave de verificacion. Quizas es mejor hacerlo con createAt, por es null aqui
-            token2 = token.slice(-6)
-            const update = await prisma.user.update({
-                data: {
-                    isValidated: true,
-                },
-                where:{
-                    id: Number(id),
-                }
+    } catch (e) {
+        if (e instanceof JsonWebTokenError) {
+            res.status(401).json({
+                "es": "Este link ha expirado, pide uno nuevo.",
+                "en": "This link has expired, request for a new one."
             });
-            res.status(201).json(update);
         }
-
-    } catch(e) {
-        res.status(401)
     }
-
 });
 
 /**
