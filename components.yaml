@@ -33,7 +33,7 @@ components:
             properties:
               status:
                 type: string
-              model:
+              bicycleHistory:
                 $ref: "#/components/schemas/BicycleHistory"
 
     Submission:
@@ -126,9 +126,9 @@ components:
           type: string
         start:
           type: string
-        user: 
+        user:
           $ref: "#/components/schemas/User"
-        bicycle: 
+        bicycle:
           $ref: "#/components/schemas/Bicycle"
     BicycleModelInput:
       type: object
@@ -202,6 +202,14 @@ components:
           type: string
         booking:
           $ref: "#/components/schemas/Booking"
+        ulock:
+          type: string
+        lights:
+          type: string
+        fleet:
+          type: string
+        reflector:
+          type: string
     UserInput:
       type: object
       properties:
@@ -234,11 +242,11 @@ components:
           type: string
         name:
           type: string
-        LastName:
+        lastName:
           type: string
-        BornDate:
+        birthday:
           type: string
-        adress:
+        address:
           type: string
         city:
           type: string
@@ -252,16 +260,16 @@ components:
         description:
           type: string
     BicycleHistory:
-          type: object
-          properties:
-            id:
-              type: integer
-            bicycle:
-              $ref: "#/components/schemas/Bicycle"
-            bicycleId:
-              type: integer
-            description:
-              type: string     
+      type: object
+      properties:
+        id:
+          type: integer
+        bicycle:
+          $ref: "#/components/schemas/Bicycle"
+        bicycleId:
+          type: integer
+        description:
+          type: string
     UserHistoryInput:
       type: object
       properties:
@@ -270,16 +278,16 @@ components:
         description:
           type: string
     UserHistory:
-          type: object
-          properties:
-            id:
-              type: integer
-            user:
-              $ref: "#/components/schemas/User"
-            userId:
-              type: integer
-            description:
-              type: string 
+      type: object
+      properties:
+        id:
+          type: integer
+        user:
+          $ref: "#/components/schemas/User"
+        userId:
+          type: integer
+        description:
+          type: string
     Error:
       type: object
       properties:

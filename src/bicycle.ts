@@ -21,10 +21,15 @@ const prisma = new PrismaClient();
  *                  description: A successful response
  *                  content: 
  *                      application/json:
- *                          schema: 
- *                              type: array
- *                              items:  
- *                                $ref: '#/components/schemas/Bicycle'
+ *                          schema:
+ *                              type: object
+ *                              properties: 
+ *                                  status: 
+ *                                      type: string
+ *                                  bicycles:
+ *                                      type: array
+ *                                      items: 
+ *                                        $ref: '#/components/schemas/Bicycle'
  *              '401': 
  *                 $ref: '#/components/responses/Unauthorized'
  *              '403':
@@ -32,7 +37,7 @@ const prisma = new PrismaClient();
  */
 router.get("/", user({ staffOnly: true }), async (req, res) => {
     const { take, skip, } = req.query;
-    const query = await prisma.bicycle.findMany({
+    const bicycles = await prisma.bicycle.findMany({
         take: Number(take) || undefined,
         skip: Number(skip) || undefined,
         orderBy: {
@@ -51,7 +56,7 @@ router.get("/", user({ staffOnly: true }), async (req, res) => {
             history: true
         }
     });
-    for (const row of query) {
+    for (const row of bicycles) {
         const bike = row as any;
         if (bike.bookings.length == 1) {
             bike.status = "ARRENDADA";
@@ -59,7 +64,7 @@ router.get("/", user({ staffOnly: true }), async (req, res) => {
         bike.booking = bike.bookings;
         delete bike.bookings;
     }
-    res.json(query);
+    res.json({ bicycles, status: "success" });
 });
 
 

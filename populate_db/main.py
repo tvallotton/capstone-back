@@ -2,9 +2,20 @@ from urllib.parse import urlparse
 import pandas as pd
 import psycopg2
 import dotenv
+import requests
 import os
 import time
 dotenv.load_dotenv()
+
+time.sleep(2)
+try:
+    res = requests.post("http://sibico-backend:5001/user/", json={
+        "email": "tvallotton@uc.cl",
+        "password": "asd123",
+    })
+    print("response: ", res.json())
+except:
+    pass
 
 
 def connection():
@@ -34,7 +45,6 @@ def creacte_models(conn, table):
         values (%s, '', '')
         on conflict do nothing;
         """, (modelo,))
-        
 
     cursor.execute(f"""
         select name, id from "BicycleModel"; 
@@ -86,9 +96,12 @@ def create_bicycles(conn, table, models):
         cursor.execute(query, params)
 
 
-
-
 conn = connection()
+
+cursor = conn.cursor()
+cursor.execute(
+    'update "User" set "isAdmin" = true, "isStaff" = true where email = \'tvallotton@uc.cl\';')
+
 print(os.listdir("/home/upload"))
 table = pd.read_csv("/home/upload/Inventario.csv")
 table = table[~table["codigos"].isna()]

@@ -23,10 +23,15 @@ const prisma = new PrismaClient();
  *                  description: A successful response
  *                  content: 
  *                      application/json:
- *                          schema: 
- *                              type: array
- *                              items:  
- *                                $ref: '#/components/schemas/Submission'
+ *                          schema:
+ *                              type: object
+ *                              properties: 
+ *                                  status: 
+ *                                      type: string
+ *                                  submission:
+ *                                      type: array
+ *                                      items: 
+ *                                        $ref: '#/components/schemas/Submission'
  *              '401': 
  *                 $ref: '#/components/responses/Unauthorized'
  *              '403':
@@ -34,7 +39,7 @@ const prisma = new PrismaClient();
  */
 router.get("/", user({ staffOnly: true }), async (req, res) => {
     const { take, skip, } = req.query;
-    const query = await prisma.submission.findMany({
+    const submissions = await prisma.submission.findMany({
         take: Number(take) || undefined,
         skip: Number(skip) || undefined,
         include: {
@@ -42,7 +47,7 @@ router.get("/", user({ staffOnly: true }), async (req, res) => {
             model: true,
         }
     });
-    res.json(query);
+    res.json({ submissions, status: "submissions" });
 });
 
 
