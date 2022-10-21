@@ -166,19 +166,24 @@ router.post("/", user({ staffOnly: true }), async (req, res) => {
  */
 router.patch("/", user({ staffOnly: true }), async (req, res) => {
     const { id, qrCode, status, modelId } = req.body;
-    if (!(id && qrCode && status && modelId)) {
-        return res.status(400);
+    console.log("PATCH", id, qrCode, status, modelId);
+    if (!(id || qrCode || status || modelId || fleet)) {
+        return res.status(400).json({ status: "error", en: "No fields were modified.", es: "Ningún atributo fue modificado." });
     }
     try {
+        console.log;
         const bicycle = await prisma.bicycle.update({
-            where: { id },
+            where: { id: Number(id) },
             data: {
-                qrCode, status, modelId
+                qrCode, status, modelId, fleet
             }
         });
         res.json({ status: "success", bicycle });
+        console.log({ status: "success", bicycle });
     } catch (e) {
+        console.log(e);
         res.status(404).json(errors.BICYCLE_NOT_FOUND);
+        console.log(errors.BICYCLE_NOT_FOUND);
     }
 });
 
