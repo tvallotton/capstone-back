@@ -1,6 +1,6 @@
 import { Booking, PrismaClient } from "@prisma/client";
 import { Router } from "express";
-import { user } from "./user/middleware";
+import { user, Request } from "./user/middleware";
 import errors from "./errors";
 
 const router = Router();
@@ -55,11 +55,65 @@ router.get("/", user({ staffOnly: true }), async (req, res) => {
     res.json({ bookings, status: "success" });
 });
 
+/**
+ * @swagger
+ * /booking: 
+ *      get: 
+ *          description: Public endpoint. Returns the queried bookings that belong to a user
+ *          parameters: 
+ *              - $ref: '#/components/parameters/take'
+ *              - $ref: '#/components/parameters/skip'
+ *              - $ref: '#/components/parameters/x-access-token'
+ *              - in: query
+ *                name: activeOnly
+ *                schema: 
+ *                  type: boolean
+ *                required: false
+ *          responses:
+ *              '200':
+ *                  description: A successful response
+ *                  content: 
+ *                      application/json:
+ *                          schema:
+ *                              type: object
+ *                              properties: 
+ *                                  status: 
+ *                                      type: string
+ *                                  booking:
+ *                                      type: array
+ *                                      items: 
+ *                                        $ref: '#/components/schemas/Booking'
+ *              '401': 
+ *                 $ref: '#/components/responses/Unauthorized'
+ */
+router.get("/mine", user(), async (req: Request, res) => {
+    const { take, skip, activeOnly } = req.query;
+    try {
+        const bookings = await prisma.booking.findMany({
+            skip: Number(skip) || undefined,
+            take: Number(take) || undefined,
+            where: {
+                userId: Number(req.user?.id),
+                end: {
+                    not: activeOnly === "true" ? null : undefined,
+                },
+            },
+            include: {
+                user: true,
+                bicycle: true,
+            }
+        });
+        res.json({ status: "success", bookings });
+    } catch (_) {
+        res.status(404).json(errors.NOT_FOUND);
+    }
+});
+
 /** 
  * @swagger
  * /booking/{id}:
  *      get: 
- *          description: Public endpoing. Returns the queried booking. 
+ *          description: Public t. Returns the queried booking. 
  *          parameters: 
  *              - $ref: '#/components/parameters/bookingId'
  *          responses:
@@ -83,6 +137,7 @@ router.get("/:id", async (req, res) => {
         res.status(404).json(errors.NOT_FOUND);
     }
 });
+
 
 /**
  * @swagger

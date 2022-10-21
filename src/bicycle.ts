@@ -165,25 +165,20 @@ router.post("/", user({ staffOnly: true }), async (req, res) => {
  *                  $ref: '#/components/responses/NotFound'
  */
 router.patch("/", user({ staffOnly: true }), async (req, res) => {
-    const { id, qrCode, status, modelId } = req.body;
-    console.log("PATCH", id, qrCode, status, modelId);
-    if (!(id || qrCode || status || modelId || fleet)) {
-        return res.status(400).json({ status: "error", en: "No fields were modified.", es: "Ningún atributo fue modificado." });
+    const data = req.body;
+    const { id } = data;
+    if (!id) {
+        return res.status(404).json(errors.MISSING_ID);
     }
     try {
-        console.log;
         const bicycle = await prisma.bicycle.update({
             where: { id: Number(id) },
-            data: {
-                qrCode, status, modelId, fleet
-            }
+            data: data,
         });
         res.json({ status: "success", bicycle });
-        console.log({ status: "success", bicycle });
     } catch (e) {
         console.log(e);
         res.status(404).json(errors.BICYCLE_NOT_FOUND);
-        console.log(errors.BICYCLE_NOT_FOUND);
     }
 });
 
