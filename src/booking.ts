@@ -152,7 +152,7 @@ router.get("/:id", async (req, res) => {
  *            content: 
  *                application/json: 
  *                    schema: 
- *                        $ref: '#/components/schemas/Booking'
+ *                        $ref: '#/components/schemas/BookingInput'
  *          responses: 
  *              '201': 
  *                  $ref: '#/components/responses/Booking'
@@ -189,7 +189,7 @@ router.post("/", user({ staffOnly: true }), async (req, res) => {
  *            content: 
  *                application/json: 
  *                    schema: 
- *                        $ref: '#/components/schemas/Booking'
+ *                        $ref: '#/components/schemas/BookingInput'
  *          responses: 
  *              '200': 
  *                  $ref: '#/components/responses/Booking'
