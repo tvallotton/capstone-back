@@ -12,7 +12,11 @@ const UNAUTHENTICATED = {
     "en": "You are not logged in.",
     "es": "No has ingresado sessión.",
 };
-
+const UNVALIDATED = {
+    "status": "error",
+    "en": "You must validate your email account before logging in.",
+    "es": "Debes validar tu correo electrónico antes de iniciar sessión.",
+};
 const INCORRECT_PASSWORD = {
     "status": "error",
     "code": "INCORRECT_PASSWORD",
@@ -80,5 +84,6 @@ export default {
     USER_ALREADY_EXISTS, NOT_FOUND,
     UNREGISTERED_USER, INVALID_EMAIL, UNAUTHENTICATED,
     INCORRECT_PASSWORD, UNKOWN_ERROR, BICYCLE_NOT_FOUND,
-    USER_NOT_FOUND, UNAUTHORIZED, BAD_REQUEST, MISSING_ID
+    USER_NOT_FOUND, UNAUTHORIZED, BAD_REQUEST, MISSING_ID,
+    UNVALIDATED
 };

@@ -1,12 +1,31 @@
 import { PrismaClient, User } from "@prisma/client";
 import { Router } from "express";
-import jwt from "jsonwebtoken";
+import jwt, { JsonWebTokenError } from "jsonwebtoken";
 import argon2 from "argon2";
 import { JWT_SECRET, user, Request } from "./middleware";
 import errors from "../errors";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
+import nodemailer from "nodemailer";
+import dotenv from "dotenv";
+
 const prisma = new PrismaClient();
 const router = Router();
+dotenv.config();
+
+const mailUser = process.env["MAILUSER"];
+const mailpass = process.env["MAILPASS"];
+const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+        user: mailUser,
+        pass: mailpass,
+    },
+    tls: {
+        rejectUnauthorized: false,
+    }
+});
+
+
 
 
 /**
@@ -116,12 +135,13 @@ router.get("/:id", user({ staffOnly: true }), async (req, res) => {
  *          '500': 
  *              description: Internal server error. Likely the user is already signed up. 
  */
+
 router.post("/", async (req, res) => {
     try {
         const user: User = req.body;
         user.password = await argon2.hash(user.password);
         user.email = user.email.toLowerCase();
-        if (!user.email.match(/^\S+@\S+\.\S+$/)) {
+        if (!user.email.match(/^\S+@(?:\S+\.)?(?:puc|uc)\.cl$/)) {
             res.status(400);
             res.json(errors.INVALID_EMAIL);
             return;
@@ -130,7 +150,22 @@ router.post("/", async (req, res) => {
             data: user
         });
         delete (created as any).password;
+        const token = jwt.sign({ userId: user.id, }, JWT_SECRET, { expiresIn: "1h" });
+
+        transporter.sendMail({
+            to: created.email,
+            from: mailUser,
+            subject: "Autentificacion Sibico",
+            text: `Su código de autorización para ${created.email} es el siguiente:\n \n ${token} \n \n Para iniciar sesión, debe de ingresarlo en http://localhost:5000/user/validate/${created.id}`
+        }, function (err: any) {
+            if (err) {
+                res.status(500).json({ status: "Error de sendmailer" });
+            }
+        });
+
         res.status(201).json({ status: "success", user: created });
+
+
     } catch (e) {
         const err = e as PrismaClientKnownRequestError;
         if (err.code == "P2002") {
@@ -174,26 +209,78 @@ router.post("/", async (req, res) => {
 router.post("/login", async (req, res) => {
     let { email, password } = req.body;
     if (typeof (email) != "string" || typeof (password) != "string") {
-        res.status(400)
-            .json(errors.BAD_REQUEST);
+        res.status(400);
+        res.json(errors.BAD_REQUEST);
         return;
     }
     email = email.toLowerCase();
     const user = await prisma.user.findFirst({ where: { email } });
     if (user === null) {
         res.status(401);
-        return res.json(errors.UNREGISTERED_USER);
+        res.json(errors.UNREGISTERED_USER);
+        return;
+    }
+    if (!user.isValidated) {
+        res.status(401);
+        res.json(errors.UNVALIDATED);
+        return;
     }
     const isCorrect = await argon2.verify(user.password, password);
     if (!isCorrect) {
-        return res.status(401)
-            .json(errors.INCORRECT_PASSWORD);
+        res.status(401);
+        res.json(errors.INCORRECT_PASSWORD);
+        return;
     }
     const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: "48h" });
     res.setHeader("x-access-token", token);
     res.json({ status: "success", "x-access-token": token, });
 });
 
+
+
+/**
+ * @swagger
+ * /user/validate/:
+ *     post: 
+ *      description: Validate a new user.
+ *      parameters: 
+ *      
+ *      consumes: 
+ *          - application/json
+ *      requestBody:
+ *          required: true
+ *          content: 
+ *              application/json: 
+ *                  schema: 
+ *                      $ref: '#/components/schemas/UserValidateInput'            
+ *      responses: 
+ *          '200': 
+ *              description: Correct validation of the user
+ *          '401': 
+ *              description: Validation code is incorrect
+ *          '500': 
+ *              description: Internal server error. Likely the user is already signed up. 
+ */
+router.post("/validate", async (req, res) => {
+    const { token } = req.body;
+    try {
+        const { userId: id } = jwt.verify(token, JWT_SECRET, {}) as { userId: number; };
+        const user = await prisma.user.update({
+            data: { isValidated: true, },
+            where: { id },
+        });
+        delete (user as any).password;
+        res.json({ status: "success", user });
+
+    } catch (e) {
+        if (e instanceof JsonWebTokenError) {
+            res.status(401).json({
+                "es": "Este link ha expirado, pide uno nuevo.",
+                "en": "This link has expired, request for a new one."
+            });
+        }
+    }
+});
 
 /**
  * @swagger

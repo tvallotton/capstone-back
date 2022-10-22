@@ -23,6 +23,7 @@ model User {
     isAdmin        Boolean          @default(false)
     isStaff        Boolean          @default(false)
     createdAt      DateTime         @default(now())
+    isValidated    Boolean          @default(false)
     submissions    Submission[]
     bookings       Booking[]
     history        UserHistory[]
