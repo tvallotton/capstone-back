@@ -2,3 +2,4 @@
 exclude_paths:
   - "**/*.md"
   - "CHANGELOG.md"
+  - "*.sh"
