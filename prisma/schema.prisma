@@ -11,21 +11,22 @@ datasource db {
 }
 
 model User {
-    id          Int           @id @default(autoincrement())
-    email       String        @unique
-    password    String
-    name        String        @default("")
-    lastName    String        @default("")
-    address     String        @default("")
-    city        String        @default("")
-    birthday    DateTime?
-    occuppancy  String        @default("")
-    isAdmin     Boolean       @default(false)
-    isStaff     Boolean       @default(false)
-    createdAt   DateTime      @default(now())
-    submissions Submission[]
-    bookings    Booking[]
-    history     UserHistory[]
+    id             Int              @id @default(autoincrement())
+    email          String           @unique
+    password       String
+    name           String           @default("")
+    lastName       String           @default("")
+    address        String           @default("")
+    city           String           @default("")
+    birthday       DateTime?
+    occuppancy     String           @default("")
+    isAdmin        Boolean          @default(false)
+    isStaff        Boolean          @default(false)
+    createdAt      DateTime         @default(now())
+    submissions    Submission[]
+    bookings       Booking[]
+    history        UserHistory[]
+    BicycleHistory BicycleHistory[]
 }
 
 model Bicycle {
@@ -76,6 +77,8 @@ model BicycleHistory {
     bicycleId   Int
     description String
     createdAt   DateTime @default(now())
+    user        User     @relation(fields: [userId], references: [id])
+    userId      Int
 }
 
 model UserHistory {
