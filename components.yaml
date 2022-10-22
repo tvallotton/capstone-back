@@ -130,6 +130,12 @@ components:
           $ref: "#/components/schemas/User"
         bicycle:
           $ref: "#/components/schemas/Bicycle"
+        ulock:
+          type: string
+        lights:
+          type: string
+        reflector:
+          type: string
     BicycleModelInput:
       type: object
       properties:
@@ -202,13 +208,7 @@ components:
           type: string
         booking:
           $ref: "#/components/schemas/Booking"
-        ulock:
-          type: string
-        lights:
-          type: string
         fleet:
-          type: string
-        reflector:
           type: string
     UserInput:
       type: object
