@@ -22,6 +22,7 @@ model User {
     occuppancy  String        @default("")
     isAdmin     Boolean       @default(false)
     isStaff     Boolean       @default(false)
+    isValidated Boolean       @default(false)
     createdAt   DateTime      @default(now())
     submissions Submission[]
     bookings    Booking[]

@@ -48,7 +48,7 @@ router.get("/:bicycleId", user({ staffOnly: true }), async (req, res) => {
         skip: Number(skip) || undefined,
         where: { bicycleId: Number(bicycleId) }
     });
-    res.json(history);
+    res.json({ history, status: "success" });
 });
 
 /**

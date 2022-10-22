@@ -52,7 +52,7 @@ router.get("/", user({ staffOnly: true }), async (req, res) => {
             bicycle: true,
         },
     });
-    res.json(bookings);
+    res.json({ bookings, status: "success" });
 });
 
 /** 
