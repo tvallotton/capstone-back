@@ -1,0 +1,4 @@
+#!/bin/sh
+
+npx eslint src/ --max-warnings=0
+
