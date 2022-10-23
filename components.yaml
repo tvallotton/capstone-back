@@ -256,6 +256,8 @@ components:
           type: string
         passport:
           type: string
+        unidadAcademica:
+          type: string
     BicycleHistoryInput:
       type: object
       properties:
