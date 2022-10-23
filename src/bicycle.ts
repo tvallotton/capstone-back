@@ -165,19 +165,19 @@ router.post("/", user({ staffOnly: true }), async (req, res) => {
  *                  $ref: '#/components/responses/NotFound'
  */
 router.patch("/", user({ staffOnly: true }), async (req, res) => {
-    const { id, qrCode, status, modelId } = req.body;
-    if (!(id && qrCode && status && modelId)) {
-        return res.status(400);
+    const data = req.body;
+    const { id } = data;
+    if (!id) {
+        return res.status(404).json(errors.MISSING_ID);
     }
     try {
         const bicycle = await prisma.bicycle.update({
-            where: { id },
-            data: {
-                qrCode, status, modelId
-            }
+            where: { id: Number(id) },
+            data: data,
         });
         res.json({ status: "success", bicycle });
     } catch (e) {
+        console.log(e);
         res.status(404).json(errors.BICYCLE_NOT_FOUND);
     }
 });

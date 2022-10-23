@@ -40,13 +40,13 @@ def creacte_models(conn, table):
     for modelo in set(table["Modelo"]):
         if str(modelo) == "nan":
             continue
-        cursor.execute(f"""
+        cursor.execute("""
         insert into "BicycleModel" (name, description, image)
         values (%s, '', '')
         on conflict do nothing;
         """, (modelo,))
 
-    cursor.execute(f"""
+    cursor.execute("""
         select name, id from "BicycleModel"; 
     """)
     return dict(cursor.fetchall())
