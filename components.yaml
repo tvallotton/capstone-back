@@ -252,6 +252,10 @@ components:
           type: string
         occupancy:
           type: string
+        rut:
+          type: string
+        passport:
+          type: string
     BicycleHistoryInput:
       type: object
       properties:

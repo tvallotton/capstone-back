@@ -24,6 +24,8 @@ model User {
     isStaff        Boolean          @default(false)
     createdAt      DateTime         @default(now())
     isValidated    Boolean          @default(false)
+    rut            String           @default("")
+    passport       String           @default("")
     submissions    Submission[]
     bookings       Booking[]
     history        UserHistory[]

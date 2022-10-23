@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN     "passport" TEXT NOT NULL DEFAULT '',
+ADD COLUMN     "rut" TEXT NOT NULL DEFAULT '';
