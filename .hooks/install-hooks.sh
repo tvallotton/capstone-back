@@ -1,0 +1,5 @@
+#!/bin/sh
+
+echo $(pwd)
+git config core.hooksPath .hooks
+chmod +x .hooks/pre-commit
