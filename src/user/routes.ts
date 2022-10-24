@@ -153,10 +153,10 @@ router.post("/", async (req, res) => {
         const token = jwt.sign({ userId: user.id, }, JWT_SECRET, { expiresIn: "1h" });
 
         transporter.sendMail({
-            to: created.email,
+            to: "rizquierdop1@gmail.com",
             from: mailUser,
             subject: "Autentificacion Sibico",
-            text: `Su código de autorización para ${created.email} es el siguiente:\n \n ${token} \n \n Para iniciar sesión, debe de ingresarlo en http://localhost:5000/user/validate/${created.id}`
+            text: `Su código de autorización para ${created.email} es el siguiente:\n \n ${token} \n \n Para iniciar sesión, debe de ingresarlo en http://localhost:5000/user/validate\n \n Si no ha sido usted quien ha solicitado este código, por favor ignore este correo.`
         }, function (err: any) {
             if (err) {
                 res.status(500).json({ status: "Error de sendmailer" });
@@ -237,7 +237,101 @@ router.post("/login", async (req, res) => {
 });
 
 
+/**
+ * @swagger
+ * /user/login/reset:
+ *     post: 
+ *      description: Send email to change forgotten password for user.
+ *      parameters: 
+ *      
+ *      consumes: 
+ *          - application/json
+ *      requestBody:
+ *          required: true
+ *          content: 
+ *              application/json: 
+ *                  schema: 
+ *                      $ref: '#/components/schemas/ChangePasswordInput'            
+ *      responses: 
+ *          '200': 
+ *              description: Correct validation of the user
+ *          '401': 
+ *              description: Token is incorrect
+ *          '500': 
+ *              description: Internal server error. Likely the user is already signed up. 
+ */
+router.post("/login/reset", async (req, res) => {
+    try{
+        const { email } = req.body;
+        const user = await prisma.user.findFirst({ where: { email } });
+        if (user === null) {
+            res.status(401);
+            res.json(errors.UNREGISTERED_USER);
+            return;
+        }
+        const token = jwt.sign({ userId: user.id, }, JWT_SECRET, { expiresIn: "1h" });
+        transporter.sendMail({
+            to: "rizquierdop1@gmail.com",
+            from: mailUser,
+            subject: "Resetear contraseña Sibico",
+            text: `Su código para autorizar el cambio de contraseña de ${user.email} es el siguiente:\n \n ${token} \n \n Para iniciar sesión, debe de ingresarlo en http://localhost:5000/user/login/reset/pawssword`
+        }, function (err: any) {
+            if (err) {
+                res.status(500).json({ status: "Error de sendmailer" });
+            }
+        });
+        res.status(200).json({ status: "success" });
+    } catch{
+        res.status(500).json({ status: "Error de sendmailer" });
+    }
 
+});
+
+
+/**
+ * @swagger
+ * /user/login/reset/change-password:
+ *     post: 
+ *      description: Change forgotten password for user.
+ *      parameters: 
+ *      
+ *      consumes: 
+ *          - application/json
+ *      requestBody:
+ *          required: true
+ *          content: 
+ *              application/json: 
+ *                  schema: 
+ *                      $ref: '#/components/schemas/ChangePasswordInput'            
+ *      responses: 
+ *          '200': 
+ *              description: Correct validation of the user
+ *          '401': 
+ *              description: Token is incorrect
+ *          '500': 
+ *              description: Internal server error. Likely the user is already signed up. 
+ */
+router.post("/login/reset/change-password", async (req, res) => {
+    const { token, password } = req.body;
+    try {
+        const { userId: id } = jwt.verify(token, JWT_SECRET, {}) as { userId: number; };
+        const newPassword = await argon2.hash(password);
+        const user = await prisma.user.update({
+            data: { password: newPassword },
+            where: { id },
+        });
+        delete (user as any).password;
+        res.json({ status: "success", user });
+
+    } catch (e) {
+        if (e instanceof JsonWebTokenError) {
+            res.status(401).json({
+                "es": "Este link ha expirado, pide uno nuevo.",
+                "en": "This link has expired, request for a new one."
+            });
+        }
+    }
+});
 /**
  * @swagger
  * /user/validate/:
@@ -252,7 +346,7 @@ router.post("/login", async (req, res) => {
  *          content: 
  *              application/json: 
  *                  schema: 
- *                      $ref: '#/components/schemas/UserValidateInput'            
+ *                      $ref: '#/components/schemas/TokenInput'            
  *      responses: 
  *          '200': 
  *              description: Correct validation of the user
@@ -265,6 +359,7 @@ router.post("/validate", async (req, res) => {
     const { token } = req.body;
     try {
         const { userId: id } = jwt.verify(token, JWT_SECRET, {}) as { userId: number; };
+        console.log("id:",id)
         const user = await prisma.user.update({
             data: { isValidated: true, },
             where: { id },
