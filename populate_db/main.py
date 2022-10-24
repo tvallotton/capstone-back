@@ -72,24 +72,18 @@ def create_bicycles(conn, table, models):
         insert into "Bicycle" (
             "qrCode",
             status,
-            ulock,
-            lights,
             fleet,
-            reflector,
             "modelId"
         )
         values (
-            %s, %s, %s,%s, %s, %s, %s
+            %s, %s, %s,%s
         )
         on conflict do nothing;
         """
         params = (
             bike["codigos"],
             status[bike["Unnamed: 1"]] or "",
-            bike["ULOCK"] or "",
-            bike["Luces"] or "",
             bike["FLOTA"] or "",
-            bike["Reflectante"] or "",
             models[bike["Modelo"]] or ""
 
         )
@@ -100,7 +94,7 @@ conn = connection()
 
 cursor = conn.cursor()
 cursor.execute(
-    'update "User" set "isAdmin" = true, "isStaff" = true where email = \'tvallotton@uc.cl\';')
+    'update "User" set "isAdmin" = true, "isStaff" = true, "isValidated" = true where email = \'tvallotton@uc.cl\';')
 
 print(os.listdir("/home/upload"))
 table = pd.read_csv("/home/upload/Inventario.csv")
