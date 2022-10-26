@@ -87,13 +87,13 @@ router.get("/", user({ staffOnly: true }), async (req, res) => {
 router.get("/:id", user({ staffOnly: true }), async (req, res) => {
     const { id } = req.params;
     try {
-        const query = await prisma.bicycle.findUnique({
+        const bicycle = await prisma.bicycle.findUnique({
             where: { id: Number(id) },
             include: {
                 model: true
             }
         });
-        res.json(query || errors.BICYCLE_NOT_FOUND);
+        res.json({ status: "success", bicycle } || errors.BICYCLE_NOT_FOUND);
     } catch (e) {
         res.json(errors.BICYCLE_NOT_FOUND);
     }
