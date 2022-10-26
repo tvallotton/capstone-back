@@ -352,6 +352,7 @@ router.post("/login", async (req, res) => {
         res.json(errors.UNVALIDATED);
         return;
     }
+    console.log("user", user);
     const isCorrect = await argon2.verify(user.password, password);
     if (!isCorrect) {
         res.status(401);
@@ -445,15 +446,15 @@ router.patch("/", user(), async (req: Request, res) => {
                 where: {
                     id: req.body.id,
                 },
-                data: { password, ...req.body }
+                data: { ...req.body, password }
             });
             delete (updated as any).password;
             res.json(updated);
         } else {
             res.status(403).json(errors.UNAUTHORIZED);
         }
-    } catch (debugInfo) {
-        res.status(400).json({ debugInfo, ...errors.BAD_REQUEST });
+    } catch (_) {
+        res.status(400).json(errors.BAD_REQUEST);
     }
 });
 

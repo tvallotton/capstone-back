@@ -19,7 +19,7 @@ model User {
     address         String           @default("")
     city            String           @default("")
     birthday        DateTime?
-    occuppancy      String           @default("")
+    occupancy       String           @default("")
     isAdmin         Boolean          @default(false)
     isStaff         Boolean          @default(false)
     createdAt       DateTime         @default(now())
