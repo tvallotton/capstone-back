@@ -276,7 +276,6 @@ router.post("/", async (req, res) => {
             data: user
         });
         delete (created as any).password;
-        console.log("create user id", created.id);
         const token = jwt.sign({ userId: created.id, }, JWT_SECRET, { expiresIn: "1h" });
 
         transporter.sendMail({
@@ -395,10 +394,8 @@ router.post("/login", async (req, res) => {
  */
 router.post("/validate", async (req, res) => {
     const { token } = req.body;
-    console.log("token", token);
     try {
         const { userId: id } = jwt.verify(token || "", JWT_SECRET, {}) as { userId: number; };
-        console.log("payload, ", jwt.verify(token || "", JWT_SECRET));
         const user = await prisma.user.update({
             data: { isValidated: true, },
             where: { id },
@@ -410,7 +407,6 @@ router.post("/validate", async (req, res) => {
         if (e instanceof JsonWebTokenError) {
             res.status(401).json(errors.TOKEN_EXPIRED);
         } else {
-            console.log(e);
             res.status(500).json(errors.INTERNAL_SERVER);
         }
     }
