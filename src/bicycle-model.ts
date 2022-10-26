@@ -45,9 +45,6 @@ router.get("/", async (req, res) => {
  * /bicycle-model/available:
  *      get: 
  *          description: Public endpoint. Returns the bicicle models which are available to book.
- *          parameters: 
- *              - $ref: '#/components/parameters/take'
- *              - $ref: '#/components/parameters/skip'
  *          responses:
  *              '200':
  *                   description: Returns the bicycle models as an array.
@@ -64,27 +61,52 @@ router.get("/", async (req, res) => {
  *                                    $ref: "#/components/schemas/BicycleModel"
  */
 router.get("/available", async (req, res) => {
-    const { take, skip } = req.query;
-    // this is the most complicated query so far
-    // we basically want all bicycles models where there
-    // is at least one bicycle that isn't currently booked
-    const models = await prisma.bicycleModel.findMany({
-        take: Number(take) || undefined,
-        skip: Number(skip) || undefined,
+    const stockPerModel = await prisma.bicycle.groupBy({
+        by: ["modelId"],
+        _count: {
+            id: true,
+        }
+    });
+    const submissionsPerModel = await prisma.submission.groupBy({
+        by: ["bicycleModelId"],
+        _count: { id: true }
+    });
+    const bookingsPerModel = await prisma.bicycle.groupBy({
+        by: ["modelId"],
         where: {
-            bicycles: {
+            bookings: {
                 some: {
-                    bookings: {
-                        every: {
-                            end: {
-                                not: null
-                            }
-                        }
-                    }
+                    end: { equals: null }
                 }
+            }
+        },
+        _count: { id: true }
+    });
+    // We subtract the ones that were submitted. 
+    for (const remove of submissionsPerModel) {
+        for (const model of stockPerModel) {
+            model._count.id -= remove._count.id;
+        }
+    }
+    // And we subtract the ones that are already booked. 
+    for (const remove of bookingsPerModel) {
+        for (const model of stockPerModel) {
+            model._count.id -= remove._count.id;
+        }
+    }
+    console.log(stockPerModel);
+    const avaliable = stockPerModel
+        .filter((model) => model._count.id > 0)
+        .map((model) => model.modelId);
+
+    const models = await prisma.bicycleModel.findMany({
+        where: {
+            id: {
+                in: avaliable
             }
         }
     });
+
     res.json({ models, status: "success" });
 });
 
