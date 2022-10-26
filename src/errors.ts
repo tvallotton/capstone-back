@@ -14,8 +14,16 @@ const UNAUTHENTICATED = {
 
 const UNVALIDATED = {
     "status": "error",
+    "code": "UNVALIDATED",
     "en": "You must validate your email account before logging in.",
     "es": "Debes validar tu correo electrónico antes de iniciar sessión.",
+};
+
+const TOKEN_EXPIRED = {
+    "status": "error",
+    "code": "TOKEN_EXPIRED",
+    "es": "Este link ha expirado, pide uno nuevo.",
+    "en": "This link has expired, request for a new one."
 };
 
 const INCORRECT_PASSWORD = {
@@ -82,16 +90,39 @@ const NOT_FOUND = {
 };
 
 const MISSING_ID = {
-    "stauts": "error",
+    "status": "error",
     "code": "MISSING_ID",
     "es": "El campo `id` es obligatorio.",
     "en": "The field `id` is mandatory."
 };
 
+const INTERNAL_SERVER = {
+    "status": "error",
+    "code": "INTERNAL_SERVER_ERROR",
+    "es": "Ocurrió un error en el servidor.",
+    "en": "Ocurrió un error en el servidor.",
+};
+
+const ALREADY_VALIDATED = {
+    "status": "error",
+    "code": "ALREADY_VALIDATED",
+    "es": "El correo electrónico para este usuario ya fue validado, intenta ingresar.",
+    "en": "Your email was already validated, try signing in."
+
+};
+
+const EMAIL_COULD_NOT_BE_SENT = {
+    "status": "error",
+    "code": "EMAIL_COULD_NOT_BE_SENT",
+    "es": "El correo de verificación no se pudo enviar.",
+    "en": "The email could not be sent."
+};
+
 export default {
-    USER_ALREADY_EXISTS, NOT_FOUND,
-    UNREGISTERED_USER, INVALID_EMAIL, UNAUTHENTICATED,
-    INCORRECT_PASSWORD, UNKOWN_ERROR, BICYCLE_NOT_FOUND,
-    USER_NOT_FOUND, UNAUTHORIZED, BAD_REQUEST, MISSING_ID,
-    UNVALIDATED
+    USER_ALREADY_EXISTS, NOT_FOUND, UNREGISTERED_USER,
+    INVALID_EMAIL, UNAUTHENTICATED, INCORRECT_PASSWORD,
+    UNKOWN_ERROR, BICYCLE_NOT_FOUND, USER_NOT_FOUND,
+    UNAUTHORIZED, BAD_REQUEST, MISSING_ID, UNVALIDATED,
+    TOKEN_EXPIRED, INTERNAL_SERVER, ALREADY_VALIDATED,
+    EMAIL_COULD_NOT_BE_SENT
 };
