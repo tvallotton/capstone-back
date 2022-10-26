@@ -309,7 +309,7 @@ router.post("/validate", async (req, res) => {
 router.patch("/", user(), async (req: Request, res) => {
     // if you are staff or you are editting your own profile
     if (req.user?.isStaff || req.user?.id == req.body.id) {
-        const password = req.body.password ? argon2.hash(req.body.password) : undefined;
+        const password = req.body.password ? await argon2.hash(req.body.password) : undefined;
         const updated = await prisma.user.update({
             where: {
                 id: req.body.id,
