@@ -453,7 +453,7 @@ router.patch("/", user(), async (req: Request, res) => {
             res.status(403).json(errors.UNAUTHORIZED);
         }
     } catch (debugInfo) {
-        res.json(400).json({ debugInfo, ...errors.BAD_REQUEST });
+        res.status(400).json({ debugInfo, ...errors.BAD_REQUEST });
     }
 });
 
