@@ -139,6 +139,12 @@ router.get("/:id", user({ staffOnly: true }), async (req, res) => {
 router.post("/", async (req, res) => {
     try {
         const user: User = req.body;
+
+        if (!user.email.match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/)) {
+            res.status(400);
+            res.json(errors.INVALID_PASSWORD);
+            return;
+        }
         user.password = await argon2.hash(user.password);
         user.email = user.email.toLowerCase();
         if (!user.email.match(/^\S+@(?:\S+\.)?(?:puc|uc)\.cl$/)) {
@@ -153,7 +159,7 @@ router.post("/", async (req, res) => {
         const token = jwt.sign({ userId: user.id, }, JWT_SECRET, { expiresIn: "1h" });
 
         transporter.sendMail({
-            to: "rizquierdop1@gmail.com",
+            to: created.email,
             from: mailUser,
             subject: "Autentificacion Sibico",
             text: `Su código de autorización para ${created.email} es el siguiente:\n \n ${token} \n \n Para iniciar sesión, debe de ingresarlo en http://localhost:5000/user/validate\n \n Si no ha sido usted quien ha solicitado este código, por favor ignore este correo.`
@@ -173,6 +179,74 @@ router.post("/", async (req, res) => {
             res.json(errors.USER_ALREADY_EXISTS);
             return;
         }
+        res.status(500);
+        res.json(errors.UNKOWN_ERROR);
+    }
+});
+
+/**
+ * @swagger
+ * /user/send-validation-email:
+ *     post: 
+ *      description: Creates a new user.
+ *      consumes: 
+ *          - application/json
+ *      requestBody:
+ *          required: true
+ *          content: 
+ *              application/json: 
+ *                  schema: 
+ *                      type: object
+ *                      properties: 
+ *                          email: 
+ *                              type: string          
+ *      responses: 
+ *          '201': 
+ *              $ref: '#/components/responses/User'
+ *          '500': 
+ *              description: Internal server error. Likely the user is already signed up. 
+ */
+
+router.post("/send-validation-email", async (req, res) => {
+    try {
+        let { email } = req.body;
+
+        email = email.toLowerCase();
+        if (!email.match(/^\S+@(?:\S+\.)?(?:puc|uc)\.cl$/)) {
+            res.status(400);
+            res.json(errors.INVALID_EMAIL);
+            return;
+        }
+        const user = await prisma.user.findFirst({ where: { email } });
+
+        if (!user) {
+            res.status(404);
+            res.json(errors.USER_NOT_FOUND);
+            return;
+        }
+
+        if (user.isValidated) {
+            res.status(400);
+            res.json(errors.ALREADY_VALIDATED);
+            return;
+        }
+
+        const token = jwt.sign({ userId: user.id, }, JWT_SECRET, { expiresIn: "1h" });
+
+        transporter.sendMail({
+            to: "rizquierdop1@gmail.com",
+            from: mailUser,
+            subject: "Autentificacion Sibico",
+            html: `<p>Para verificar su correo electrónico pinche <a href=http://sibico.uc.cl/verify?token="${token}">aquí</a></p>`,
+        }, function (err: any) {
+            if (err) {
+                res.status(500);
+                res.json(errors.EMAIL_COULD_NOT_BE_SENT);
+            } else {
+                res.status(201).json({ status: "success" });
+            }
+        });
+    } catch (e) {
         res.status(500);
         res.json(errors.UNKOWN_ERROR);
     }
@@ -239,7 +313,7 @@ router.post("/login", async (req, res) => {
 
 /**
  * @swagger
- * /user/login/reset:
+ * /user/login/send-reset-email:
  *     post: 
  *      description: Send email to change forgotten password for user.
  *      parameters: 
@@ -260,7 +334,7 @@ router.post("/login", async (req, res) => {
  *          '500': 
  *              description: Internal server error. Likely the user is already signed up. 
  */
-router.post("/login/reset", async (req, res) => {
+router.post("/login/send-reset-email", async (req, res) => {
     try{
         const { email } = req.body;
         const user = await prisma.user.findFirst({ where: { email } });
@@ -314,7 +388,7 @@ router.post("/login/reset", async (req, res) => {
 router.post("/login/reset/change-password", async (req, res) => {
     const { token, password } = req.body;
     try {
-        const { userId: id } = jwt.verify(token, JWT_SECRET, {}) as { userId: number; };
+        const { userId: id } = jwt.verify(token || "", JWT_SECRET, {}) as { userId: number; };
         const newPassword = await argon2.hash(password);
         const user = await prisma.user.update({
             data: { password: newPassword },
@@ -325,10 +399,9 @@ router.post("/login/reset/change-password", async (req, res) => {
 
     } catch (e) {
         if (e instanceof JsonWebTokenError) {
-            res.status(401).json({
-                "es": "Este link ha expirado, pide uno nuevo.",
-                "en": "This link has expired, request for a new one."
-            });
+            res.status(401).json(errors.TOKEN_EXPIRED);
+        } else {
+            res.status(500).json(errors.INTERNAL_SERVER);
         }
     }
 });
@@ -358,8 +431,7 @@ router.post("/login/reset/change-password", async (req, res) => {
 router.post("/validate", async (req, res) => {
     const { token } = req.body;
     try {
-        const { userId: id } = jwt.verify(token, JWT_SECRET, {}) as { userId: number; };
-        console.log("id:",id)
+        const { userId: id } = jwt.verify(token || "", JWT_SECRET, {}) as { userId: number; };
         const user = await prisma.user.update({
             data: { isValidated: true, },
             where: { id },
@@ -369,10 +441,9 @@ router.post("/validate", async (req, res) => {
 
     } catch (e) {
         if (e instanceof JsonWebTokenError) {
-            res.status(401).json({
-                "es": "Este link ha expirado, pide uno nuevo.",
-                "en": "This link has expired, request for a new one."
-            });
+            res.status(401).json(errors.TOKEN_EXPIRED);
+        } else {
+            res.status(500).json(errors.INTERNAL_SERVER);
         }
     }
 });
