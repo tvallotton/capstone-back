@@ -8,3 +8,7 @@ Para correr el back ejecuta:
 ```sh
 docker compose up -d
 ```
+
+# Admin user
+* **email:** `avcordova@uc.cl`
+* **password:** `Tere+victor<3`
