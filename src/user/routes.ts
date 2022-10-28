@@ -12,21 +12,18 @@ const prisma = new PrismaClient();
 const router = Router();
 dotenv.config();
 
-const mailUser = process.env["MAILUSER"];
-const mailpass = process.env["MAILPASS"];
+const mailUser = process.env["MAIL_USER"];
+const mailPass = process.env["MAIL_PASS"];
 const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
         user: mailUser,
-        pass: mailpass,
+        pass: mailPass,
     },
     tls: {
         rejectUnauthorized: false,
     }
 });
-
-
-
 
 /**
  * @swagger
@@ -135,12 +132,11 @@ router.get("/:id", user({ staffOnly: true }), async (req, res) => {
  *          '500': 
  *              description: Internal server error. Likely the user is already signed up. 
  */
-
 router.post("/", async (req, res) => {
     try {
         const user: User = req.body;
-
-        if (!user.email.match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/)) {
+        const pass = user.password;
+        if (!(pass.match(/[A-Z]/) && pass.match(/[a-z]/) && pass.match(/\d/))) {
             res.status(400);
             res.json(errors.INVALID_PASSWORD);
             return;
@@ -156,7 +152,7 @@ router.post("/", async (req, res) => {
             data: user
         });
         delete (created as any).password;
-        const token = jwt.sign({ userId: user.id, }, JWT_SECRET, { expiresIn: "1h" });
+        const token = jwt.sign({ userId: created.id, }, JWT_SECRET, { expiresIn: "1h" });
 
         transporter.sendMail({
             to: created.email,
@@ -165,13 +161,12 @@ router.post("/", async (req, res) => {
             text: `Su código de autorización para ${created.email} es el siguiente:\n \n ${token} \n \n Para iniciar sesión, debe de ingresarlo en http://localhost:5000/user/validate\n \n Si no ha sido usted quien ha solicitado este código, por favor ignore este correo.`
         }, function (err: any) {
             if (err) {
-                res.status(500).json({ status: "Error de sendmailer" });
+                console.log(err);
+                res.status(500).json(errors.EMAIL_COULD_NOT_BE_SENT);
+            } else {
+                res.status(201).json({ status: "success", user: created });
             }
         });
-
-        res.status(201).json({ status: "success", user: created });
-
-
     } catch (e) {
         const err = e as PrismaClientKnownRequestError;
         if (err.code == "P2002") {
@@ -179,6 +174,75 @@ router.post("/", async (req, res) => {
             res.json(errors.USER_ALREADY_EXISTS);
             return;
         }
+        res.status(500);
+        res.json(errors.UNKOWN_ERROR);
+    }
+});
+
+
+/**
+ * @swagger
+ * /user/send-validation-email:
+ *     post: 
+ *      description: Creates a new user.
+ *      consumes: 
+ *          - application/json
+ *      requestBody:
+ *          required: true
+ *          content: 
+ *              application/json: 
+ *                  schema: 
+ *                      type: object
+ *                      properties: 
+ *                          email: 
+ *                              type: string          
+ *      responses: 
+ *          '201': 
+ *              $ref: '#/components/responses/User'
+ *          '500': 
+ *              description: Internal server error. Likely the user is already signed up. 
+ */
+router.post("/send-validation-email", async (req, res) => {
+    try {
+        let { email } = req.body;
+
+        email = email.toLowerCase();
+        if (!email.match(/^\S+@(?:\S+\.)?(?:puc|uc)\.cl$/)) {
+            res.status(400);
+            res.json(errors.INVALID_EMAIL);
+            return;
+        }
+        const user = await prisma.user.findFirst({ where: { email } });
+
+        if (!user) {
+            res.status(404);
+            res.json(errors.USER_NOT_FOUND);
+            return;
+        }
+
+        if (user.isValidated) {
+            res.status(400);
+            res.json(errors.ALREADY_VALIDATED);
+            return;
+        }
+
+        const token = jwt.sign({ userId: user.id, }, JWT_SECRET, { expiresIn: "1h" });
+
+        transporter.sendMail({
+            to: email,
+            from: mailUser,
+            subject: "Autentificacion Sibico",
+            html: `<p>Para verificar su correo electrónico pinche <a href=http://sibico.uc.cl/verify?token="${token}">aquí</a></p>`,
+        }, function (err: any) {
+            if (err) {
+                console.log(err);
+                res.status(500);
+                res.json(errors.EMAIL_COULD_NOT_BE_SENT);
+            } else {
+                res.status(201).json({ status: "success" });
+            }
+        });
+    } catch (e) {
         res.status(500);
         res.json(errors.UNKOWN_ERROR);
     }
@@ -299,6 +363,7 @@ router.post("/login", async (req, res) => {
         res.json(errors.UNVALIDATED);
         return;
     }
+    console.log("user", user);
     const isCorrect = await argon2.verify(user.password, password);
     if (!isCorrect) {
         res.status(401);
@@ -313,7 +378,7 @@ router.post("/login", async (req, res) => {
 
 /**
  * @swagger
- * /user/login/send-reset-email:
+ * /user/login/send-reset-password:
  *     post: 
  *      description: Send email to change forgotten password for user.
  *      parameters: 
@@ -325,7 +390,10 @@ router.post("/login", async (req, res) => {
  *          content: 
  *              application/json: 
  *                  schema: 
- *                      $ref: '#/components/schemas/ChangePasswordInput'            
+ *                      type: object
+ *                      properties: 
+ *                          email: 
+ *                              type: string           
  *      responses: 
  *          '200': 
  *              description: Correct validation of the user
@@ -334,8 +402,8 @@ router.post("/login", async (req, res) => {
  *          '500': 
  *              description: Internal server error. Likely the user is already signed up. 
  */
-router.post("/login/send-reset-email", async (req, res) => {
-    try{
+router.post("/login/send-reset-password", async (req, res) => {
+    try {
         const { email } = req.body;
         const user = await prisma.user.findFirst({ where: { email } });
         if (user === null) {
@@ -345,18 +413,20 @@ router.post("/login/send-reset-email", async (req, res) => {
         }
         const token = jwt.sign({ userId: user.id, }, JWT_SECRET, { expiresIn: "1h" });
         transporter.sendMail({
-            to: "rizquierdop1@gmail.com",
+            to: email,
             from: mailUser,
             subject: "Resetear contraseña Sibico",
             text: `Su código para autorizar el cambio de contraseña de ${user.email} es el siguiente:\n \n ${token} \n \n Para iniciar sesión, debe de ingresarlo en http://localhost:5000/user/login/reset/pawssword`
         }, function (err: any) {
+            console.log(err);
             if (err) {
-                res.status(500).json({ status: "Error de sendmailer" });
+                res.status(500).json({ status: "error", es: "No se pudo enviar el correo.", en: "" });
+            } else {
+                res.status(200).json({ status: "success" });
             }
         });
-        res.status(200).json({ status: "success" });
-    } catch{
-        res.status(500).json({ status: "Error de sendmailer" });
+    } catch {
+        res.status(500).json(errors.USER_NOT_FOUND);
     }
 
 });
@@ -396,7 +466,6 @@ router.post("/login/reset/change-password", async (req, res) => {
         });
         delete (user as any).password;
         res.json({ status: "success", user });
-
     } catch (e) {
         if (e instanceof JsonWebTokenError) {
             res.status(401).json(errors.TOKEN_EXPIRED);
@@ -410,8 +479,6 @@ router.post("/login/reset/change-password", async (req, res) => {
  * /user/validate/:
  *     post: 
  *      description: Validate a new user.
- *      parameters: 
- *      
  *      consumes: 
  *          - application/json
  *      requestBody:
@@ -422,16 +489,25 @@ router.post("/login/reset/change-password", async (req, res) => {
  *                      $ref: '#/components/schemas/TokenInput'            
  *      responses: 
  *          '200': 
- *              description: Correct validation of the user
+ *              description: Responds with the user if it succeeds.
+ *              content:
+ *                  application/json: 
+ *                      schema:
+ *                          $ref: '#/components/schemas/User'
  *          '401': 
- *              description: Validation code is incorrect
- *          '500': 
- *              description: Internal server error. Likely the user is already signed up. 
+ *              description: Invalid credentials.
+ *              content: 
+ *                  application/json: 
+ *                      schema:
+ *                          $ref: '#/components/schemas/Error'
  */
 router.post("/validate", async (req, res) => {
     const { token } = req.body;
+    console.log("token", token);
     try {
+        console.log(jwt.verify(token, JWT_SECRET, {}));
         const { userId: id } = jwt.verify(token || "", JWT_SECRET, {}) as { userId: number; };
+        console.log("id", id);
         const user = await prisma.user.update({
             data: { isValidated: true, },
             where: { id },
@@ -443,6 +519,7 @@ router.post("/validate", async (req, res) => {
         if (e instanceof JsonWebTokenError) {
             res.status(401).json(errors.TOKEN_EXPIRED);
         } else {
+            console.log(e);
             res.status(500).json(errors.INTERNAL_SERVER);
         }
     }
@@ -474,18 +551,23 @@ router.post("/validate", async (req, res) => {
 
 router.patch("/", user(), async (req: Request, res) => {
     // if you are staff or you are editting your own profile
-    if (req.user?.isStaff || req.user?.id == req.body.id) {
-        const password = req.body.password ? argon2.hash(req.body.password) : undefined;
-        const updated = await prisma.user.update({
-            where: {
-                id: req.body.id,
-            },
-            data: { password, ...req.body }
-        });
-        delete (updated as any).password;
-        res.json(updated);
-    } else {
-        res.status(403).json(errors.UNAUTHORIZED);
+    try {
+        if (req.user?.isStaff || req.user?.id == req.body.id) {
+            delete req.body.email;
+            const password = req.body.password ? await argon2.hash(req.body.password) : undefined;
+            const updated = await prisma.user.update({
+                where: {
+                    id: req.body.id,
+                },
+                data: { ...req.body, password }
+            });
+            delete (updated as any).password;
+            res.json(updated);
+        } else {
+            res.status(403).json(errors.UNAUTHORIZED);
+        }
+    } catch (_) {
+        res.status(400).json(errors.BAD_REQUEST);
     }
 });
 

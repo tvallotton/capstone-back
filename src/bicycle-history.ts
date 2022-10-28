@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { Router } from "express";
-import { user } from "./user/middleware";
+import { Request, user } from "./user/middleware";
 import errors from "./errors";
 
 const router = Router();
@@ -42,7 +42,8 @@ router.get("/:bicycleId", user({ staffOnly: true }), async (req, res) => {
     const { bicycleId } = req.params;
     const history = await prisma.bicycleHistory.findMany({
         include: {
-            bicycle: true
+            bicycle: true,
+            user: true,
         },
         take: Number(take) || undefined,
         skip: Number(skip) || undefined,
@@ -75,16 +76,15 @@ router.get("/:bicycleId", user({ staffOnly: true }), async (req, res) => {
  *              "403":
  *                 $ref: "#/components/responses/Forbidden"
  */
-router.post("/", user({ staffOnly: true }), async (req, res) => {
-
+router.post("/", user({ staffOnly: true }), async (req: Request, res) => {
     const { bicycleId, description } = req.body;
+    const userId = Number(req.user?.id);
     if (!bicycleId && !description) {
         return res.status(400);
     }
     try {
-
         const bicycleHistory = await prisma.bicycleHistory.create({
-            data: { bicycleId, description }
+            data: { bicycleId, description, userId }
         });
         res.status(201).json({ "status": "success", bicycleHistory });
     } catch (e) {

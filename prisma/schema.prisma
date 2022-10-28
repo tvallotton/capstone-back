@@ -11,43 +11,43 @@ datasource db {
 }
 
 model User {
-    id          Int           @id @default(autoincrement())
-    email       String        @unique
-    password    String
-    name        String        @default("")
-    lastName    String        @default("")
-    address      String        @default("")
-    city        String        @default("")
-    birthday    DateTime?
-    occuppancy  String        @default("")
-    isAdmin     Boolean       @default(false)
-    isStaff     Boolean       @default(false)
-    isValidated Boolean       @default(false)
-    createdAt   DateTime      @default(now())
-    submissions Submission[]
-    bookings    Booking[]
-    history     UserHistory[]
+    id              Int              @id @default(autoincrement())
+    email           String           @unique
+    password        String
+    name            String           @default("")
+    lastName        String           @default("")
+    address         String           @default("")
+    city            String           @default("")
+    birthday        DateTime?
+    occupancy       String           @default("")
+    isAdmin         Boolean          @default(false)
+    isStaff         Boolean          @default(false)
+    createdAt       DateTime         @default(now())
+    isValidated     Boolean          @default(false)
+    rut             String           @default("")
+    passport        String           @default("")
+    unidadAcademica String           @default("")
+    submissions     Submission[]
+    bookings        Booking[]
+    history         UserHistory[]
+    BicycleHistory  BicycleHistory[]
 }
 
 model Bicycle {
-    id        Int              @id @default(autoincrement())
-    qrCode    String           @unique
-    status    BicycleStatus
-    model     BicycleModel     @relation(fields: [modelId], references: [id])
-    modelId   Int
-    bookings  Booking[]
-    history   BicycleHistory[]
-    ulock     String           @default("")
-    lights    String           @default("")
-    fleet     String           @default("")
-    reflector String           @default("")
+    id       Int              @id @default(autoincrement())
+    qrCode   String           @unique
+    status   BicycleStatus
+    model    BicycleModel     @relation(fields: [modelId], references: [id])
+    modelId  Int
+    bookings Booking[]
+    history  BicycleHistory[]
+    fleet    String           @default("")
 }
 
 model BicycleModel {
     id          Int          @id @default(autoincrement())
     name        String       @unique
     description String
-    // el número de bicicletas reservadas para este modelo
     image       String?
     bicycles    Bicycle[]
     submissions Submission[]
@@ -62,7 +62,6 @@ model Submission {
     createdAt      DateTime     @default(now())
 }
 
-// Porque el bicycleid no es unique??
 model Booking {
     id        Int       @id @default(autoincrement())
     user      User      @relation(fields: [userId], references: [id])
@@ -71,6 +70,9 @@ model Booking {
     bicycleId Int
     start     DateTime  @default(now())
     end       DateTime?
+    ulock     Int       @default(1)
+    lights    Int       @default(1)
+    reflector Int       @default(1)
 }
 
 model BicycleHistory {
@@ -79,6 +81,8 @@ model BicycleHistory {
     bicycleId   Int
     description String
     createdAt   DateTime @default(now())
+    user        User     @relation(fields: [userId], references: [id])
+    userId      Int
 }
 
 model UserHistory {
