@@ -11,7 +11,7 @@ time.sleep(2)
 try:
     res = requests.post("http://sibico-backend:5001/user/", json={
         "email": "tvallotton@uc.cl",
-        "password": "asd123",
+        "password": "Asd12345",
     })
     print("response: ", res.json())
 except:

@@ -220,7 +220,17 @@ components:
       required:
         - email
         - password
-    UserValidateInput:
+    ChangePasswordInput:
+      type: object
+      properties:
+        token:
+          type: string
+        password:
+          type: string
+      required:
+        - token
+        - password
+    TokenInput:
       type: object
       properties:
         token:

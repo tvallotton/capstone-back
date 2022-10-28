@@ -74,6 +74,12 @@ const INVALID_EMAIL = {
     "en": "The email address is not valid",
     "es": "El correo electrónico no es válido."
 };
+const INVALID_PASSWORD = {
+    "status": "error",
+    "code": "INVALID_PASSWORD",
+    "en": "The password must have a minimum length of 8 characters, in addition to containing at least one uppercase letter, one lowercase letter, one number. ",
+    "es": "La contraseña debe de tener una longitud minima de 8 caracteres, ademas de contener minimo una letra mayúscula, una minúscula, un número."
+};
 
 const USER_ALREADY_EXISTS = {
     "status": "error",
@@ -119,10 +125,10 @@ const EMAIL_COULD_NOT_BE_SENT = {
 };
 
 export default {
-    USER_ALREADY_EXISTS, NOT_FOUND, UNREGISTERED_USER,
-    INVALID_EMAIL, UNAUTHENTICATED, INCORRECT_PASSWORD,
-    UNKOWN_ERROR, BICYCLE_NOT_FOUND, USER_NOT_FOUND,
-    UNAUTHORIZED, BAD_REQUEST, MISSING_ID, UNVALIDATED,
-    TOKEN_EXPIRED, INTERNAL_SERVER, ALREADY_VALIDATED,
+    USER_ALREADY_EXISTS, NOT_FOUND,
+    UNREGISTERED_USER, INVALID_EMAIL, INVALID_PASSWORD, UNAUTHENTICATED,
+    INCORRECT_PASSWORD, UNKOWN_ERROR, BICYCLE_NOT_FOUND,
+    USER_NOT_FOUND, UNAUTHORIZED, BAD_REQUEST, UNVALIDATED,
+    MISSING_ID, TOKEN_EXPIRED, INTERNAL_SERVER, ALREADY_VALIDATED,
     EMAIL_COULD_NOT_BE_SENT
 };
