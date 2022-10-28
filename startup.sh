@@ -1,6 +1,7 @@
 #!/bin/bash
 
 npx prisma migrate deploy
+npx prisma generate
 if [ $NODE_ENV = "production" ]
 then
     echo "running in prod mode"
