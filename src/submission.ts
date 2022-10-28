@@ -47,7 +47,7 @@ router.get("/", user({ staffOnly: true }), async (req, res) => {
             model: true,
         }
     });
-    res.json({ submissions, status: "submissions" });
+    res.json({ submissions, status: "success" });
 });
 
 
