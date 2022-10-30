@@ -47,7 +47,7 @@ router.get("/", user({ staffOnly: true }), async (req, res) => {
             model: true,
         }
     });
-    res.json({ submissions, status: "submissions" });
+    res.json({ submissions, status: "success" });
 });
 
 
@@ -108,7 +108,21 @@ router.get("/mine", user(), async (req: Request, res) => {
 router.post("/", user(), async (req: Request, res) => {
     const userId = req.user?.id as number;
     const { bicycleModelId } = req.body;
+
+
     try {
+        // check the user hasn't already booked a bicycle
+        const booking = await prisma.booking.findFirst({
+            where: {
+                userId, end: { equals: null }
+            }
+        });
+        if (booking) {
+            res.status(400);
+            res.json(errors.USER_ALREADY_BORROWS);
+            return;
+        }
+
         const submission = await prisma.submission.create({
             data: {
                 userId,
@@ -123,6 +137,68 @@ router.post("/", user(), async (req: Request, res) => {
     }
 });
 
+
+/**
+ * @swagger
+ * /submission/upgrade:
+ *      post: 
+ *          description: 
+ *          parameters: 
+ *              - $ref: '#/components/parameters/x-access-token'
+ *          consumes:
+ *              - application/json
+ *          requestBody:
+ *              required: true
+ *              content: 
+ *                  application/json: 
+ *                      schema: 
+ *                          $ref: '#/components/schemas/UpgradeInput'
+ *          responses:
+ *              '201':
+ *                  $ref: '#/components/responses/Booking'
+ * 
+ */
+router.post("/upgrade", user({ staffOnly: true }), async (req: Request, res) => {
+    const { qrCode, userId, lights, ulock, reflector } = req.body;
+    try {
+        const bicycle = await prisma.bicycle.findFirst({ where: { qrCode }, include: { bookings: true } });
+        if (!bicycle) {
+            res.status(404);
+            res.json(errors.BICYCLE_NOT_FOUND);
+            return;
+        }
+        // check the bicycle is not already borrowed
+        if (bicycle.bookings.filter(b => b.end != null).length != 0) {
+            res.status(400);
+            res.json(errors.BICYCLE_ALREADY_LENT);
+        }
+
+        const submission = await prisma.submission.deleteMany({ where: { userId } });
+        if (submission.count == 0) {
+            res.status(404);
+            res.json(errors.SUBMISSION_NOT_FOUND);
+            return;
+        }
+
+        const booking = await prisma.booking.create({
+            data: {
+                ulock,
+                lights,
+                reflector,
+                userId: userId,
+                bicycleId: bicycle?.id,
+            }
+        });
+        res.json({ status: "success", booking });
+        return;
+    }
+    catch (e) {
+        console.log(e);
+        res.status(500);
+        res.json(errors.UNKOWN_ERROR);
+        return;
+    }
+});
 
 /**
  * @swagger

@@ -10,8 +10,8 @@ dotenv.load_dotenv()
 time.sleep(2)
 try:
     res = requests.post("http://sibico-backend:5001/user/", json={
-        "email": "tvallotton@uc.cl",
-        "password": "asd123",
+        "email": "avcordova@uc.cl",
+        "password": "Tere+victor<3",
     })
     print("response: ", res.json())
 except:
@@ -94,7 +94,7 @@ conn = connection()
 
 cursor = conn.cursor()
 cursor.execute(
-    'update "User" set "isAdmin" = true, "isStaff" = true, "isValidated" = true where email = \'tvallotton@uc.cl\';')
+    'update "User" set "isAdmin" = true, "isStaff" = true, "isValidated" = true where email = \'avcordova@uc.cl\';')
 
 print(os.listdir("/home/upload"))
 table = pd.read_csv("/home/upload/Inventario.csv")

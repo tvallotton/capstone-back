@@ -74,6 +74,12 @@ const INVALID_EMAIL = {
     "en": "The email address is not valid",
     "es": "El correo electrónico no es válido."
 };
+const INVALID_PASSWORD = {
+    "status": "error",
+    "code": "INVALID_PASSWORD",
+    "en": "The password must have a minimum length of 8 characters, in addition to containing at least one uppercase letter, one lowercase letter, one number. ",
+    "es": "La contraseña debe de tener una longitud minima de 8 caracteres, ademas de contener minimo una letra mayúscula, una minúscula, un número."
+};
 
 const USER_ALREADY_EXISTS = {
     "status": "error",
@@ -118,11 +124,33 @@ const EMAIL_COULD_NOT_BE_SENT = {
     "en": "The email could not be sent."
 };
 
+const SUBMISSION_NOT_FOUND = {
+    "status": "error",
+    "code": "SUBMISSION_NOT_FOUND",
+    "es": "No se pudo encontrar una submission para el usuario.",
+    "en": "A submission could not be found for that user."
+};
+
+const USER_ALREADY_BORROWS = {
+    "status": "error",
+    "code": "USER_ALREADY_BORROWS",
+    "es": "Sólo se puede arrendar una bicicleta.",
+    "en": "You may only borrow one bicycle."
+};
+
+const BICYCLE_ALREADY_LENT = {
+    "status": "error",
+    "code": "BICYCLE_ALREADY_LENT",
+    "es": "La bicicleta sigue prestada, termine el préstamo antes de volver a prestarla.",
+    "en": "The bicycle is "
+};
+
 export default {
-    USER_ALREADY_EXISTS, NOT_FOUND, UNREGISTERED_USER,
-    INVALID_EMAIL, UNAUTHENTICATED, INCORRECT_PASSWORD,
-    UNKOWN_ERROR, BICYCLE_NOT_FOUND, USER_NOT_FOUND,
-    UNAUTHORIZED, BAD_REQUEST, MISSING_ID, UNVALIDATED,
-    TOKEN_EXPIRED, INTERNAL_SERVER, ALREADY_VALIDATED,
-    EMAIL_COULD_NOT_BE_SENT
+    USER_ALREADY_EXISTS, NOT_FOUND, UNAUTHENTICATED,
+    UNREGISTERED_USER, INVALID_EMAIL, INVALID_PASSWORD,
+    INCORRECT_PASSWORD, UNKOWN_ERROR, BICYCLE_NOT_FOUND,
+    USER_NOT_FOUND, UNAUTHORIZED, BAD_REQUEST, UNVALIDATED,
+    MISSING_ID, TOKEN_EXPIRED, INTERNAL_SERVER, ALREADY_VALIDATED,
+    EMAIL_COULD_NOT_BE_SENT, SUBMISSION_NOT_FOUND, BICYCLE_ALREADY_LENT,
+    USER_ALREADY_BORROWS,
 };
