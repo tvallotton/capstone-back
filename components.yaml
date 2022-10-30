@@ -106,6 +106,19 @@ components:
           schema:
             $ref: "#/components/schemas/Error"
   schemas:
+    UpgradeInput:
+      type: object
+      properties:
+        qrCode:
+          type: string
+        userId:
+          type: integer
+        lights:
+          type: integer
+        ulock:
+          type: integer
+        reflector:
+          type: integer
     BookingInput:
       type: object
       properties:

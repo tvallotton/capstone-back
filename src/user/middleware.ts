@@ -113,3 +113,36 @@ function unauthenticated(res: Response, next: NextFunction, options?: Options,) 
     }
 }
 
+function _missingData(user: User) {
+    const keys: Array<keyof User> = [
+        "email",
+        "password",
+        "name",
+        "lastName",
+        "address",
+        "city",
+        "birthday",
+        "occupancy",
+        "unidadAcademica",
+    ];
+    const missing = [];
+    for (const key of keys) {
+        const value = user[key];
+        if (value == "") {
+            missing.push(key);
+        }
+    }
+    if (user.rut == "" && user.passport == "") {
+        missing.push("rut");
+    }
+
+    if (missing.length != 0) {
+        return {
+            "status": "error",
+            "en": `Missing the following user data: ${missing.join(", ")}.`,
+            "es": `Faltan los siguientes datos de usuario: ${missing.join(", ")}.`,
+        };
+    }
+
+
+}
