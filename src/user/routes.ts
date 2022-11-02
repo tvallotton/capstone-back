@@ -179,7 +179,7 @@ router.post("/", async (req, res) => {
             return;
         }
         res.status(400);
-        res.json(errors.UNKOWN_ERROR); ///cambiar1
+        res.json(errors.UNKOWN_ERROR_CREATE_USER);
     }
 });
 
