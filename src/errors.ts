@@ -9,7 +9,7 @@ const UNAUTHENTICATED = {
     "status": "error",
     "code": "UNAUTHENTICATED",
     "en": "You are not logged in.",
-    "es": "No has ingresado sessión.",
+    "es": "No has ingresado sesión.",
 };
 
 const UNVALIDATED = {

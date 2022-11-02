@@ -100,6 +100,50 @@ router.get("/:id", user({ staffOnly: true }), async (req, res) => {
 });
 
 
+/** 
+ * @swagger
+ * /bicycle/qr-code/{qrCode}:
+ *      get: 
+ *          description: returns the queried bicycle by its qrCode.
+ *          parameters: 
+ *              -  in: path
+ *                 name: qrCode
+ *                 description: qrCode value.
+ *                 required: true
+ *                 schema:
+ *                      type: string
+ *              - $ref: '#/components/parameters/x-access-token'
+ *          responses:
+ *              '200':
+ *                 $ref: '#/components/responses/Bicycle'
+ *              '401': 
+ *                 $ref: '#/components/responses/Unauthorized'
+ *              '403':
+ *                 $ref: '#/components/responses/Forbidden'
+ */
+router.get("/qr-code/:qrCode", user({ staffOnly: true }), async (req, res) => {
+    const { qrCode } = req.params;
+    try {
+        const query = await prisma.bicycle.findUnique({
+            where: { qrCode },
+            include: {
+                model: true,
+                bookings: {
+                    where: {
+                        end: { equals: null }
+                    }
+                }
+            }
+        });
+        const booking = query?.bookings[0];
+        const { bookings: _, ...bicycle } = { ...query, booking };
+        res.json({ status: "success", bicycle } || errors.BICYCLE_NOT_FOUND);
+    } catch (e) {
+        res.json(errors.BICYCLE_NOT_FOUND);
+    }
+});
+
+
 /**
  * @swagger
  * /bicycle: 
@@ -125,15 +169,14 @@ router.get("/:id", user({ staffOnly: true }), async (req, res) => {
  *                 $ref: '#/components/responses/Forbidden'
  */
 router.post("/", user({ staffOnly: true }), async (req, res) => {
-    const { qrCode, status, modelId } = req.body;
+    const { qrCode, status, modelId, ...data } = req.body;
     if (!qrCode && !status && !modelId) {
         return res.status(400);
     }
     try {
-
         const bicycle = await prisma.bicycle.create({
             data: {
-                qrCode, status, modelId
+                qrCode, status, modelId, ...data
             }
         });
         res.status(201).json({ "status": "success", bicycle });
