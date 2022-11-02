@@ -169,15 +169,14 @@ router.get("/qr-code/:qrCode", user({ staffOnly: true }), async (req, res) => {
  *                 $ref: '#/components/responses/Forbidden'
  */
 router.post("/", user({ staffOnly: true }), async (req, res) => {
-    const { qrCode, status, modelId } = req.body;
+    const { qrCode, status, modelId, ...data } = req.body;
     if (!qrCode && !status && !modelId) {
         return res.status(400);
     }
     try {
-
         const bicycle = await prisma.bicycle.create({
             data: {
-                qrCode, status, modelId
+                qrCode, status, modelId, ...data
             }
         });
         res.status(201).json({ "status": "success", bicycle });
