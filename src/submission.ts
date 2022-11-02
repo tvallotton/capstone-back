@@ -104,6 +104,8 @@ router.get("/mine", user(), async (req: Request, res) => {
  *                  $ref: '#/components/responses/Submission'
  *              '401': 
  *                 $ref: '#/components/responses/Unauthorized'
+ *              '403':
+ *                description: 'The user have already borrowed a bicycle'
  */
 router.post("/", user(), async (req: Request, res) => {
     const userId = req.user?.id as number;
@@ -118,7 +120,7 @@ router.post("/", user(), async (req: Request, res) => {
             }
         });
         if (booking) {
-            res.status(400);
+            res.status(403);
             res.json(errors.USER_ALREADY_BORROWS);
             return;
         }
@@ -156,6 +158,12 @@ router.post("/", user(), async (req: Request, res) => {
  *          responses:
  *              '201':
  *                  $ref: '#/components/responses/Booking'
+ *              '401':
+ *                  $ref: '#/components/responses/Unauthorized'
+ *              '403':
+ *                  description: 'The bivyvle is already leat'
+ *              '404':
+ *                  description: 'The bicycle, the user or the submission is not found'
  * 
  */
 router.post("/upgrade", user({ staffOnly: true }), async (req: Request, res) => {
@@ -169,7 +177,7 @@ router.post("/upgrade", user({ staffOnly: true }), async (req: Request, res) => 
         }
         // check the bicycle is not already borrowed
         if (bicycle.bookings.filter(b => b.end != null).length != 0) {
-            res.status(400);
+            res.status(403);
             res.json(errors.BICYCLE_ALREADY_LENT);
         }
 
@@ -193,7 +201,6 @@ router.post("/upgrade", user({ staffOnly: true }), async (req: Request, res) => 
         return;
     }
     catch (e) {
-        console.log(e);
         res.status(500);
         res.json(errors.UNKOWN_ERROR);
         return;
