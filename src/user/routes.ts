@@ -140,7 +140,11 @@ router.post("/", async (req, res) => {
     try {
         const user: User = req.body;
         const pass = user.password;
-        if (!(pass.match(/[A-Z]/) && pass.match(/[a-z]/) && pass.match(/\d/))) {
+        const safePass = (
+            pass.match(/[A-Z]/) && pass.match(/\d/) &&
+            pass.match(/[a-z]/) && pass.match(/.{8}/)
+        );
+        if (!safePass) {
             res.status(400);
             res.json(errors.INVALID_PASSWORD);
             return;
@@ -159,10 +163,10 @@ router.post("/", async (req, res) => {
         const token = jwt.sign({ userId: created.id, }, JWT_SECRET, { expiresIn: "1h" });
 
         transporter.sendMail({
-            to: created.email,
+            to: user.email,
             from: mailUser,
             subject: "Autentificacion Sibico",
-            text: `Su código de autorización para ${created.email} es el siguiente:\n \n ${token} \n \n Para iniciar sesión, debe de ingresarlo en http://localhost:5000/user/validate\n \n Si no ha sido usted quien ha solicitado este código, por favor ignore este correo.`
+            html: `<p>Para verificar su correo electrónico pinche <a href=http://54.162.148.230:4173/validate?token="${token}">aquí</a></p>`,
         }, function (err: any) {
             if (err) {
                 console.log(err);
@@ -180,79 +184,6 @@ router.post("/", async (req, res) => {
         }
         res.status(400);
         res.json(errors.UNKOWN_ERROR_CREATE_USER);
-    }
-});
-
-
-/**
- * @swagger
- * /user/send-validation-email:
- *     post: 
- *      description: Creates a new user.
- *      consumes: 
- *          - application/json
- *      requestBody:
- *          required: true
- *          content: 
- *              application/json: 
- *                  schema: 
- *                      type: object
- *                      properties: 
- *                          email: 
- *                              type: string          
- *      responses: 
- *          '201': 
- *              $ref: '#/components/responses/User'
- *          '400':
- *             $ref: '#/components/responses/BadRequest'
- *          '404':
- *             $ref: '#/components/responses/NotFound'
- *          '500': 
- *              description: Internal server error. Likely the user is already signed up. 
- */
-router.post("/send-validation-email", async (req, res) => {
-    try {
-        let { email } = req.body;
-
-        email = email.toLowerCase();
-        if (!email.match(/^\S+@(?:\S+\.)?(?:puc|uc)\.cl$/)) {
-            res.status(400);
-            res.json(errors.INVALID_EMAIL);
-            return;
-        }
-        const user = await prisma.user.findFirst({ where: { email } });
-
-        if (!user) {
-            res.status(404);
-            res.json(errors.USER_NOT_FOUND);
-            return;
-        }
-
-        if (user.isValidated) {
-            res.status(400);
-            res.json(errors.ALREADY_VALIDATED);
-            return;
-        }
-
-        const token = jwt.sign({ userId: user.id, }, JWT_SECRET, { expiresIn: "1h" });
-
-        transporter.sendMail({
-            to: email,
-            from: mailUser,
-            subject: "Autentificacion Sibico",
-            html: `<p>Para verificar su correo electrónico pinche <a href=http://sibico.uc.cl/verify?token="${token}">aquí</a></p>`,
-        }, function (err: any) {
-            if (err) {
-                console.log(err);
-                res.status(500);
-                res.json(errors.EMAIL_COULD_NOT_BE_SENT);
-            } else {
-                res.status(204).json({ status: "success" });
-            }
-        });
-    } catch (e) {
-        res.status(500);
-        res.json(errors.UNKOWN_ERROR);
     }
 });
 
@@ -304,6 +235,17 @@ router.post("/login", async (req, res) => {
     if (!user.isValidated) {
         res.status(403);
         res.json(errors.UNVALIDATED);
+        const token = jwt.sign({ userId: user.id, }, JWT_SECRET, { expiresIn: "1h" });
+        transporter.sendMail({
+            to: email,
+            from: mailUser,
+            subject: "Autentificacion Sibico",
+            html: `<p>Para verificar su correo electrónico pinche <a href=http://54.162.148.230:4173/validate?token="${token}">aquí</a></p>`,
+        }, (err: any) => {
+            if (err) {
+                console.log(err);
+            }
+        });
         return;
     }
     console.log("user", user);
