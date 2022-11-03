@@ -162,8 +162,8 @@ const INCOMPLETE_USER_INFO = {
 const USER_ALREADY_SUBMITTED = {
     "status": "error",
     "code": "USER_ALREADY_SUBMTTED",
-    "es": "Ya tienes una solicitud pendiente.",
-    "en": "You already have a pending submission."
+    "es": "Lo siento, ya tienes una reserva activa a tu nombre.",
+    "en": "You already have a pending submission to your name."
 };
 
 export default {

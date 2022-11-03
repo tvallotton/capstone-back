@@ -68,19 +68,23 @@ router.get("/", user({ staffOnly: true }), async (req, res) => {
  *                 $ref: '#/components/responses/Unauthorized'
  */
 router.get("/mine", user(), async (req: Request, res) => {
-    const submission = await prisma.submission.findUnique({
-        where: {
-            userId: req.user?.id
-        },
-        include: {
-            user: true,
-            model: true,
-        }
-    });
+    try {
+        const submission = await prisma.submission.findUnique({
+            where: {
+                userId: req.user?.id
+            },
+            include: {
+                user: true,
+                model: true,
+            }
+        });
 
-    if (submission) {
-        res.json({ status: "success", submission });
-    } else {
+        if (submission) {
+            res.json({ status: "success", submission });
+        } else {
+            res.status(404).json(errors.NOT_FOUND);
+        }
+    } catch (e) {
         res.status(404).json(errors.NOT_FOUND);
     }
 });
