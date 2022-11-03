@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { Router } from "express";
-import { user, Request } from "./user/middleware";
+import { user, Request, missingData } from "./user/middleware";
 import errors from "./errors";
 export const router = Router();
 
@@ -110,8 +110,6 @@ router.get("/mine", user(), async (req: Request, res) => {
 router.post("/", user(), async (req: Request, res) => {
     const userId = req.user?.id as number;
     const { bicycleModelId } = req.body;
-
-
     try {
         // check the user hasn't already booked a bicycle
         const booking = await prisma.booking.findFirst({
@@ -122,6 +120,12 @@ router.post("/", user(), async (req: Request, res) => {
         if (booking) {
             res.status(403);
             res.json(errors.USER_ALREADY_BORROWS);
+            return;
+        }
+
+        if (req.user && missingData(req.user)) {
+            res.status(400);
+            res.json(errors.INCOMPLETE_USER_INFO);
             return;
         }
 
