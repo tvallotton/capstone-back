@@ -129,6 +129,10 @@ router.get("/:id", user({ staffOnly: true }), async (req, res) => {
  *      responses: 
  *          '201': 
  *              $ref: '#/components/responses/User'
+ *          '400':
+ *              $ref: '#/components/responses/BadRequest'
+ *          '403':
+ *              description: User already exist.
  *          '500': 
  *              description: Internal server error. Likely the user is already signed up. 
  */
@@ -170,12 +174,12 @@ router.post("/", async (req, res) => {
     } catch (e) {
         const err = e as PrismaClientKnownRequestError;
         if (err.code == "P2002") {
-            res.status(400);
+            res.status(403);
             res.json(errors.USER_ALREADY_EXISTS);
             return;
         }
-        res.status(500);
-        res.json(errors.UNKOWN_ERROR);
+        res.status(400);
+        res.json(errors.UNKOWN_ERROR_CREATE_USER);
     }
 });
 
@@ -199,6 +203,10 @@ router.post("/", async (req, res) => {
  *      responses: 
  *          '201': 
  *              $ref: '#/components/responses/User'
+ *          '400':
+ *             $ref: '#/components/responses/BadRequest'
+ *          '404':
+ *             $ref: '#/components/responses/NotFound'
  *          '500': 
  *              description: Internal server error. Likely the user is already signed up. 
  */
@@ -239,75 +247,7 @@ router.post("/send-validation-email", async (req, res) => {
                 res.status(500);
                 res.json(errors.EMAIL_COULD_NOT_BE_SENT);
             } else {
-                res.status(201).json({ status: "success" });
-            }
-        });
-    } catch (e) {
-        res.status(500);
-        res.json(errors.UNKOWN_ERROR);
-    }
-});
-
-/**
- * @swagger
- * /user/send-validation-email:
- *     post: 
- *      description: Creates a new user.
- *      consumes: 
- *          - application/json
- *      requestBody:
- *          required: true
- *          content: 
- *              application/json: 
- *                  schema: 
- *                      type: object
- *                      properties: 
- *                          email: 
- *                              type: string          
- *      responses: 
- *          '201': 
- *              $ref: '#/components/responses/User'
- *          '500': 
- *              description: Internal server error. Likely the user is already signed up. 
- */
-
-router.post("/send-validation-email", async (req, res) => {
-    try {
-        let { email } = req.body;
-
-        email = email.toLowerCase();
-        if (!email.match(/^\S+@(?:\S+\.)?(?:puc|uc)\.cl$/)) {
-            res.status(400);
-            res.json(errors.INVALID_EMAIL);
-            return;
-        }
-        const user = await prisma.user.findFirst({ where: { email } });
-
-        if (!user) {
-            res.status(404);
-            res.json(errors.USER_NOT_FOUND);
-            return;
-        }
-
-        if (user.isValidated) {
-            res.status(400);
-            res.json(errors.ALREADY_VALIDATED);
-            return;
-        }
-
-        const token = jwt.sign({ userId: user.id, }, JWT_SECRET, { expiresIn: "1h" });
-
-        transporter.sendMail({
-            to: "rizquierdop1@gmail.com",
-            from: mailUser,
-            subject: "Autentificacion Sibico",
-            html: `<p>Para verificar su correo electrónico pinche <a href=http://sibico.uc.cl/verify?token="${token}">aquí</a></p>`,
-        }, function (err: any) {
-            if (err) {
-                res.status(500);
-                res.json(errors.EMAIL_COULD_NOT_BE_SENT);
-            } else {
-                res.status(201).json({ status: "success" });
+                res.status(204).json({ status: "success" });
             }
         });
     } catch (e) {
@@ -342,13 +282,16 @@ router.post("/send-validation-email", async (req, res) => {
  *                  application/json: 
  *                      schema:
  *                          $ref: '#/components/schemas/Error'
- *          
+ *          '403':
+ *               description: User is not validated.
+ *          '500':
+ *               description: Internal server error.
+ *              
  */
 router.post("/login", async (req, res) => {
     let { email, password } = req.body;
     if (typeof (email) != "string" || typeof (password) != "string") {
-        res.status(400);
-        res.json(errors.BAD_REQUEST);
+        res.status(400).json({ status: "error", es: "Las credenciales tiene un formato invalido.", en: "Credentials have an invalid type" });
         return;
     }
     email = email.toLowerCase();
@@ -359,7 +302,7 @@ router.post("/login", async (req, res) => {
         return;
     }
     if (!user.isValidated) {
-        res.status(401);
+        res.status(403);
         res.json(errors.UNVALIDATED);
         return;
     }
@@ -380,9 +323,7 @@ router.post("/login", async (req, res) => {
  * @swagger
  * /user/login/send-reset-password:
  *     post: 
- *      description: Send email to change forgotten password for user.
- *      parameters: 
- *      
+ *      description: Send email to change forgotten password for user.  
  *      consumes: 
  *          - application/json
  *      requestBody:
@@ -395,10 +336,12 @@ router.post("/login", async (req, res) => {
  *                          email: 
  *                              type: string           
  *      responses: 
- *          '200': 
+ *          '204': 
  *              description: Correct validation of the user
  *          '401': 
  *              description: Token is incorrect
+ *          '404':
+ *              description: User not found.
  *          '500': 
  *              description: Internal server error. Likely the user is already signed up. 
  */
@@ -418,15 +361,14 @@ router.post("/login/send-reset-password", async (req, res) => {
             subject: "Resetear contraseña Sibico",
             text: `Su código para autorizar el cambio de contraseña de ${user.email} es el siguiente:\n \n ${token} \n \n Para iniciar sesión, debe de ingresarlo en http://localhost:5000/user/login/reset/pawssword`
         }, function (err: any) {
-            console.log(err);
             if (err) {
                 res.status(500).json({ status: "error", es: "No se pudo enviar el correo.", en: "" });
             } else {
-                res.status(200).json({ status: "success" });
+                res.status(204).json({ status: "success" }); //duda  no se si devolver un 200 o un 204
             }
         });
     } catch {
-        res.status(500).json(errors.USER_NOT_FOUND);
+        res.status(404).json(errors.USER_NOT_FOUND);
     }
 
 });
@@ -437,8 +379,6 @@ router.post("/login/send-reset-password", async (req, res) => {
  * /user/login/reset/change-password:
  *     post: 
  *      description: Change forgotten password for user.
- *      parameters: 
- *      
  *      consumes: 
  *          - application/json
  *      requestBody:
@@ -494,12 +434,10 @@ router.post("/login/reset/change-password", async (req, res) => {
  *                  application/json: 
  *                      schema:
  *                          $ref: '#/components/schemas/User'
- *          '401': 
- *              description: Invalid credentials.
- *              content: 
- *                  application/json: 
- *                      schema:
- *                          $ref: '#/components/schemas/Error'
+ *          '403':
+ *             description: Invalid token.
+ *          '500':
+ *            description: Internal server error.
  */
 router.post("/validate", async (req, res) => {
     const { token } = req.body;
@@ -517,7 +455,7 @@ router.post("/validate", async (req, res) => {
 
     } catch (e) {
         if (e instanceof JsonWebTokenError) {
-            res.status(401).json(errors.TOKEN_EXPIRED);
+            res.status(403).json(errors.TOKEN_EXPIRED);
         } else {
             console.log(e);
             res.status(500).json(errors.INTERNAL_SERVER);
@@ -547,6 +485,8 @@ router.post("/validate", async (req, res) => {
  *              $ref: '#/components/responses/NotFound'
  *          '401': 
  *              $ref: '#/components/responses/Unauthorized'
+ *          '403':
+ *              description: User is not validated.
  */
 
 router.patch("/", user(), async (req: Request, res) => {
@@ -607,7 +547,7 @@ router.delete("/:id", user({ staffOnly: true }), async (req: Request, res) => {
 });
 
 router.use((_err: Error, _req: any, res: any, _next: any) => {
-    res.status(500).json(errors.UNAUTHORIZED);
+    res.status(401).json(errors.UNAUTHORIZED);
 });
 
 

@@ -33,9 +33,16 @@ const INCORRECT_PASSWORD = {
     "en": "The user or password are incorrect.",
 };
 
-const UNKOWN_ERROR = {
+const UNKOWN_ERROR ={
     "status": "error",
     "code": "UNKOWN_ERROR",
+    "es": "Ocurrió un error desconocido.",
+    "en": "An unknown error occurred "
+};
+
+const UNKOWN_ERROR_CREATE_USER = {
+    "status": "error",
+    "code": "UNKOWN_ERROR_CREATE_USER",
     "es": "Ocurrió un error creando el usuario.",
     "en": "An error occurred creating the user"
 };
@@ -152,5 +159,5 @@ export default {
     USER_NOT_FOUND, UNAUTHORIZED, BAD_REQUEST, UNVALIDATED,
     MISSING_ID, TOKEN_EXPIRED, INTERNAL_SERVER, ALREADY_VALIDATED,
     EMAIL_COULD_NOT_BE_SENT, SUBMISSION_NOT_FOUND, BICYCLE_ALREADY_LENT,
-    USER_ALREADY_BORROWS,
+    USER_ALREADY_BORROWS, UNKOWN_ERROR_CREATE_USER
 };

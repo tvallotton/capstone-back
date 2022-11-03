@@ -172,7 +172,7 @@ router.post("/", user({ staffOnly: true }), async (req, res) => {
         res.status(201).json({ status: "success", booking });
     } catch (e) {
         console.log(e);
-        res.status(404).json(errors.BAD_REQUEST);
+        res.status(400).json(errors.BAD_REQUEST);
     }
 });
 
