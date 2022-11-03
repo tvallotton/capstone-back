@@ -113,7 +113,7 @@ function unauthenticated(res: Response, next: NextFunction, options?: Options,) 
     }
 }
 
-function _missingData(user: User) {
+export function missingData(user: User) {
     const keys: Array<keyof User> = [
         "email",
         "password",

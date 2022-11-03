@@ -152,6 +152,13 @@ const BICYCLE_ALREADY_LENT = {
     "en": "The bicycle is "
 };
 
+const INCOMPLETE_USER_INFO = {
+    "status": "error",
+    "code": "INCOMPLETE_USER_INFO",
+    "es": "Completa tu información de usuario antes de solicitar una bicicleta.",
+    "en": "Complete your user info before requesting a bicycle."
+};
+
 export default {
     USER_ALREADY_EXISTS, NOT_FOUND, UNAUTHENTICATED,
     UNREGISTERED_USER, INVALID_EMAIL, INVALID_PASSWORD,
@@ -159,5 +166,5 @@ export default {
     USER_NOT_FOUND, UNAUTHORIZED, BAD_REQUEST, UNVALIDATED,
     MISSING_ID, TOKEN_EXPIRED, INTERNAL_SERVER, ALREADY_VALIDATED,
     EMAIL_COULD_NOT_BE_SENT, SUBMISSION_NOT_FOUND, BICYCLE_ALREADY_LENT,
-    USER_ALREADY_BORROWS, UNKOWN_ERROR_CREATE_USER
+    USER_ALREADY_BORROWS, UNKOWN_ERROR_CREATE_USER, INCOMPLETE_USER_INFO
 };
