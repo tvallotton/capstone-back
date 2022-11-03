@@ -2,6 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import { Router } from "express";
 import { user, Request, missingData } from "./user/middleware";
 import errors from "./errors";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 export const router = Router();
 
 
@@ -138,8 +139,12 @@ router.post("/", user(), async (req: Request, res) => {
         res.status(201).json({ status: "success", submission });
     }
     catch (e) {
-        console.log(e);
-        res.status(400).json(errors.BAD_REQUEST);
+        if (e instanceof PrismaClientKnownRequestError) {
+            if (e.code == "P2002") {
+                res.status(400).json(errors.USER_ALREADY_SUBMITTED);
+            }
+        }
+        res.status(500).json(errors.UNKOWN_ERROR);
     }
 });
 
