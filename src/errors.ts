@@ -33,7 +33,7 @@ const INCORRECT_PASSWORD = {
     "en": "The user or password are incorrect.",
 };
 
-const UNKOWN_ERROR ={
+const UNKOWN_ERROR = {
     "status": "error",
     "code": "UNKOWN_ERROR",
     "es": "Ocurrió un error desconocido.",
@@ -85,7 +85,7 @@ const INVALID_PASSWORD = {
     "status": "error",
     "code": "INVALID_PASSWORD",
     "en": "The password must have a minimum length of 8 characters, in addition to containing at least one uppercase letter, one lowercase letter, one number. ",
-    "es": "La contraseña debe de tener una longitud minima de 8 caracteres, ademas de contener minimo una letra mayúscula, una minúscula, un número."
+    "es": "La contraseña debe de tener una longitud minima de 8 caracteres, además de contener minimo una letra mayúscula, una minúscula, un número."
 };
 
 const USER_ALREADY_EXISTS = {
