@@ -142,6 +142,7 @@ router.post("/", user(), async (req: Request, res) => {
         if (e instanceof PrismaClientKnownRequestError) {
             if (e.code == "P2002") {
                 res.status(400).json(errors.USER_ALREADY_SUBMITTED);
+                return;
             }
         }
         res.status(500).json(errors.UNKOWN_ERROR);
