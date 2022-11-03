@@ -116,12 +116,10 @@ function unauthenticated(res: Response, next: NextFunction, options?: Options,) 
 export function missingData(user: User) {
     const keys: Array<keyof User> = [
         "email",
-        "password",
         "name",
         "lastName",
         "address",
         "city",
-        "birthday",
         "occupancy",
         "unidadAcademica",
     ];
@@ -132,9 +130,9 @@ export function missingData(user: User) {
             missing.push(key);
         }
     }
-    if (user.rut == "" && user.passport == "") {
-        missing.push("rut");
-    }
+    // if (user.rut == "" && user.passport == "") {
+    //     missing.push("rut");
+    // }
 
     if (missing.length != 0) {
         return {
