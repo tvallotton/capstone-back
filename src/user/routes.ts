@@ -265,9 +265,7 @@ router.post("/login", async (req, res) => {
  * @swagger
  * /user/login/send-reset-password:
  *     post: 
- *      description: Send email to change forgotten password for user.
- *      parameters: 
- *      
+ *      description: Send email to change forgotten password for user.  
  *      consumes: 
  *          - application/json
  *      requestBody:
@@ -280,7 +278,7 @@ router.post("/login", async (req, res) => {
  *                          email: 
  *                              type: string           
  *      responses: 
- *          '200': 
+ *          '204': 
  *              description: Correct validation of the user
  *          '401': 
  *              description: Token is incorrect
@@ -305,11 +303,10 @@ router.post("/login/send-reset-password", async (req, res) => {
             subject: "Resetear contraseña Sibico",
             text: `Su código para autorizar el cambio de contraseña de ${user.email} es el siguiente:\n \n ${token} \n \n Para iniciar sesión, debe de ingresarlo en http://localhost:5000/user/login/reset/pawssword`
         }, function (err: any) {
-            console.log(err);
             if (err) {
                 res.status(500).json({ status: "error", es: "No se pudo enviar el correo.", en: "" });
             } else {
-                res.status(200).json({ status: "success" });
+                res.status(204).json({ status: "success" }); //duda  no se si devolver un 200 o un 204
             }
         });
     } catch {
@@ -324,8 +321,6 @@ router.post("/login/send-reset-password", async (req, res) => {
  * /user/login/reset/change-password:
  *     post: 
  *      description: Change forgotten password for user.
- *      parameters: 
- *      
  *      consumes: 
  *          - application/json
  *      requestBody:
