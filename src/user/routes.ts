@@ -166,7 +166,7 @@ router.post("/", async (req, res) => {
             to: user.email,
             from: mailUser,
             subject: "Autentificacion Sibico",
-            html: `<p>Para verificar su correo electrónico pinche <a href=http://54.162.148.230:4173/validate?token="${token}">aquí</a></p>`,
+            html: `<p>Para verificar su correo electrónico pinche <a href=http://54.162.148.230:4173/validate?token=${token}>aquí</a></p>`,
         }, function (err: any) {
             if (err) {
                 console.log(err);
@@ -240,7 +240,7 @@ router.post("/login", async (req, res) => {
             to: email,
             from: mailUser,
             subject: "Autentificacion Sibico",
-            html: `<p>Para verificar su correo electrónico pinche <a href=http://54.162.148.230:4173/validate?token="${token}">aquí</a></p>`,
+            html: `<p>Para verificar su correo electrónico pinche <a href=http://54.162.148.230:4173/validate?token=${token}>aquí</a></p>`,
         }, (err: any) => {
             if (err) {
                 console.log(err);
