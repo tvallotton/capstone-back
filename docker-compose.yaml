@@ -9,7 +9,6 @@ services:
     environment:
       - NODE_ENV=production
       - DATABASE_URL=postgresql://postgres:postgres@sibico-postgres/sibico?schema=public
-    env_file: .env
     ports:
       - 5001:5001
     depends_on:
