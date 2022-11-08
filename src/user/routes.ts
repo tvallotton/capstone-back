@@ -510,7 +510,7 @@ const PUBLIC_FIELDS = {
     "address": true,
     "city": true,
     "birthday": true,
-    "occuppancy": true,
+    "occupancy": true,
     "submissions": true,
     "bookings": true,
 };
