@@ -11,4 +11,4 @@ docker compose up -d
 
 # Admin user
 * **email:** `avcordova@uc.cl`
-* **password:** `Tere+victor<3`
+* **password:** `Asd12345`
