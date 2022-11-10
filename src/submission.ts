@@ -225,6 +225,8 @@ router.post("/upgrade", user({ staffOnly: true }), async (req: Request, res) => 
  * @swagger
  * /submission: 
  *      patch: 
+ *          parameters: 
+ *              - $ref: '#/components/parameters/x-access-token'
  *          consumes: 
  *              - application/json
  *          requestBody:
@@ -266,6 +268,7 @@ router.patch("/", user({ staffOnly: true }), async (req: Request, res) => {
  *      delete: 
  *          description: deletes a submission from and returns it. 
  *          parameters: 
+ *              - $ref: '#/components/parameters/x-access-token'
  *              - in: path
  *                name: id
  *                schema: 
