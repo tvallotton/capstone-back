@@ -94,9 +94,7 @@ router.get("/mine", user(), async (req: Request, res) => {
             take: Number(take) || undefined,
             where: {
                 userId: Number(req.user?.id),
-                end: {
-                    not: activeOnly === "true" ? null : undefined,
-                },
+                end: activeOnly === "true" ? null : undefined,
             },
             include: {
                 user: true,
