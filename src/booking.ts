@@ -58,7 +58,7 @@ router.get("/", user({ staffOnly: true }), async (req, res) => {
 
 /**
  * @swagger
- * /booking: 
+ * /booking/mine: 
  *      get: 
  *          description: Public endpoint. Returns the queried bookings that belong to a user
  *          parameters: 
@@ -95,9 +95,7 @@ router.get("/mine", user(), async (req: Request, res) => {
             take: Number(take) || undefined,
             where: {
                 userId: Number(req.user?.id),
-                end: {
-                    not: activeOnly === "true" ? null : undefined,
-                },
+                end: activeOnly === "true" ? null : undefined,
             },
             include: {
                 user: true,
