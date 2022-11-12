@@ -293,50 +293,34 @@ router.patch("/", user({ staffOnly: true }), async (req, res) => {
  */
 router.post("/terminate", async (req, res) => {
     const { qrCode, id } = req.body;
-    try {
-        if (qrCode) {
-            const { count } = await prisma.booking.updateMany({
-                where: {
-                    bicycle: {
-                        qrCode,
-                    },
-                    end: null,
-                    exitForm: { some: {} }
-                },
-                data: {
-                    end: new Date()
-                },
 
-            });
-            if (count) {
-                res.json({ "status": "success" });
-            } else {
-                const booking = await prisma.booking.findFirst({
-                    where: { bicycle: { qrCode, } },
-                    include: { exitForm: true }
-                });
-                if (booking == null) {
-                    res.status(404).json(errors.NOT_FOUND);
-                } else if (booking.exitForm) {
-                    res.status(400).json(errors.MISSING_EXIT_FORM);
-                } else if (booking.end) {
-                    res.status(400).json(errors.BOOKING_ALREADY_TERMINATED);
-                } else {
-                    res.status(500).json(errors.UNKOWN_ERROR);
-                }
-            }
-        } else if (id) {
-            const booking = await prisma.booking.update({
-                where: { id },
-                data: {
-                    end: new Date()
-                }
-            });
-            res.json({ "status": "success", booking });
-        }
-    } catch (e) {
-        res.status(404).json(errors.NOT_FOUND);
+    const { count } = await prisma.booking.updateMany({
+        where: {
+            bicycle: { qrCode, id, },
+            end: null,
+            exitForm: { some: {} }
+        },
+        data: { end: new Date() },
+    });
+    if (count) {
+        return res.json({ "status": "success" });
     }
+
+    const booking = await prisma.booking.findFirst({
+        where: { bicycle: { qrCode, } },
+        include: { exitForm: true }
+    });
+
+    if (booking == null) {
+        return res.status(404).json(errors.NOT_FOUND);
+    }
+    if (booking.exitForm) {
+        return res.status(400).json(errors.MISSING_EXIT_FORM);
+    }
+    if (booking.end) {
+        return res.status(400).json(errors.BOOKING_ALREADY_TERMINATED);
+    }
+    res.status(500).json(errors.UNKOWN_ERROR);
 });
 
 /**
