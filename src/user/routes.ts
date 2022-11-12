@@ -12,13 +12,14 @@ const prisma = new PrismaClient();
 const router = Router();
 dotenv.config();
 
-const mailUser = process.env["MAIL_USER"];
-const mailPass = process.env["MAIL_PASS"];
+const MAIL_USER = process.env["MAIL_USER"];
+const MAIL_PASS = process.env["MAIL_PASS"];
+const HOST = process.env["HOST"];
 const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
-        user: mailUser,
-        pass: mailPass,
+        user: MAIL_USER,
+        pass: MAIL_PASS,
     },
     tls: {
         rejectUnauthorized: false,
@@ -164,9 +165,9 @@ router.post("/", async (req, res) => {
 
         transporter.sendMail({
             to: user.email,
-            from: mailUser,
+            from: MAIL_USER,
             subject: "Autentificacion Sibico",
-            html: `<p>Para verificar su correo electrónico pinche <a href=http://54.162.148.230:4173/validate?token=${token}>aquí</a></p>`,
+            html: `<p>Para verificar su correo electrónico pinche <a href=${HOST}/validate?token=${token}>aquí</a></p>`,
         }, function (err: any) {
             if (err) {
                 console.log(err);
@@ -238,9 +239,9 @@ router.post("/login", async (req, res) => {
         const token = jwt.sign({ userId: user.id, }, JWT_SECRET, { expiresIn: "1h" });
         transporter.sendMail({
             to: email,
-            from: mailUser,
+            from: MAIL_USER,
             subject: "Autentificacion Sibico",
-            html: `<p>Para verificar su correo electrónico pinche <a href=http://54.162.148.230:4173/validate?token=${token}>aquí</a></p>`,
+            html: `<p>Para verificar su correo electrónico pinche <a href=${HOST}/validate?token=${token}>aquí</a></p>`,
         }, (err: any) => {
             if (err) {
                 console.log(err);
@@ -299,7 +300,7 @@ router.post("/login/send-reset-password", async (req, res) => {
         const token = jwt.sign({ userId: user.id, }, JWT_SECRET, { expiresIn: "1h" });
         transporter.sendMail({
             to: email,
-            from: mailUser,
+            from: MAIL_USER,
             subject: "Resetear contraseña Sibico",
             text: `Su código para autorizar el cambio de contraseña de ${user.email} es el siguiente:\n \n ${token} \n \n Para iniciar sesión, debe de ingresarlo en http://localhost:5000/user/login/reset/pawssword`
         }, function (err: any) {

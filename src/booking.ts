@@ -113,7 +113,7 @@ router.get("/mine", user(), async (req: Request, res) => {
  * @swagger
  * /booking/{id}:
  *      get: 
- *          description: Public t. Returns the queried booking. 
+ *          description: Public endpoint. Returns the queried booking. 
  *          parameters: 
  *              - $ref: '#/components/parameters/bookingId'
  *          responses:
@@ -138,6 +138,50 @@ router.get("/:id", async (req, res) => {
     }
 });
 
+
+
+/** 
+ * @swagger
+ * /booking/qr-code/{qrCode}:
+ *      get: 
+ *          description: Public endpoint. Returns the queried booking. 
+ *          parameters: 
+ *              - in: path
+ *                name: qrCode
+ *                schema: 
+ *                  type: string             
+ *          responses:
+ *              '200':
+ *                  $ref: '#/components/responses/Booking'
+ *              '404': 
+ *                  $ref: '#/components/responses/NotFound'
+ */
+router.get("/qr-code/:qrCode", async (req, res) => {
+    const { qrCode } = req.params;
+    console.log(qrCode);
+    try {
+        const bookings = await prisma.booking.findMany({
+            where: {
+                bicycle: { qrCode },
+                end: {
+                    not: null
+                }
+            },
+            include: {
+                user: true,
+                bicycle: true,
+            }
+        });
+        const booking = bookings[0];
+        if (booking) {
+            res.json({ status: "success", booking });
+        } else {
+            res.status(404).json(errors.BICYCLE_NOT_FOUND);
+        }
+    } catch (_) {
+        res.status(500).json(errors.UNKOWN_ERROR);
+    }
+});
 
 /**
  * @swagger
