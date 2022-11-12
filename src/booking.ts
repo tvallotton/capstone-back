@@ -3,6 +3,7 @@ import { Router } from "express";
 import { user, Request } from "./user/middleware";
 import errors from "./errors";
 
+
 const router = Router();
 const prisma = new PrismaClient();
 
@@ -297,9 +298,10 @@ router.post("/terminate", async (req, res) => {
             const { count } = await prisma.booking.updateMany({
                 where: {
                     bicycle: {
-                        qrCode
+                        qrCode,
                     },
-                    end: null
+                    end: null,
+                    exitForm: { some: {} }
                 },
                 data: {
                     end: new Date()
@@ -309,7 +311,19 @@ router.post("/terminate", async (req, res) => {
             if (count) {
                 res.json({ "status": "success" });
             } else {
-                res.status(404).json(errors.NOT_FOUND);
+                const booking = await prisma.booking.findFirst({
+                    where: { bicycle: { qrCode, } },
+                    include: { exitForm: true }
+                });
+                if (booking == null) {
+                    res.status(404).json(errors.NOT_FOUND);
+                } else if (booking.exitForm) {
+                    res.status(400).json(errors.MISSING_EXIT_FORM);
+                } else if (booking.end) {
+                    res.status(400).json(errors.BOOKING_ALREADY_TERMINATED);
+                } else {
+                    res.status(500).json(errors.UNKOWN_ERROR);
+                }
             }
         } else if (id) {
             const booking = await prisma.booking.update({

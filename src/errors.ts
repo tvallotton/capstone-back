@@ -166,6 +166,20 @@ const USER_ALREADY_SUBMITTED = {
     "en": "You already have a pending submission to your name."
 };
 
+const MISSING_EXIT_FORM = {
+    "status": "error",
+    "code": "MISSING_EXIT_FORM",
+    "es": "El usuario debe rellenar el formulario de salida antes de devolver la bicicleta.",
+    "en": "The user must fill out the exit form before returning the bike."
+};
+
+const BOOKING_ALREADY_TERMINATED = {
+    "status": "error",
+    "code": "BOOKING_ALREADY_TERMINATED",
+    "es": "La reserva ya fue terminada.",
+    "en": "The booking was already terminated."
+};
+
 export default {
     USER_ALREADY_EXISTS, NOT_FOUND, UNAUTHENTICATED,
     UNREGISTERED_USER, INVALID_EMAIL, INVALID_PASSWORD,
@@ -174,5 +188,5 @@ export default {
     MISSING_ID, TOKEN_EXPIRED, INTERNAL_SERVER, ALREADY_VALIDATED,
     EMAIL_COULD_NOT_BE_SENT, SUBMISSION_NOT_FOUND, BICYCLE_ALREADY_LENT,
     USER_ALREADY_BORROWS, UNKOWN_ERROR_CREATE_USER, INCOMPLETE_USER_INFO,
-    USER_ALREADY_SUBMITTED,
+    USER_ALREADY_SUBMITTED, MISSING_EXIT_FORM, BOOKING_ALREADY_TERMINATED
 };
