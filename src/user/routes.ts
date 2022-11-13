@@ -14,7 +14,7 @@ dotenv.config();
 
 const MAIL_USER = process.env["MAIL_USER"];
 const MAIL_PASS = process.env["MAIL_PASS"];
-const HOST = process.env["HOST"];
+const HOST = process.env["HOST"] || "http://localhost:5173";
 const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
@@ -166,7 +166,6 @@ router.post("/", async (req, res) => {
         transporter.sendMail({
             to: user.email,
             from: MAIL_USER,
-            subject: "Autentificacion Sibico",
             html: `<p>Para verificar su correo electrónico pinche <a href=${HOST}/validate?token=${token}>aquí</a></p>`,
         }, function (err: any) {
             if (err) {
