@@ -50,7 +50,7 @@ router.get("/", user({ staffOnly: true }), async (req, res) => {
         },
         include: {
             user: true,
-            bicycle: true,
+            bicycle: { include: { model: true, } },
         },
     });
     res.json({ bookings, status: "success" });
@@ -89,6 +89,7 @@ router.get("/", user({ staffOnly: true }), async (req, res) => {
  */
 router.get("/mine", user(), async (req: Request, res) => {
     const { take, skip, activeOnly } = req.query;
+
     try {
         const bookings = await prisma.booking.findMany({
             skip: Number(skip) || undefined,
@@ -99,11 +100,12 @@ router.get("/mine", user(), async (req: Request, res) => {
             },
             include: {
                 user: true,
-                bicycle: true,
+                bicycle: { include: { model: true, } },
             }
         });
         res.json({ status: "success", bookings });
-    } catch (_) {
+    } catch (e) {
+        console.log(e);
         res.status(404).json(errors.NOT_FOUND);
     }
 });
@@ -128,7 +130,7 @@ router.get("/:id", async (req, res) => {
             where: { id: Number(id) },
             include: {
                 user: true,
-                bicycle: true,
+                bicycle: { include: { model: true, } },
             }
         });
         res.json({ status: "success", booking });
@@ -168,7 +170,7 @@ router.get("/qr-code/:qrCode", async (req, res) => {
             },
             include: {
                 user: true,
-                bicycle: true,
+                bicycle: { include: { model: true, } },
             }
         });
         const booking = bookings[0];
@@ -211,6 +213,10 @@ router.post("/", user({ staffOnly: true }), async (req, res) => {
     try {
         const booking = await prisma.booking.create({
             data,
+            include: {
+                user: true,
+                bicycle: { include: { model: true, } },
+            }
         });
         res.status(201).json({ status: "success", booking });
     } catch (e) {
@@ -250,6 +256,10 @@ router.patch("/", user({ staffOnly: true }), async (req, res) => {
         const booking = await prisma.booking.update({
             where: { id },
             data,
+            include: {
+                user: true,
+                bicycle: { include: { model: true, } },
+            }
         });
         res.json({ status: "success", booking });
     } catch (e) {
@@ -325,7 +335,7 @@ router.post("/terminate", async (req, res) => {
  * @swagger
  * /booking: 
  *      delete:
- *          description: > 
+ *          description: 
  *              Private endpoint, admins only. 
  *              This should be used for bookings that never occured 
  *              and want to be removed from the record. 

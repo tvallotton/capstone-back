@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
-
 import { Router } from "express";
 import errors from "./errors";
+import { user, Request } from "./user/middleware";
 
 const prisma = new PrismaClient();
 const router = Router();
@@ -11,6 +11,7 @@ const router = Router();
  * /exit-form: 
  *      get: 
  *          parameters: 
+ *              - $ref: '#/components/parameters/x-access-token'
  *              - in: query
  *                name: id
  *                schema: 
@@ -27,7 +28,7 @@ const router = Router();
  *              '200': 
  *                  $ref: '#/components/responses/ExitForm'
  */
-router.get("/", async (req, res) => {
+router.get("/", user({ staffOnly: true }), async (req, res) => {
     const { id, userId, bookingId } = req.query;
     const exitForm = await prisma.exitForm.findFirst({
         where: {
@@ -55,13 +56,14 @@ const requiredFields = [
     "accessoryReview",
     "suggestions",
     "parkingSpot",
-    "bookingId",
 ];
 
 /**
  * @swagger
  * /exit-form/:
  *      put: 
+ *          parameters: 
+ *              - $ref: "#/components/parameters/x-access-token"
  *          consumes: 
  *              - application/json
  *          requestBody:
@@ -72,8 +74,10 @@ const requiredFields = [
  *                        $ref: "#/components/schemas/ExitFormInput"
  *          
  */
-router.put("/", async (req, res) => {
+router.put("/", user(), async (req: Request, res) => {
+    const userId = Number(req.user?.id);
     const data = req.body;
+
     for (const field of requiredFields) {
         if (data[field]) {
             return res.json({
@@ -84,21 +88,31 @@ router.put("/", async (req, res) => {
         }
     }
 
-    const exitForm = await prisma.exitForm.findFirst({
-        where: { bookingId: data.bookingId }
+    let exitForm = await prisma.exitForm.findFirst({
+        where: { booking: { userId } }
     });
-    if (!exitForm) {
-        const exitForm = await prisma.exitForm.create({
-            data,
-        });
-        res.json({ status: "success", exitForm, });
-    } else {
+    if (exitForm) {
         await prisma.exitForm.updateMany({
             where: { bookingId: Number(data.bookingId) },
             data,
         });
-        res.json({ status: "success", exitForm: { ...exitForm, ...data } });
+        return res.json({ status: "success", exitForm: { ...exitForm, ...data } });
     }
+
+    const booking = await prisma.booking.findFirst({
+        where: { userId }
+    });
+
+    if (!booking) {
+        return res.status(404).json(errors.BOOKING_NOT_FOUND);
+    }
+
+    exitForm = await prisma.exitForm.create({
+        data: { ...data, bookingId: booking.id }
+    });
+
+    res.json({ status: "success", exitForm, });
+
 });
 
 export default router; 

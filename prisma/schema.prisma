@@ -77,6 +77,7 @@ model Booking {
     ulock     Int        @default(1)
     lights    Int        @default(1)
     reflector Int        @default(1)
+    helmet    Int        @default(1)
     exitForm  ExitForm[]
 }
 

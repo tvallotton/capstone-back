@@ -174,11 +174,13 @@ components:
         bicycle:
           $ref: "#/components/schemas/Bicycle"
         ulock:
-          type: string
+          type: integer
         lights:
-          type: string
+          type: integer
         reflector:
-          type: string
+          type: integer
+        helmet:
+          type: integer
     BicycleModelInput:
       type: object
       properties:
