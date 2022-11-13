@@ -106,6 +106,36 @@ components:
           schema:
             $ref: "#/components/schemas/Error"
   schemas:
+    ExitFormInput:
+      type: object
+      properties:
+        bicycleReview:
+          type: integer
+      accessoryReview:
+        type: integer
+      suggestions:
+        type: string
+      parkingSpot:
+        type: string
+      bookingId:
+        type: integer
+    ExitForm:
+      type: object
+      properties:
+        id:
+          type: integer
+        bicycleReview:
+          type: integer
+      accessoryReview:
+        type: integer
+      suggestions:
+        type: string
+      parkingSpot:
+        type: string
+      booking:
+        $ref: "#/components/schemas/Booking"
+      bookingId:
+        type: integer
     UpgradeInput:
       type: object
       properties:
@@ -144,11 +174,13 @@ components:
         bicycle:
           $ref: "#/components/schemas/Bicycle"
         ulock:
-          type: string
+          type: integer
         lights:
-          type: string
+          type: integer
         reflector:
-          type: string
+          type: integer
+        helmet:
+          type: integer
     BicycleModelInput:
       type: object
       properties:

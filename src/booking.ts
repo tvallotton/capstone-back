@@ -3,6 +3,7 @@ import { Router } from "express";
 import { user, Request } from "./user/middleware";
 import errors from "./errors";
 
+
 const router = Router();
 const prisma = new PrismaClient();
 
@@ -49,7 +50,7 @@ router.get("/", user({ staffOnly: true }), async (req, res) => {
         },
         include: {
             user: true,
-            bicycle: true,
+            bicycle: { include: { model: true, } },
         },
     });
     res.json({ bookings, status: "success" });
@@ -88,23 +89,23 @@ router.get("/", user({ staffOnly: true }), async (req, res) => {
  */
 router.get("/mine", user(), async (req: Request, res) => {
     const { take, skip, activeOnly } = req.query;
+
     try {
         const bookings = await prisma.booking.findMany({
             skip: Number(skip) || undefined,
             take: Number(take) || undefined,
             where: {
                 userId: Number(req.user?.id),
-                end: {
-                    not: activeOnly === "true" ? null : undefined,
-                },
+                end: activeOnly === "true" ? null : undefined,
             },
             include: {
                 user: true,
-                bicycle: true,
+                bicycle: { include: { model: true, } },
             }
         });
         res.json({ status: "success", bookings });
-    } catch (_) {
+    } catch (e) {
+        console.log(e);
         res.status(404).json(errors.NOT_FOUND);
     }
 });
@@ -113,7 +114,7 @@ router.get("/mine", user(), async (req: Request, res) => {
  * @swagger
  * /booking/{id}:
  *      get: 
- *          description: Public t. Returns the queried booking. 
+ *          description: Public endpoint. Returns the queried booking. 
  *          parameters: 
  *              - $ref: '#/components/parameters/bookingId'
  *          responses:
@@ -129,7 +130,7 @@ router.get("/:id", async (req, res) => {
             where: { id: Number(id) },
             include: {
                 user: true,
-                bicycle: true,
+                bicycle: { include: { model: true, } },
             }
         });
         res.json({ status: "success", booking });
@@ -138,6 +139,50 @@ router.get("/:id", async (req, res) => {
     }
 });
 
+
+
+/** 
+ * @swagger
+ * /booking/qr-code/{qrCode}:
+ *      get: 
+ *          description: Public endpoint. Returns the queried booking. 
+ *          parameters: 
+ *              - in: path
+ *                name: qrCode
+ *                schema: 
+ *                  type: string             
+ *          responses:
+ *              '200':
+ *                  $ref: '#/components/responses/Booking'
+ *              '404': 
+ *                  $ref: '#/components/responses/NotFound'
+ */
+router.get("/qr-code/:qrCode", async (req, res) => {
+    const { qrCode } = req.params;
+    console.log(qrCode);
+    try {
+        const bookings = await prisma.booking.findMany({
+            where: {
+                bicycle: { qrCode },
+                end: {
+                    not: null
+                }
+            },
+            include: {
+                user: true,
+                bicycle: { include: { model: true, } },
+            }
+        });
+        const booking = bookings[0];
+        if (booking) {
+            res.json({ status: "success", booking });
+        } else {
+            res.status(404).json(errors.BICYCLE_NOT_FOUND);
+        }
+    } catch (_) {
+        res.status(500).json(errors.UNKOWN_ERROR);
+    }
+});
 
 /**
  * @swagger
@@ -168,6 +213,10 @@ router.post("/", user({ staffOnly: true }), async (req, res) => {
     try {
         const booking = await prisma.booking.create({
             data,
+            include: {
+                user: true,
+                bicycle: { include: { model: true, } },
+            }
         });
         res.status(201).json({ status: "success", booking });
     } catch (e) {
@@ -207,6 +256,10 @@ router.patch("/", user({ staffOnly: true }), async (req, res) => {
         const booking = await prisma.booking.update({
             where: { id },
             data,
+            include: {
+                user: true,
+                bicycle: { include: { model: true, } },
+            }
         });
         res.json({ status: "success", booking });
     } catch (e) {
@@ -248,44 +301,41 @@ router.patch("/", user({ staffOnly: true }), async (req, res) => {
  */
 router.post("/terminate", async (req, res) => {
     const { qrCode, id } = req.body;
-    try {
-        if (qrCode) {
-            const { count } = await prisma.booking.updateMany({
-                where: {
-                    bicycle: {
-                        qrCode
-                    },
-                    end: null
-                },
-                data: {
-                    end: new Date()
-                },
 
-            });
-            if (count) {
-                res.json({ "status": "success" });
-            } else {
-                res.status(404).json(errors.NOT_FOUND);
-            }
-        } else if (id) {
-            const booking = await prisma.booking.update({
-                where: { id },
-                data: {
-                    end: new Date()
-                }
-            });
-            res.json({ "status": "success", booking });
-        }
-    } catch (e) {
-        res.status(404).json(errors.NOT_FOUND);
+    const { count } = await prisma.booking.updateMany({
+        where: {
+            bicycle: { qrCode, id, },
+            end: null,
+            exitForm: { some: {} }
+        },
+        data: { end: new Date() },
+    });
+    if (count) {
+        return res.json({ "status": "success" });
     }
+
+    const booking = await prisma.booking.findFirst({
+        where: { bicycle: { qrCode, } },
+        include: { exitForm: true }
+    });
+
+    if (booking == null) {
+        return res.status(404).json(errors.NOT_FOUND);
+    }
+    if (booking.exitForm) {
+        return res.status(400).json(errors.MISSING_EXIT_FORM);
+    }
+    if (booking.end) {
+        return res.status(400).json(errors.BOOKING_ALREADY_TERMINATED);
+    }
+    res.status(500).json(errors.UNKOWN_ERROR);
 });
 
 /**
  * @swagger
  * /booking: 
  *      delete:
- *          description: > 
+ *          description: 
  *              Private endpoint, admins only. 
  *              This should be used for bookings that never occured 
  *              and want to be removed from the record. 

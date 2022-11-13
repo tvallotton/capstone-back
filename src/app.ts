@@ -9,6 +9,7 @@ import booking from "./booking";
 import cors from "cors";
 import bicycleHistory from "./bicycle-history";
 import userHistory from "./user-history";
+import exitForm from "./exit-form";
 dotenv.config();
 
 const PORT = process.env["PORT"] || 5001;
@@ -25,6 +26,7 @@ app.use("/submission", submission);
 app.use("/bicycle-model", bicycleModel);
 app.use("/bicycle/history", bicycleHistory);
 app.use("/booking", booking);
+app.use("/exit-form", exitForm);
 app.use("/", docs);
 
 app.listen(PORT, () => {
