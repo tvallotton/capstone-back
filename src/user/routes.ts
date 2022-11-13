@@ -12,13 +12,14 @@ const prisma = new PrismaClient();
 const router = Router();
 dotenv.config();
 
-const mailUser = process.env["MAIL_USER"];
-const mailPass = process.env["MAIL_PASS"];
+const MAIL_USER = process.env["MAIL_USER"];
+const MAIL_PASS = process.env["MAIL_PASS"];
+const HOST = process.env["HOST"] || "http://localhost:5173";
 const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
-        user: mailUser,
-        pass: mailPass,
+        user: MAIL_USER,
+        pass: MAIL_PASS,
     },
     tls: {
         rejectUnauthorized: false,
@@ -164,9 +165,8 @@ router.post("/", async (req, res) => {
 
         transporter.sendMail({
             to: user.email,
-            from: mailUser,
-            subject: "Autentificacion Sibico",
-            html: `<p>Para verificar su correo electrónico pinche <a href=http://54.162.148.230:4173/validate?token=${token}>aquí</a></p>`,
+            from: MAIL_USER,
+            html: `<p>Para verificar su correo electrónico pinche <a href=${HOST}/validate?token=${token}>aquí</a></p>`,
         }, function (err: any) {
             if (err) {
                 console.log(err);
@@ -238,9 +238,9 @@ router.post("/login", async (req, res) => {
         const token = jwt.sign({ userId: user.id, }, JWT_SECRET, { expiresIn: "1h" });
         transporter.sendMail({
             to: email,
-            from: mailUser,
+            from: MAIL_USER,
             subject: "Autentificacion Sibico",
-            html: `<p>Para verificar su correo electrónico pinche <a href=http://54.162.148.230:4173/validate?token=${token}>aquí</a></p>`,
+            html: `<p>Para verificar su correo electrónico pinche <a href=${HOST}/validate?token=${token}>aquí</a></p>`,
         }, (err: any) => {
             if (err) {
                 console.log(err);
@@ -278,7 +278,7 @@ router.post("/login", async (req, res) => {
  *                          email: 
  *                              type: string           
  *      responses: 
- *          '200': 
+ *          '204': 
  *              description: Correct validation of the user
  *          '401': 
  *              description: Token is incorrect
@@ -299,14 +299,14 @@ router.post("/send-reset-password", async (req, res) => {
         const token = jwt.sign({ userId: user.id, }, JWT_SECRET, { expiresIn: "1h" });
         transporter.sendMail({
             to: email,
-            from: mailUser,
+            from: MAIL_USER,
             subject: "Resetear contraseña Sibico",
             html: `<p>se ha solicitado restablecer la contraseña de ${user.email}. \n \n Para modificarla ingrese aqui: <a href=http://sibico.uc.cl/reset-password?token=${token}>aquí</a></p>`,
         }, function (err: any) {
             if (err) {
                 res.status(500).json({ status: "error", es: "No se pudo enviar el correo.", en: "" });
             } else {
-                res.status(200).json({ status: "success" }); //duda  no se si devolver un 200 o un 204
+                res.status(204).json({ status: "success" });
             }
         });
     } catch {

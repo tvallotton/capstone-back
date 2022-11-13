@@ -183,14 +183,18 @@ router.post("/", user(), async (req: Request, res) => {
 router.post("/upgrade", user({ staffOnly: true }), async (req: Request, res) => {
     const { qrCode, userId, lights, ulock, reflector } = req.body;
     try {
-        const bicycle = await prisma.bicycle.findFirst({ where: { qrCode }, include: { bookings: true } });
+        const bicycle = await prisma.bicycle.findFirst({
+            where: { qrCode }, include: {
+                bookings: { where: { end: null } }
+            }
+        });
         if (!bicycle) {
             res.status(404);
             res.json(errors.BICYCLE_NOT_FOUND);
             return;
         }
         // check the bicycle is not already borrowed
-        if (bicycle.bookings.filter(b => b.end != null).length != 0) {
+        if (bicycle.bookings.length == 0) {
             res.status(403);
             res.json(errors.BICYCLE_ALREADY_LENT);
         }
