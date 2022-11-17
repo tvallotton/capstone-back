@@ -357,7 +357,7 @@ router.post("/send-reset-password", async (req, res) => {
             to: email,
             from: MAIL_USER,
             subject: "Resetear contraseña Sibico",
-            html: `<p>se ha solicitado restablecer la contraseña de ${user.email}. \n \n Para modificarla ingrese aqui: <a href=http://sibico.uc.cl/reset-password?token=${token}>aquí</a></p>`,
+            html: `<p>se ha solicitado restablecer la contraseña de ${user.email}. \n \n Para modificarla ingrese aqui: <a href=${HOST}/reset-password?token=${token}>aquí</a></p>`,
         }, function (err: any) {
             if (err) {
                 res.status(500).json({ status: "error", es: "No se pudo enviar el correo.", en: "" });
