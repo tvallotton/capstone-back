@@ -276,8 +276,6 @@ router.post("/login", async (req, res) => {
  *               properties: 
  *                 tipo: 
  *                   type: string
- *                 message:
- *                   type: string
  *        responses: 
  *          '204': 
  *              description: Emergency email send correctly
@@ -290,7 +288,7 @@ router.post("/:id/emergency", async (req, res) => {
     try {
         const { id } = req.params;
         const { tipo } = req.body;
-        const time = new Date(); ///REVISAR
+        //const time = new Date(); ///REVISAR
         const asunto = tipo === "accidente" ? "un accidente" : "una emergencia";
 
         const user = await prisma.user.findFirst({
