@@ -260,6 +260,62 @@ router.post("/login", async (req, res) => {
     res.json({ status: "success", "x-access-token": token, });
 });
 
+/**
+ * @swagger
+ * /user/{id}/emergency:
+ *     post: 
+ *       description: Send a email when a user report emergency/accident.
+ *       consumes: 
+ *         - application/json
+ *       requestBody:
+ *         required: true
+ *         content: 
+ *           application/json: 
+ *             schema: 
+ *               type: object
+ *               properties: 
+ *                 tipo: 
+ *                   type: string
+ *        responses: 
+ *          '204': 
+ *              description: Emergency email send correctly
+ *          '404':
+ *              description: User not found.
+ *          '500': 
+ *              description: Internal server error. Tipicatly the email could not be sent.
+ */
+router.post("/:id/emergency", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { tipo } = req.body;
+        //const time = new Date(); ///REVISAR
+        const asunto = tipo === "accidente" ? "un accidente" : "una emergencia";
+
+        const user = await prisma.user.findFirst({
+            where: { id: Number(id) }
+        });
+
+        if (user === null) {
+            return res.status(404).json(errors.USER_NOT_FOUND);
+        }
+        transporter.sendMail({
+            to: MAIL_USER, ////IMPORTANTE: cambiar al mail al que se tiene que enviar el correo
+            cc: user.email,
+            from: MAIL_USER,
+            subject: `${user.name} ha reportado ${asunto}`,
+            html: `<p>El usuario ${user.email} ha reportado ${asunto}.\n \n \n 
+                [Datos del usuario]\n \n Nombre: ${user.name} ${user.lastName} \n email:${user.email}\n rut:${user.rut}\n campus:${user.campus} \n \n \n`,
+        }, function (err: any) {
+            if (err) {
+                res.status(500).json({ status: "error", es: "No se pudo enviar el correo.", en: "" });
+            } else {
+                res.status(204).json({ status: "success" });
+            }
+        });
+    } catch {
+        res.status(404).json(errors.USER_NOT_FOUND);
+    }
+});
 
 /**
  * @swagger
@@ -278,7 +334,7 @@ router.post("/login", async (req, res) => {
  *                          email: 
  *                              type: string           
  *      responses: 
- *          '204': 
+ *          '200': 
  *              description: Correct validation of the user
  *          '401': 
  *              description: Token is incorrect
@@ -301,12 +357,12 @@ router.post("/send-reset-password", async (req, res) => {
             to: email,
             from: MAIL_USER,
             subject: "Resetear contraseña Sibico",
-            html: `<p>se ha solicitado restablecer la contraseña de ${user.email}. \n \n Para modificarla ingrese aqui: <a href=http://sibico.uc.cl/reset-password?token=${token}>aquí</a></p>`,
+            html: `<p>se ha solicitado restablecer la contraseña de ${user.email}. \n \n Para modificarla ingrese aqui: <a href=${HOST}/reset-password?token=${token}>aquí</a></p>`,
         }, function (err: any) {
             if (err) {
                 res.status(500).json({ status: "error", es: "No se pudo enviar el correo.", en: "" });
             } else {
-                res.status(204).json({ status: "success" });
+                res.status(200).json({ status: "success" });
             }
         });
     } catch {
