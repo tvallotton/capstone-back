@@ -186,6 +186,13 @@ const BOOKING_NOT_FOUND = {
     "es": "No tienes reservas activas."
 };
 
+const CANNOT_DELETE_LENT_BICYCLE = {
+    "status": "error",
+    "code": "CANNOT_DELETE_LENT_BICYCLE",
+    "en": "The bicycle cannot be deleted because it has been lent.",
+    "es": "La bicicleta no puede ser borrada ya que ha sido prestada."
+};
+
 export default {
     USER_ALREADY_EXISTS, NOT_FOUND, UNAUTHENTICATED,
     UNREGISTERED_USER, INVALID_EMAIL, INVALID_PASSWORD,
@@ -195,5 +202,5 @@ export default {
     EMAIL_COULD_NOT_BE_SENT, SUBMISSION_NOT_FOUND, BICYCLE_ALREADY_LENT,
     USER_ALREADY_BORROWS, UNKOWN_ERROR_CREATE_USER, INCOMPLETE_USER_INFO,
     USER_ALREADY_SUBMITTED, MISSING_EXIT_FORM, BOOKING_ALREADY_TERMINATED,
-    BOOKING_NOT_FOUND
+    BOOKING_NOT_FOUND, CANNOT_DELETE_LENT_BICYCLE
 };
