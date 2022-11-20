@@ -189,8 +189,8 @@ const BOOKING_NOT_FOUND = {
 const CANNOT_DELETE_LENT_BICYCLE = {
     "status": "error",
     "code": "CANNOT_DELETE_LENT_BICYCLE",
-    "en": "The bicycle cannot be deleted because it has been lent. Alternatively, you may set its status to \"INHABILITADA\"",
-    "es": "La bicicleta no puede ser borrada ya que ha sido prestada. Alternativamente, puedes cambiar su estado a \"INHABILITADA\""
+    "en": "The bicycle cannot be deleted because it has been lent. Alternatively, you may set its status to \"INHABILITADA\".",
+    "es": "La bicicleta no puede ser borrada ya que ha sido prestada. Alternativamente, puedes cambiar su estado a \"INHABILITADA\"."
 };
 
 export default {
