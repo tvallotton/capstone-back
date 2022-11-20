@@ -1,0 +1,19 @@
+[
+    {
+        "email": "tvallotton@uc.cl",
+        "password": "Asd12345",
+        "name": "Tom\u00e1s",
+        "lastName": "Vallotton",
+        "address": "Avenida las bolas 4234",
+        "city": "Santiago",
+        "birthday": "1999-11-14T17:51:22.238Z",
+        "occupancy": "Estudiante",
+        "rut": "20592485-2",
+        "passport": "",
+        "unidadAcademica": "Ingenier\u00eda",
+        "campus": "SAN JOAQU\u00cdN",
+        "meansOfTransport": "METRO",
+        "tripsPerWeek": 2,
+        "howDidYouHearAboutUs": "Por las redes sociales"
+    }
+]
