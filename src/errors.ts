@@ -16,7 +16,7 @@ const UNVALIDATED = {
     "status": "error",
     "code": "UNVALIDATED",
     "en": "You must validate your email account before logging in.",
-    "es": "Debes validar tu correo electrónico antes de iniciar sessión.",
+    "es": "Debes validar tu correo electrónico antes de iniciar sesión.",
 };
 
 const TOKEN_EXPIRED = {
@@ -189,8 +189,8 @@ const BOOKING_NOT_FOUND = {
 const CANNOT_DELETE_LENT_BICYCLE = {
     "status": "error",
     "code": "CANNOT_DELETE_LENT_BICYCLE",
-    "en": "The bicycle cannot be deleted because it has been lent.",
-    "es": "La bicicleta no puede ser borrada ya que ha sido prestada."
+    "en": "The bicycle cannot be deleted because it has been lent. Alternatively, you may set its status to \"INHABILITADA\"",
+    "es": "La bicicleta no puede ser borrada ya que ha sido prestada. Alternativamente, puedes cambiar su estado a \"INHABILITADA\""
 };
 
 export default {
