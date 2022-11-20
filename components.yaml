@@ -111,14 +111,12 @@ components:
       properties:
         bicycleReview:
           type: integer
-      accessoryReview:
-        type: integer
-      suggestions:
-        type: string
-      parkingSpot:
-        type: string
-      bookingId:
-        type: integer
+        accessoryReview:
+          type: integer
+        suggestions:
+          type: string
+        parkingSpot:
+          type: string
     ExitForm:
       type: object
       properties:
@@ -126,23 +124,21 @@ components:
           type: integer
         bicycleReview:
           type: integer
-      accessoryReview:
-        type: integer
-      suggestions:
-        type: string
-      parkingSpot:
-        type: string
-      booking:
-        $ref: "#/components/schemas/Booking"
-      bookingId:
-        type: integer
+        accessoryReview:
+          type: integer
+        suggestions:
+          type: string
+        parkingSpot:
+          type: string
+        booking:
+          $ref: "#/components/schemas/Booking"
+        bookingId:
+          type: integer
     UpgradeInput:
       type: object
       properties:
         qrCode:
           type: string
-        userId:
-          type: integer
         lights:
           type: integer
         ulock:

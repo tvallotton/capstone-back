@@ -2,6 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import { Router } from "express";
 import { user } from "./user/middleware";
 import errors from "./errors";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 export const router = Router();
 
 
@@ -37,6 +38,7 @@ const prisma = new PrismaClient();
  */
 router.get("/", user({ staffOnly: true }), async (req, res) => {
     const { take, skip, } = req.query;
+    console.log("take, skip", take, skip);
     const bicycles = await prisma.bicycle.findMany({
         take: Number(take) || undefined,
         skip: Number(skip) || undefined,
@@ -61,7 +63,7 @@ router.get("/", user({ staffOnly: true }), async (req, res) => {
         if (bike.bookings.length == 1) {
             bike.status = "ARRENDADA";
         }
-        bike.booking = bike.bookings;
+        bike.booking = bike.bookings[0];
         delete bike.bookings;
     }
     res.json({ bicycles, status: "success" });
@@ -238,7 +240,7 @@ router.patch("/", user({ staffOnly: true }), async (req, res) => {
  *              '404': 
  *                  $ref: '#/components/responses/NotFound'
  */
-router.delete("/:id", user({ staffOnly: true }), async (req, res) => {
+router.delete("/:id", user({ adminsOnly: true }), async (req, res) => {
     const { id, } = req.params;
     try {
         const bicycle = await prisma.bicycle.delete({
@@ -246,7 +248,15 @@ router.delete("/:id", user({ staffOnly: true }), async (req, res) => {
         });
         res.json({ "status": "success", bicycle });
     } catch (e) {
-        res.status(404).json(errors.BICYCLE_NOT_FOUND);
+        if (e instanceof PrismaClientKnownRequestError) {
+            if (e.code == "P2003") {
+                return res.status(400).json(errors.CANNOT_DELETE_LENT_BICYCLE);
+            }
+            if (e.code == "P2025") {
+                return res.status(400).json(errors.BICYCLE_NOT_FOUND);
+            }
+        }
+        res.status(500).json(errors.UNKOWN_ERROR);
     }
 });
 

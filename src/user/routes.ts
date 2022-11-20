@@ -182,6 +182,7 @@ router.post("/", async (req, res) => {
             res.json(errors.USER_ALREADY_EXISTS);
             return;
         }
+        console.log(e);
         res.status(400);
         res.json(errors.UNKOWN_ERROR_CREATE_USER);
     }

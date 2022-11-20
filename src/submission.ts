@@ -194,9 +194,10 @@ router.post("/upgrade", user({ staffOnly: true }), async (req: Request, res) => 
             return;
         }
         // check the bicycle is not already borrowed
-        if (bicycle.bookings.length == 0) {
+        if (bicycle.bookings.length != 0) {
             res.status(403);
             res.json(errors.BICYCLE_ALREADY_LENT);
+            return;
         }
 
         const submission = await prisma.submission.deleteMany({ where: { userId } });
@@ -219,6 +220,7 @@ router.post("/upgrade", user({ staffOnly: true }), async (req: Request, res) => 
         return;
     }
     catch (e) {
+        console.log(e);
         res.status(500);
         res.json(errors.UNKOWN_ERROR);
         return;
