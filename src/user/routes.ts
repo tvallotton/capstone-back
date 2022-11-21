@@ -305,7 +305,7 @@ router.post("/:id/emergency", async (req, res) => {
             from: MAIL_USER,
             subject: `${user.name} ha reportado ${asunto}`,
             html: `<p>El usuario ${user.email} ha reportado ${asunto}.\n \n \n 
-                [Datos del usuario]\n \n Nombre: ${user.name} ${user.lastName} \n email:${user.email}\n rut:${user.rut}\n campus:${user.campus} \n \n \n`,
+                [Datos del usuario]\n \n Nombre: ${user.name} ${user.lastName} \n email:${user.email}\n \n \n`,
         }, function (err: any) {
             if (err) {
                 res.status(500).json({ status: "error", es: "No se pudo enviar el correo.", en: "" });
