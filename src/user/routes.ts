@@ -500,8 +500,8 @@ router.patch("/", user(), async (req: Request, res) => {
                 },
                 data: { ...req.body, password }
             });
-            delete (updated as any).password;
-            res.json(updated);
+            const { password: _, ...user } = updated;
+            res.json({ status: "success", user });
         } else {
             res.status(403).json(errors.UNAUTHORIZED);
         }
