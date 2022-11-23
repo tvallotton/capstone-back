@@ -220,6 +220,18 @@ router.patch("/", user({ staffOnly: true }), async (req, res) => {
             where: { id: Number(id) },
             data: data,
         });
+
+        if (data.status == "ROBADA") {
+            await prisma.booking.updateMany({
+                data: {
+                    end: new Date(),
+                },
+                where: {
+                    bicycleId: id,
+                    end: null,
+                },
+            });
+        }
         res.json({ status: "success", bicycle });
     } catch (e) {
         console.log(e);
