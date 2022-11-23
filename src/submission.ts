@@ -292,12 +292,12 @@ router.delete("/:id", user(), async (req: Request, res) => {
     const id = Number(req.params.id);
     try {
         if (req.user?.isAdmin) {
-            const submission = await prisma.submission.delete({
+            const submission = await prisma.submission.deleteMany({
                 where: { id },
             });
             return res.json({ status: "success", submission });
         }
-        const submission = await prisma.submission.delete({
+        const submission = await prisma.submission.deleteMany({
             where: { id, userId: req.user?.id }
         });
         res.json({ status: "success", submission });
