@@ -289,7 +289,7 @@ router.patch("/", user({ staffOnly: true }), async (req: Request, res) => {
  *                 $ref: '#/components/responses/Forbidden'
  */
 router.delete("/:id", user(), async (req: Request, res) => {
-    const { id } = req.body;
+    const id = Number(req.params.id);
     try {
         if (req.user?.isAdmin) {
             const submission = await prisma.submission.delete({
