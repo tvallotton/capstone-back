@@ -116,4 +116,5 @@ enum BicycleStatus {
     EVENTO // reservada para evento
     REPARACION // no está prestada pero está averiada
     INHABILITADA // se considera perdida/destruida
+    ROBADA
 }
