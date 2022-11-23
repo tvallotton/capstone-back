@@ -290,12 +290,18 @@ router.patch("/", user({ staffOnly: true }), async (req: Request, res) => {
  */
 router.delete("/:id", user(), async (req: Request, res) => {
     const { id } = req.body;
-    const userId = req.user?.isStaff ? undefined : req.user?.id;
     try {
+        if (req.user?.isAdmin) {
+            const submission = await prisma.submission.delete({
+                where: { id },
+            });
+            return res.json({ status: "success", submission });
+        }
         const submission = await prisma.submission.delete({
-            where: { id, userId },
+            where: { id, userId: req.user?.id }
         });
         res.json({ status: "success", submission });
+
     } catch (e) {
         res.status(404).json(errors.NOT_FOUND);
     }
