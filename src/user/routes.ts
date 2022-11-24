@@ -563,6 +563,7 @@ const PUBLIC_FIELDS = {
     "city": true,
     "birthday": true,
     "occupancy": true,
+    "unidadAcademica": true,
     "submissions": true,
     "bookings": true,
 };
