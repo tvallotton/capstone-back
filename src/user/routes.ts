@@ -565,6 +565,7 @@ const PUBLIC_FIELDS = {
     "occupancy": true,
     "submissions": true,
     "bookings": true,
+    "signature": true,
 };
 
 export default router; 
