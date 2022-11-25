@@ -1,8 +1,9 @@
 import { Booking, PrismaClient, Schedule, Submission } from "@prisma/client";
+import assert from "assert";
 import { Router } from "express";
 import errors from "./errors";
-import { user } from "./user/middleware";
-
+import { Request, user } from "./user/middleware";
+import moment from "moment-timezone";
 
 const max = (a: number, b: number) => a > b ? a : b;
 
@@ -24,8 +25,8 @@ const prisma = new PrismaClient();
  */
 router.get("/", async (req, res) => {
     const query = await prisma.schedule.findFirst();
-    const array = query || Array(6).fill(Array(8).fill(false));
-    res.json({ status: "success", array });
+    const schedule = query?.array || Array(6).fill(Array(8).fill(false));
+    res.json({ status: "success", schedule });
 });
 /**
  * @swagger
@@ -46,111 +47,161 @@ router.get("/", async (req, res) => {
  *              '200':
  *                  content:
  *                       application/json:
+ *                          schema: 
+ *                              $ref: "#/components/schemas/Schedule"
  */
 router.put("/", user({ adminsOnly: true }), async (req, res) => {
     try {
         const array = [];
+        console.log(req.body);
         for (let i = 0; i < 6; i++) {
             const row = [];
-            for (let j = 0; i < 8; i++) {
+            for (let j = 0; j < 8; j++) {
+                console.log(`[i, j] = ${[i, j]}`);
                 row.push(Boolean(req.body[i][j]));
             }
             array.push(row);
         }
-        await prisma.schedule.upsert({
+        const { array: schedule } = await prisma.schedule.upsert({
             create: { array },
             update: { array },
-            where: {}
+            where: {
+                id: "Singleton",
+            }
         });
-        res.json({ status: "success" });
+        res.json({ status: "success", schedule });
     } catch (e) {
         console.log(e);
         res.json(errors.EXPECTED_MATRIX);
     }
 });
 
+
 /**
  * @swagger
- * /schedule/return/{bookingId}: 
+ * /schedule/available: 
  *      get: 
  *          description: returns the avaliable dates for a booking
- *          parameters: 
- *              - in: path
- *                name: bookingId
- *                schema: 
- *                  type: integer
+ *          parameters:   
+ *              - $ref: "#/components/parameters/x-access-token"
  *          responses: 
  *              '200':
  *                  $ref: "#/components/responses/Dates"
  */
-router.get("/return/:bookingId", async (req, res) => {
-    const { bookingId } = req.params;
+router.get("/available", user(), async (req: Request, res) => {
+    const user = req.user;
+    assert(user);
+
+
     const schedule = await prisma.schedule.findFirst();
     if (!schedule) {
         return res.status(503).json(errors.OUT_OF_SERVICE);
     }
-    const booking = await prisma.booking.findFirst({ where: { id: Number(bookingId) } });
-    if (!booking) {
-        return res.status(404).json(errors.BOOKING_NOT_FOUND);
+
+    if (user.submission) {
+        const dates = forSubmission(user.submission, schedule);
+        return res.json({ status: "success", dates });
     }
-    if (booking.end) {
-        return res.status(400).json(errors.BOOKING_ALREADY_TERMINATED);
+    else if (user.booking) {
+        const dates = forBooking(user.booking, schedule);
+        return res.json({ status: "success", dates });
+    } else {
+        res.status(400).json(errors.SUBMISSION_NOT_FOUND);
     }
-    const dates = forBooking(booking, schedule);
-    res.json({ status: "success", dates });
 });
 
 
-router.get("/pickup/:submissionId", async (req, res) => {
-    const { submissionId } = req.params;
-    const schedule = await prisma.schedule.findFirst();
-    if (!schedule) {
-        return res.status(503).json(errors.OUT_OF_SERVICE);
+/**
+ * @swagger
+ * /schedule/date: 
+ *      put: 
+ *          description: returns the avaliable dates for a booking
+ *          parameters:   
+ *              - $ref: "#/components/parameters/x-access-token"
+ *          consumes: 
+ *              - application/json
+ *          requestBody:
+ *            required: true
+ *            content: 
+ *                application/json:
+ *                    schema:  
+ *                       type: object
+ *                       properties: 
+ *                          date: 
+ *                              type: string
+ *          responses: 
+ *              '200':
+ *                  description: Returns the history of the queried bicycle as an array.
+ *                  content:
+ *                      application/json: 
+ *                          schema: 
+ *                              type: object
+ *                              properties: 
+ *                                  status: string
+ */
+router.put("/date", user(), async (req: Request, res) => {
+    const user = req.user;
+    assert(user);
+    const { date } = req.body;
+
+    if (user.submission) {
+        await prisma.submission.update({
+            data: {
+                pickupSchedule: date,
+            },
+            where: {
+                id: user.submission.id,
+            }
+        });
+        res.json({ status: "success", date });
+    } else if (user.booking) {
+        await prisma.booking.update({
+            data: {
+                returnSchedule: date,
+            },
+            where: {
+                id: user.booking.id,
+            }
+        });
+        res.json({ status: "success", date });
+    } else {
+        res.status(404).json(errors.SUBMISSION_NOT_FOUND);
     }
-    const submission = await prisma.submission.findFirst({ where: { id: Number(submissionId) } });
-    if (!submission) {
-        return res.status(404).json(errors.SUBMISSION_NOT_FOUND);
-    }
-    const dates = forSubmission(submission, schedule);
-    res.json({ status: "success", dates });
 });
 
-const twoWeeks = 1000 * 60 ** 2 * 24 * 15;
+const windowPeriod = 1000 * 60 ** 2 * 24 * 7 * 3;
 
 function forSubmission(submission: Submission, schedule: Schedule) {
     const now = new Date();
-    const end = Number(now) + twoWeeks;
-    return matches(schedule, new Date(), new Date(end));
+    const end = Number(now) + windowPeriod;
+    return matches(schedule, moment(), moment(end));
 }
 
 function forBooking(booking: Booking, schedule: Schedule) {
     const duration = booking.duration * 1000 * 60 ** 2 * 24 * 30;
     const now = Number(new Date());
     const bookingStart = Number(booking.start);
-    const end = max(now + twoWeeks, bookingStart + duration);
-    const start = end - twoWeeks;
-
-    return matches(schedule, new Date(start), new Date(end));
+    const end = max(now + windowPeriod, bookingStart + duration);
+    const start = end - windowPeriod;
+    return matches(schedule, moment(start), moment(end));
 }
 
 
-function matches(schedule: Schedule, start: Date, end: Date) {
+function matches(schedule: Schedule, start: moment.Moment, end: moment.Moment) {
     const array = schedule.array as boolean[][];
     const matches = [];
     for (normalize(start); start < end; increment(start)) {
-        const day = array[start.getDay()] || Array(8).fill(false);
-        console.log("day", day);
-        console.log("block", block(start));
+        const day = array[start.day() - 1];
         if (day[block(start)]) {
-            matches.push(new Date(start));
+            matches.push(start.format());
         }
     }
     return matches;
 }
 
 
-function block(date: Date): number {
-    switch (date.getHours()) {
+function block(date: moment.Moment): number {
+    switch (date.hours()) {
     case 8: return 0;
     case 10: return 1;
     case 11: return 2;
@@ -162,51 +213,54 @@ function block(date: Date): number {
     }
 }
 
-function normalize(date: Date) {
-    date.setSeconds(0);
-    date.setMilliseconds(0);
-    const m = date.getMinutes();
-    const h = date.getHours();
+function normalize(date: moment.Moment) {
+    date.tz("America/Santiago");
+    date.second(0).millisecond(0);
+
+    const m = date.minutes();
+    const h = date.hours();
     const t = h + m / 60;
 
     if (t < 10) {
-        date.setHours(8);
-        date.setMinutes(30);
+        date.hours(8);
+        date.minutes(30);
     } else if (t < 11.5) {
-        date.setHours(10);
-        date.setMinutes(0);
+        date.hours(10);
+        date.minutes(0);
     } else if (t < 14) {
-        date.setHours(11);
-        date.setMinutes(30);
+        date.hours(11);
+        date = date.minutes(30);
     } else if (t < 15.5) {
-        date.setHours(14);
-        date.setMinutes(0);
+        date.hours(14);
+        date.minutes(0);
     } else if (t < 17) {
-        date.setHours(15);
-        date.setMinutes(30);
+        date.hours(15);
+        date.minutes(30);
     } else if (t < 18.5) {
-        date.setHours(17);
-        date.setMinutes(0);
+        date.hours(17);
+        date.minutes(0);
     } else if (t < 20) {
-        date.setHours(18);
-        date.setMilliseconds(30);
+        date.hours(18);
+        date.minutes(30);
     } else {
-        date.setHours(20);
-        date.setMinutes(0);
+        date.hours(20);
+        date.minutes(0);
     }
+    return date;
 }
 
-function increment(date: Date) {
-    if (date.getHours() == 11) {
-        date.setHours(14);
-        date.setMinutes(0);
-    } else if (date.getHours() >= 20) {
-        date.setTime(Number(date) + 12.5 * 60 ** 2 * 1000);
-        if (date.getDay() == 0) {
-            date.setTime(Number(date) + 24 * 60 ** 2 * 1000);
+function increment(date: moment.Moment) {
+    if (date.hour() == 11) {
+        date.hours(14);
+        date.minutes(0);
+
+    } else if (date.hour() >= 20) {
+        date.add(12.5 * 60 ** 2 * 1000);
+        if (date.day() == 0) {
+            date.add(+ 24 * 60 ** 2 * 1000);
         }
     } else {
-        date.setTime(Number(date) + 1.5 * 60 ** 2 * 1000);
+        date.add(1.5 * 60 ** 2 * 1000);
     }
 }
 

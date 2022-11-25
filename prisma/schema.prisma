@@ -62,25 +62,26 @@ model Submission {
     user           User         @relation(fields: [userId], references: [id])
     model          BicycleModel @relation(fields: [bicycleModelId], references: [id])
     userId         Int          @unique
+    pickupSchedule DateTime?
     bicycleModelId Int
     createdAt      DateTime     @default(now())
 }
 
 model Booking {
-    id              Int        @id @default(autoincrement())
-    user            User       @relation(fields: [userId], references: [id])
-    userId          Int
-    bicycle         Bicycle    @relation(fields: [bicycleId], references: [id])
-    bicycleId       Int
-    start           DateTime   @default(now())
-    end             DateTime?
-    scheduledReturn DateTime?
-    duration        Int
-    ulock           Int        @default(1)
-    lights          Int        @default(1)
-    reflector       Int        @default(1)
-    helmet          Int        @default(1)
-    exitForm        ExitForm[]
+    id             Int        @id @default(autoincrement())
+    user           User       @relation(fields: [userId], references: [id])
+    userId         Int
+    bicycle        Bicycle    @relation(fields: [bicycleId], references: [id])
+    bicycleId      Int
+    start          DateTime   @default(now())
+    end            DateTime?
+    returnSchedule DateTime?
+    duration       Int        @default(3)
+    ulock          Int        @default(1)
+    lights         Int        @default(1)
+    reflector      Int        @default(1)
+    helmet         Int        @default(1)
+    exitForm       ExitForm[]
 }
 
 model BicycleHistory {
