@@ -80,7 +80,7 @@ router.post("/", user({ staffOnly: true }), async (req: Request, res) => {
     const { bicycleId, description } = req.body;
     const userId = Number(req.user?.id);
     if (!bicycleId && !description) {
-        return res.status(400);
+        return res.status(400).json(errors.BAD_REQUEST);
     }
     try {
         const bicycleHistory = await prisma.bicycleHistory.create({

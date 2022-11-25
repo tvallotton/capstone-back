@@ -1,5 +1,9 @@
 components:
   responses:
+    Dates:
+      content:
+        application/json:
+          $ref: "#/components/schemas/Dates"
     Booking:
       description: Returns the booking.
       content:
@@ -106,6 +110,10 @@ components:
           schema:
             $ref: "#/components/schemas/Error"
   schemas:
+    Dates:
+      type: array
+      items:
+        type: string
     ExitFormInput:
       type: object
       properties:
@@ -361,6 +369,62 @@ components:
           type: string
         status:
           type: string
+
+    Schedule:
+      type: array
+      items:
+        type: array
+        items:
+          type: boolean
+      example:
+        - - false
+          - false
+          - false
+          - false
+          - false
+          - false
+          - false
+          - false
+        - - false
+          - false
+          - false
+          - false
+          - false
+          - false
+          - false
+          - false
+        - - false
+          - false
+          - false
+          - false
+          - false
+          - false
+          - false
+          - false
+        - - false
+          - false
+          - false
+          - false
+          - false
+          - false
+          - false
+          - false
+        - - false
+          - false
+          - false
+          - false
+          - false
+          - false
+          - false
+          - false
+        - - false
+          - false
+          - false
+          - false
+          - false
+          - false
+          - false
+          - false
   parameters:
     bicycleModelId:
       in: path

@@ -181,7 +181,7 @@ router.post("/", user(), async (req: Request, res) => {
  * 
  */
 router.post("/upgrade", user({ staffOnly: true }), async (req: Request, res) => {
-    const { qrCode, userId, lights, ulock, reflector } = req.body;
+    const { qrCode, userId, lights, ulock, reflector, duration } = req.body;
     try {
         const bicycle = await prisma.bicycle.findFirst({
             where: { qrCode }, include: {
@@ -212,6 +212,7 @@ router.post("/upgrade", user({ staffOnly: true }), async (req: Request, res) => 
                 ulock,
                 lights,
                 reflector,
+                duration,
                 userId: userId,
                 bicycleId: bicycle?.id,
             }

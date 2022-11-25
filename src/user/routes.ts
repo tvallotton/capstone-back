@@ -277,7 +277,7 @@ router.post("/login", async (req, res) => {
  *               properties: 
  *                 tipo: 
  *                   type: string
- *        responses: 
+ *       responses: 
  *          '204': 
  *              description: Emergency email send correctly
  *          '404':
