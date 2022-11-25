@@ -61,7 +61,7 @@ export function user(options?: Options) {
                 } else {
                     return next();
                 }
-            } catch (_) {
+            } catch (e) {
                 return expired(res, next, options);
             }
         }

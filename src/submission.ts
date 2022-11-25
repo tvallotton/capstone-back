@@ -221,7 +221,7 @@ router.post("/upgrade", user({ staffOnly: true }), async (req: Request, res) => 
         return;
     }
     catch (e) {
-        console.log(e);
+
         res.status(500);
         res.json(errors.UNKOWN_ERROR);
         return;

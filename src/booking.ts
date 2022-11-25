@@ -105,7 +105,6 @@ router.get("/mine", user(), async (req: Request, res) => {
         });
         res.json({ status: "success", bookings });
     } catch (e) {
-        console.log(e);
         res.status(404).json(errors.NOT_FOUND);
     }
 });
@@ -159,7 +158,6 @@ router.get("/:id", async (req, res) => {
  */
 router.get("/qr-code/:qrCode", async (req, res) => {
     const { qrCode } = req.params;
-    console.log(qrCode);
     try {
         const bookings = await prisma.booking.findMany({
             where: {

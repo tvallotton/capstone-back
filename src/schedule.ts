@@ -53,11 +53,9 @@ router.get("/", async (req, res) => {
 router.put("/", user({ adminsOnly: true }), async (req, res) => {
     try {
         const array = [];
-        console.log(req.body);
         for (let i = 0; i < 6; i++) {
             const row = [];
             for (let j = 0; j < 8; j++) {
-                console.log(`[i, j] = ${[i, j]}`);
                 row.push(Boolean(req.body[i][j]));
             }
             array.push(row);
@@ -71,7 +69,6 @@ router.put("/", user({ adminsOnly: true }), async (req, res) => {
         });
         res.json({ status: "success", schedule });
     } catch (e) {
-        console.log(e);
         res.json(errors.EXPECTED_MATRIX);
     }
 });

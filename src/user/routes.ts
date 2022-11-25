@@ -169,7 +169,6 @@ router.post("/", async (req, res) => {
             html: `<p>Para verificar su correo electrónico pinche <a href=${HOST}/validate?token=${token}>aquí</a></p>`,
         }, function (err: any) {
             if (err) {
-                console.log(err);
                 res.status(500).json(errors.EMAIL_COULD_NOT_BE_SENT);
             } else {
                 res.status(201).json({ status: "success", user: created });
@@ -182,7 +181,7 @@ router.post("/", async (req, res) => {
             res.json(errors.USER_ALREADY_EXISTS);
             return;
         }
-        console.log(e);
+
         res.status(400);
         res.json(errors.UNKOWN_ERROR_CREATE_USER);
     }
@@ -242,14 +241,12 @@ router.post("/login", async (req, res) => {
             from: MAIL_USER,
             subject: "Autentificacion Sibico",
             html: `<p>Para verificar su correo electrónico pinche <a href=${HOST}/validate?token=${token}>aquí</a></p>`,
-        }, (err: any) => {
-            if (err) {
-                console.log(err);
-            }
+        }, (err: unknown) => {
+            if (err) console.log(err);
         });
         return;
     }
-    console.log("user", user);
+
     const isCorrect = await argon2.verify(user.password, password);
     if (!isCorrect) {
         res.status(401);
@@ -440,11 +437,11 @@ router.post("/change-password", async (req, res) => {
  */
 router.post("/validate", async (req, res) => {
     const { token } = req.body;
-    console.log("token", token);
+
     try {
         console.log(jwt.verify(token, JWT_SECRET, {}));
         const { userId: id } = jwt.verify(token || "", JWT_SECRET, {}) as { userId: number; };
-        console.log("id", id);
+
         const user = await prisma.user.update({
             data: { isValidated: true, },
             where: { id },
@@ -456,7 +453,7 @@ router.post("/validate", async (req, res) => {
         if (e instanceof JsonWebTokenError) {
             res.status(403).json(errors.TOKEN_EXPIRED);
         } else {
-            console.log(e);
+
             res.status(500).json(errors.INTERNAL_SERVER);
         }
     }
