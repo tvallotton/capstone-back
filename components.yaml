@@ -153,6 +153,8 @@ components:
           type: integer
         reflector:
           type: integer
+        duration:
+          type: integer
     BookingInput:
       type: object
       properties:

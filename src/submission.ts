@@ -181,7 +181,8 @@ router.post("/", user(), async (req: Request, res) => {
  * 
  */
 router.post("/upgrade", user({ staffOnly: true }), async (req: Request, res) => {
-    const { qrCode, userId, lights, ulock, reflector, duration } = req.body;
+    const { qrCode, lights, ulock, reflector, duration } = req.body;
+    const userId = req.user?.id || NaN;
     try {
         const bicycle = await prisma.bicycle.findFirst({
             where: { qrCode }, include: {
@@ -200,12 +201,13 @@ router.post("/upgrade", user({ staffOnly: true }), async (req: Request, res) => 
             return;
         }
 
-        const submission = await prisma.submission.deleteMany({ where: { userId } });
-        if (submission.count == 0) {
+        const submission = await prisma.submission.findFirst({ where: { userId } });
+        if (!submission) {
             res.status(404);
             res.json(errors.SUBMISSION_NOT_FOUND);
             return;
         }
+
 
         const booking = await prisma.booking.create({
             data: {
@@ -213,15 +215,17 @@ router.post("/upgrade", user({ staffOnly: true }), async (req: Request, res) => 
                 lights,
                 reflector,
                 duration,
-                userId: userId,
-                bicycleId: bicycle?.id,
+                userId,
+                bicycleId: bicycle.id,
             }
         });
+
+        await prisma.submission.delete({ where: { userId, } });
         res.json({ status: "success", booking });
         return;
     }
     catch (e) {
-
+        console.log(e);
         res.status(500);
         res.json(errors.UNKOWN_ERROR);
         return;
