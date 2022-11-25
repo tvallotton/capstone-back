@@ -170,7 +170,7 @@ router.get("/:id", async (req, res) => {
  *              '403':
  *                 $ref: '#/components/responses/Forbidden'
  */
-router.post("/", user({ staffOnly: true }), async (req, res) => {
+router.post("/", user({ adminsOnly: true }), async (req, res) => {
     const { name, image, description } = req.body;
     try {
         const model = await prisma.bicycleModel.create({
@@ -205,7 +205,7 @@ router.post("/", user({ staffOnly: true }), async (req, res) => {
  *              '400': 
  *                  $ref: '#/components/responses/BadRequest'
  */
-router.patch("/", user({ staffOnly: true }), async (req, res) => {
+router.patch("/", user({ adminsOnly: true }), async (req, res) => {
     const inputModel: BicycleModel = req.body;
     const id = Number(inputModel.id);
     try {
@@ -235,7 +235,7 @@ router.patch("/", user({ staffOnly: true }), async (req, res) => {
  *              '404': 
  *                  $ref: '#/components/responses/NotFound'
  */
-router.delete("/:id", user({ staffOnly: true }), async (req, res) => {
+router.delete("/:id", user({ adminsOnly: true }), async (req, res) => {
     const { id } = req.params;
     try {
         const model = await prisma.bicycleModel.delete({

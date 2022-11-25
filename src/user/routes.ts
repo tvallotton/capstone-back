@@ -51,7 +51,7 @@ const transporter = nodemailer.createTransport({
  *                                        $ref: '#/components/schemas/User'
  *                  
  */
-router.get("/", user({ staffOnly: true }), async (req, res) => {
+router.get("/", user({ adminsOnly: true }), async (req, res) => {
     const skip = Number(req.query.skip) || undefined;
     const take = Number(req.query.take) || undefined;
 
@@ -102,7 +102,7 @@ router.get("/me", user(), async (req: Request, res: any) => {
  *          '403': 
  *              $ref: '#/components/responses/Forbidden'
  */
-router.get("/:id", user({ staffOnly: true }), async (req, res) => {
+router.get("/:id", user({ adminsOnly: true }), async (req, res) => {
     const { id } = req.params;
     const user = await prisma.user.findFirst({
         where: { id: Number(id) }
@@ -526,7 +526,7 @@ router.patch("/", user(), async (req: Request, res) => {
  *          '403': 
  *              $ref: '#/components/responses/Forbidden'
  */
-router.delete("/:id", user({ staffOnly: true }), async (req: Request, res) => {
+router.delete("/:id", user({ adminsOnly: true }), async (req: Request, res) => {
     const { id } = req.params;
     try {
         const user = await prisma.user.delete({

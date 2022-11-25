@@ -40,7 +40,7 @@ const prisma = new PrismaClient();
  *              '403':
  *                 $ref: '#/components/responses/Forbidden'
  */
-router.get("/", user({ staffOnly: true }), async (req, res) => {
+router.get("/", user({ adminsOnly: true }), async (req, res) => {
     const { take, skip, activeOnly } = req.query;
     const bookings = await prisma.booking.findMany({
         take: Number(take) || undefined,
@@ -246,7 +246,7 @@ router.post("/", user({ adminsOnly: true }), async (req, res) => {
  *              '403':
  *                 $ref: '#/components/responses/Forbidden'
  */
-router.patch("/", user({ staffOnly: true }), async (req, res) => {
+router.patch("/", user({ adminsOnly: true }), async (req, res) => {
     const { id } = req.body;
     const data: Booking = req.body;
     try {
@@ -354,7 +354,7 @@ router.post("/terminate", async (req, res) => {
  *              '403':
  *                 $ref: '#/components/responses/Forbidden'
  */
-router.delete("/:id", user({ staffOnly: true }), async (req, res) => {
+router.delete("/:id", user({ adminsOnly: true }), async (req, res) => {
     const { id } = req.params;
     try {
         const booking = await prisma.booking.delete({

@@ -38,7 +38,7 @@ const prisma = new PrismaClient();
  *              '403':
  *                 $ref: '#/components/responses/Forbidden'
  */
-router.get("/", user({ staffOnly: true }), async (req, res) => {
+router.get("/", user({ adminsOnly: true }), async (req, res) => {
     const { take, skip, } = req.query;
     const submissions = await prisma.submission.findMany({
         take: Number(take) || undefined,
@@ -180,7 +180,7 @@ router.post("/", user(), async (req: Request, res) => {
  *                  description: 'The bicycle, the user or the submission is not found'
  * 
  */
-router.post("/upgrade", user({ staffOnly: true }), async (req: Request, res) => {
+router.post("/upgrade", user({ adminsOnly: true }), async (req: Request, res) => {
     const { qrCode, lights, ulock, reflector, duration } = req.body;
     const userId = req.user?.id || NaN;
     try {
@@ -255,7 +255,7 @@ router.post("/upgrade", user({ staffOnly: true }), async (req: Request, res) => 
  *                  $ref: '#/components/responses/NotFound'
  * 
  */
-router.patch("/", user({ staffOnly: true }), async (req: Request, res) => {
+router.patch("/", user({ adminsOnly: true }), async (req: Request, res) => {
     const { id, bicycleModelId } = req.body;
     try {
         const submission = await prisma.submission.update({

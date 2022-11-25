@@ -56,7 +56,7 @@ export function user(options?: Options) {
                 req.user = await fetchUser(token);
                 if (!req.user?.isAdmin && options?.adminsOnly) {
                     return forbidden(res);
-                } else if (!req.user?.isStaff && options?.staffOnly) {
+                } else if (!(req.user?.isStaff || req.user?.isAdmin) && options?.staffOnly) {
                     return forbidden(res);
                 } else {
                     return next();

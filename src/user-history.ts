@@ -38,7 +38,7 @@ const prisma = new PrismaClient();
  *              "404":
  *                   $ref: "#/components/responses/NotFound"
  */
-router.get("/:userId", user({ staffOnly: true }), async (req, res) => {
+router.get("/:userId", user({ adminsOnly: true }), async (req, res) => {
     const { take, skip } = req.query;
     const { userId } = req.params;
     const history = await prisma.userHistory.findMany({
@@ -77,7 +77,7 @@ router.get("/:userId", user({ staffOnly: true }), async (req, res) => {
  *              "403":
  *                 $ref: "#/components/responses/Forbidden"
  */
-router.post("/", user({ staffOnly: true }), async (req, res) => {
+router.post("/", user({ adminsOnly: true }), async (req, res) => {
     const { userId, description } = req.body;
     if (!userId && !description) {
         return res.status(400);
@@ -108,7 +108,7 @@ router.post("/", user({ staffOnly: true }), async (req, res) => {
  *              "404": 
  *                  $ref: "#/components/responses/NotFound"
  */
-router.delete("/:id", user({ staffOnly: true }), async (req, res) => {
+router.delete("/:id", user({ adminsOnly: true }), async (req, res) => {
     const { id } = req.params;
     try {
         const history = await prisma.userHistory.delete({

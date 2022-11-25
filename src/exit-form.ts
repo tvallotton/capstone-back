@@ -28,7 +28,7 @@ const router = Router();
  *              '200': 
  *                  $ref: '#/components/responses/ExitForm'
  */
-router.get("/", user({ staffOnly: true }), async (req, res) => {
+router.get("/", user({ adminsOnly: true }), async (req, res) => {
     const { id, userId, bookingId } = req.query;
     const exitForm = await prisma.exitForm.findFirst({
         where: {
