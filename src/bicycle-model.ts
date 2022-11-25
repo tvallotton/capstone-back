@@ -94,7 +94,6 @@ router.get("/available", async (req, res) => {
             model._count.id -= remove._count.id;
         }
     }
-    console.log(stockPerModel);
     const avaliable = stockPerModel
         .filter((model) => model._count.id > 0)
         .map((model) => model.modelId);
@@ -132,7 +131,6 @@ router.get("/available", async (req, res) => {
  */
 router.get("/:id", async (req, res) => {
     const { id } = req.params;
-    console.log("id: ", id);
     try {
         const model = await prisma.bicycleModel.findUnique({
             where: { id: Number(id) }
@@ -144,7 +142,6 @@ router.get("/:id", async (req, res) => {
             res.status(404).json(errors.NOT_FOUND);
         }
     } catch (e) {
-        console.log(e);
         res.status(400).json(errors.BAD_REQUEST);
     }
 });

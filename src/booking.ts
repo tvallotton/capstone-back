@@ -105,7 +105,6 @@ router.get("/mine", user(), async (req: Request, res) => {
         });
         res.json({ status: "success", bookings });
     } catch (e) {
-        console.log(e);
         res.status(404).json(errors.NOT_FOUND);
     }
 });
@@ -159,7 +158,6 @@ router.get("/:id", async (req, res) => {
  */
 router.get("/qr-code/:qrCode", async (req, res) => {
     const { qrCode } = req.params;
-    console.log(qrCode);
     try {
         const bookings = await prisma.booking.findMany({
             where: {
@@ -208,7 +206,7 @@ router.get("/qr-code/:qrCode", async (req, res) => {
  *              '403':
  *                 $ref: '#/components/responses/Forbidden'
  */
-router.post("/", user({ staffOnly: true }), async (req, res) => {
+router.post("/", user({ adminsOnly: true }), async (req, res) => {
     const data: Booking = req.body;
     try {
         const booking = await prisma.booking.create({
@@ -220,7 +218,6 @@ router.post("/", user({ staffOnly: true }), async (req, res) => {
         });
         res.status(201).json({ status: "success", booking });
     } catch (e) {
-        console.log(e);
         res.status(400).json(errors.BAD_REQUEST);
     }
 });
