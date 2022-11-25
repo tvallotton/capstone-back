@@ -1,4 +1,4 @@
-import { PrismaClient, User } from "@prisma/client";
+import { Booking, PrismaClient, Submission, User, UserHistory } from "@prisma/client";
 import express, { Response, NextFunction, } from "express";
 import jwt from "jsonwebtoken";
 import process from "process";
@@ -11,7 +11,7 @@ if (!JWT_SECRET) {
 
 const prisma = new PrismaClient();
 
-export type Request = express.Request & { user?: User; };
+export type Request = express.Request & { user?: User & { booking: Booking; submission?: Submission; history: UserHistory[]; }; };
 
 interface Options {
     /**
@@ -61,7 +61,7 @@ export function user(options?: Options) {
                 } else {
                     return next();
                 }
-            } catch (_) {
+            } catch (e) {
                 return expired(res, next, options);
             }
         }
@@ -72,9 +72,16 @@ export function user(options?: Options) {
 async function fetchUser(token: string) {
     const { id } = jwt.verify(token, JWT_SECRET, {}) as { id: number; };
     const user = await prisma.user.findFirst({
-        where: { id }
+        where: { id },
+        include: { bookings: true, submissions: true, history: true }
     });
-    return user || undefined;
+    if (!user) {
+        return undefined;
+    }
+    const { bookings, submissions, ...user2 } = user;
+    const booking = bookings.filter(booking => !booking.end)[0];
+    const submission = submissions[0];
+    return { ...user2, booking, submission };
 }
 // returns forbidden if admins or users only.
 function forbidden(res: Response) {

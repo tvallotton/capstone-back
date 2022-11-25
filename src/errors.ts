@@ -176,7 +176,7 @@ const MISSING_EXIT_FORM = {
 const BOOKING_ALREADY_TERMINATED = {
     "status": "error",
     "code": "BOOKING_ALREADY_TERMINATED",
-    "es": "La reserva ya fue terminada.",
+    "es": "La reserva ya ha terminado.",
     "en": "The booking was already terminated."
 };
 
@@ -193,6 +193,20 @@ const CANNOT_DELETE_LENT_BICYCLE = {
     "es": "La bicicleta no puede ser borrada ya que ha sido prestada. Alternativamente, puedes cambiar su estado a \"INHABILITADA\"."
 };
 
+const EXPECTED_MATRIX = {
+    "status": "error",
+    "code": "EXPECTED_MATRIX",
+    "en": "Expected a boolean matrix of 6x8.",
+    "es": "Se esperaba una matriz booleana de 6x8.",
+};
+
+const OUT_OF_SERVICE = {
+    "status": "error",
+    "code": "OUT_OF_SERVICE",
+    "en": "Sibico is currenlty out of service.",
+    "es": "Sibico se encuentra actualmente fuera de servicio."
+};
+
 export default {
     USER_ALREADY_EXISTS, NOT_FOUND, UNAUTHENTICATED,
     UNREGISTERED_USER, INVALID_EMAIL, INVALID_PASSWORD,
@@ -202,5 +216,5 @@ export default {
     EMAIL_COULD_NOT_BE_SENT, SUBMISSION_NOT_FOUND, BICYCLE_ALREADY_LENT,
     USER_ALREADY_BORROWS, UNKOWN_ERROR_CREATE_USER, INCOMPLETE_USER_INFO,
     USER_ALREADY_SUBMITTED, MISSING_EXIT_FORM, BOOKING_ALREADY_TERMINATED,
-    BOOKING_NOT_FOUND, CANNOT_DELETE_LENT_BICYCLE
+    BOOKING_NOT_FOUND, CANNOT_DELETE_LENT_BICYCLE, EXPECTED_MATRIX, OUT_OF_SERVICE
 };

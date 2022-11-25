@@ -38,7 +38,7 @@ const prisma = new PrismaClient();
  */
 router.get("/", user({ staffOnly: true }), async (req, res) => {
     const { take, skip, } = req.query;
-    console.log("take, skip", take, skip);
+
     const bicycles = await prisma.bicycle.findMany({
         take: Number(take) || undefined,
         skip: Number(skip) || undefined,
@@ -234,7 +234,6 @@ router.patch("/", user({ staffOnly: true }), async (req, res) => {
         }
         res.json({ status: "success", bicycle });
     } catch (e) {
-        console.log(e);
         res.status(404).json(errors.BICYCLE_NOT_FOUND);
     }
 });
