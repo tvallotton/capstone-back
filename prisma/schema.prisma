@@ -30,6 +30,7 @@ model User {
     campus               String           @default("")
     meansOfTransport     String           @default("")
     tripsPerWeek         Int?
+    signature            String?
     howDidYouHearAboutUs String           @default("")
     submissions          Submission[]
     bookings             Booking[]
