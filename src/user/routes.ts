@@ -566,6 +566,7 @@ const PUBLIC_FIELDS = {
     "unidadAcademica": true,
     "submissions": true,
     "bookings": true,
+    "signature": true,
 };
 
 export default router; 
