@@ -1,6 +1,6 @@
 import { Booking, PrismaClient } from "@prisma/client";
 import { Router } from "express";
-import { user, Request } from "./user/middleware";
+import { user, Request, PUBLIC_FIELDS } from "./user/middleware";
 import errors from "./errors";
 
 
@@ -49,7 +49,7 @@ router.get("/", user({ adminsOnly: true }), async (req, res) => {
             end: activeOnly === "true" ? null : undefined
         },
         include: {
-            user: true,
+            user: { select: PUBLIC_FIELDS },
             bicycle: { include: { model: true, } },
         },
     });
@@ -99,7 +99,7 @@ router.get("/mine", user(), async (req: Request, res) => {
                 end: activeOnly === "true" ? null : undefined,
             },
             include: {
-                user: true,
+                user: { select: PUBLIC_FIELDS },
                 bicycle: { include: { model: true, } },
             }
         });
@@ -128,7 +128,7 @@ router.get("/:id", async (req, res) => {
         const booking = await prisma.booking.findUnique({
             where: { id: Number(id) },
             include: {
-                user: true,
+                user: { select: PUBLIC_FIELDS },
                 bicycle: { include: { model: true, } },
             }
         });
@@ -167,7 +167,7 @@ router.get("/qr-code/:qrCode", async (req, res) => {
                 }
             },
             include: {
-                user: true,
+                user: { select: PUBLIC_FIELDS },
                 bicycle: { include: { model: true, } },
             }
         });
@@ -212,7 +212,7 @@ router.post("/", user({ adminsOnly: true }), async (req, res) => {
         const booking = await prisma.booking.create({
             data,
             include: {
-                user: true,
+                user: { select: PUBLIC_FIELDS },
                 bicycle: { include: { model: true, } },
             }
         });
@@ -254,7 +254,7 @@ router.patch("/", user({ adminsOnly: true }), async (req, res) => {
             where: { id },
             data,
             include: {
-                user: true,
+                user: { select: PUBLIC_FIELDS },
                 bicycle: { include: { model: true, } },
             }
         });

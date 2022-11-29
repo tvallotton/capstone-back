@@ -2,7 +2,7 @@ import { PrismaClient, User } from "@prisma/client";
 import { Router } from "express";
 import jwt, { JsonWebTokenError } from "jsonwebtoken";
 import argon2 from "argon2";
-import { JWT_SECRET, user, Request } from "./middleware";
+import { JWT_SECRET, user, Request, PUBLIC_FIELDS } from "./middleware";
 import errors from "../errors";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 import nodemailer from "nodemailer";
@@ -545,25 +545,5 @@ router.delete("/:id", user({ adminsOnly: true }), async (req: Request, res) => {
 router.use((_err: Error, _req: any, res: any, _next: any) => {
     res.status(401).json(errors.UNAUTHORIZED);
 });
-
-
-
-const PUBLIC_FIELDS = {
-    "id": true,
-    "email": true,
-    "isAdmin": true,
-    "isStaff": true,
-    "createdAt": true,
-    "name": true,
-    "lastName": true,
-    "address": true,
-    "city": true,
-    "birthday": true,
-    "occupancy": true,
-    "unidadAcademica": true,
-    "submissions": true,
-    "bookings": true,
-    "signature": true,
-};
 
 export default router; 

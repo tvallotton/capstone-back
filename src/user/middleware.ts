@@ -151,3 +151,21 @@ export function missingData(user: User) {
 
 
 }
+
+export const PUBLIC_FIELDS = {
+    "id": true,
+    "email": true,
+    "isAdmin": true,
+    "isStaff": true,
+    "createdAt": true,
+    "name": true,
+    "lastName": true,
+    "address": true,
+    "city": true,
+    "birthday": true,
+    "occupancy": true,
+    "unidadAcademica": true,
+    "submissions": true,
+    "bookings": true,
+    "signature": true,
+};

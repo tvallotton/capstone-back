@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { Router } from "express";
-import { user } from "./user/middleware";
+import { PUBLIC_FIELDS, user } from "./user/middleware";
 import errors from "./errors";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 export const router = Router();
@@ -52,7 +52,9 @@ router.get("/", user({ staffOnly: true }), async (req, res) => {
                     end: null
                 },
                 include: {
-                    user: true
+                    user: {
+                        select: PUBLIC_FIELDS,
+                    }
                 }
             },
             history: true

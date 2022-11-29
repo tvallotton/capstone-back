@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { Router } from "express";
-import { user, Request, missingData } from "./user/middleware";
+import { user, Request, missingData, PUBLIC_FIELDS } from "./user/middleware";
 import errors from "./errors";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 export const router = Router();
@@ -44,7 +44,7 @@ router.get("/", user({ adminsOnly: true }), async (req, res) => {
         take: Number(take) || undefined,
         skip: Number(skip) || undefined,
         include: {
-            user: true,
+            user: { select: PUBLIC_FIELDS },
             model: true,
         }
     });
@@ -74,7 +74,7 @@ router.get("/mine", user(), async (req: Request, res) => {
                 userId: req.user?.id
             },
             include: {
-                user: true,
+                user: { select: PUBLIC_FIELDS },
                 model: true,
             }
         });

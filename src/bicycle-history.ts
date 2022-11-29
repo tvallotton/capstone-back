@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { Router } from "express";
-import { Request, user } from "./user/middleware";
+import { PUBLIC_FIELDS, Request, user } from "./user/middleware";
 import errors from "./errors";
 
 const router = Router();
@@ -43,7 +43,9 @@ router.get("/:bicycleId", user({ staffOnly: true }), async (req, res) => {
     const history = await prisma.bicycleHistory.findMany({
         include: {
             bicycle: true,
-            user: true,
+            user: {
+                select: PUBLIC_FIELDS,
+            },
         },
         take: Number(take) || undefined,
         skip: Number(skip) || undefined,
