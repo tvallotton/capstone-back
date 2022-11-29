@@ -96,9 +96,11 @@ router.put("/", user({ adminsOnly: true }), async (req, res) => {
  *                                          $ref: "#/components/schemas/Booking"
  *
  */
-router.get("/bookings", async (req, res) => {
-    const start = now();
-    const end = now();
+router.get("/bookings", user({ adminsOnly: true }), async (req, res) => {
+    const offset = Number(req.query.offset) || 0;
+    const start = now(offset);
+    const end = now(offset + 1000 * 60 ** 2 * 24 * 31);
+
     end.add(1000 * 60 ** 2 * 24 * 30);
     let bookings = await prisma.booking.findMany({
         include: {
@@ -151,10 +153,11 @@ router.get("/bookings", async (req, res) => {
  *                                          $ref: "#/components/schemas/Submission"
  *
  */
-router.get("/bookings", async (req, res) => {
-    const start = now();
-    const end = now();
-    end.add(1000 * 60 ** 2 * 24 * 30);
+router.get("/submission", user({ adminsOnly: true }), async (req, res) => {
+    const offset = Number(req.query.offset) || 0;
+    const start = now(offset);
+    const end = now(offset + 1000 * 60 ** 2 * 24 * 31);
+
     let submissions = await prisma.submission.findMany({
         include: {
             user: { select: PUBLIC_FIELDS },
@@ -237,11 +240,13 @@ router.get("/available", user(), async (req: Request, res) => {
  *              '200':
  *                  description: Returns the history of the queried bicycle as an array.
  *                  content:
- *                      application/json: 
- *                          schema: 
+ *                      application/json:
+ *                          schema:
  *                              type: object
  *                              properties: 
- *                                  status: string
+ *                                  status: 
+ *                                      type: string
+ * 
  */
 router.put("/date", user(), async (req: Request, res) => {
     const user = req.user;
@@ -306,14 +311,14 @@ function matches(schedule: Schedule, start: moment.Moment, end: moment.Moment) {
 
 function block(date: moment.Moment): number {
     switch (date.hours()) {
-        case 8: return 0;
-        case 10: return 1;
-        case 11: return 2;
-        case 14: return 3;
-        case 15: return 5;
-        case 17: return 6;
-        case 18: return 7;
-        default: return 8;
+    case 8: return 0;
+    case 10: return 1;
+    case 11: return 2;
+    case 14: return 3;
+    case 15: return 5;
+    case 17: return 6;
+    case 18: return 7;
+    default: return 8;
     }
 }
 
@@ -367,13 +372,14 @@ function increment(date: moment.Moment) {
         date.add(1.5 * 60 ** 2 * 1000);
     }
 }
-function now(): Moment {
-    const start = moment().tz("America/Santiago");
-    start.hours(0);
-    start.minutes(0);
-    start.seconds(0);
-    start.milliseconds(0);
-    return start;
+function now(offset: number): Moment {
+    const time = moment().tz("America/Santiago");
+    time.hours(0);
+    time.minutes(0);
+    time.seconds(0);
+    time.milliseconds(0);
+    time.add(offset);
+    return time;
 }
 
 export default router;
