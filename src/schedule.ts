@@ -2,8 +2,9 @@ import { Booking, PrismaClient, Schedule, Submission } from "@prisma/client";
 import assert from "assert";
 import { Router } from "express";
 import errors from "./errors";
-import { Request, user } from "./user/middleware";
-import moment from "moment-timezone";
+import { PUBLIC_FIELDS, Request, user } from "./user/middleware";
+import moment, { Moment } from "moment-timezone";
+
 
 const max = (a: number, b: number) => a > b ? a : b;
 
@@ -73,6 +74,112 @@ router.put("/", user({ adminsOnly: true }), async (req, res) => {
     }
 });
 
+
+/**
+ * @swagger
+ * /schedule/booking:
+ *      get: 
+ *          parameters: 
+ *              - $ref: "#/components/parameters/x-access-token"
+ *          consumes: 
+ *              - application/json
+ *          responses:
+ *              '200':
+ *                  content:
+ *                       application/json:
+ *                          schema: 
+ *                              type: object
+ *                              properties: 
+ *                                  dates: 
+ *                                      type: object
+ *                                      additionalProperties:
+ *                                          $ref: "#/components/schemas/Booking"
+ *
+ */
+router.get("/bookings", async (req, res) => {
+    const start = now();
+    const end = now();
+    end.add(1000 * 60 ** 2 * 24 * 30);
+    let bookings = await prisma.booking.findMany({
+        include: {
+            user: { select: PUBLIC_FIELDS },
+            bicycle: {
+                include: { model: true }
+            },
+        },
+        where: {
+            end: null,
+            returnSchedule: {
+                not: null,
+                lt: end.toDate(),
+                gt: start.toDate(),
+            }
+        }
+    }) as Array<Booking & { returnSchedule: Date; }>;
+
+    const dates: { [k: string]: Booking[]; } = {};
+    while (start < end) {
+        dates[start.format("Y-M-D")] = bookings.filter(booking => booking.returnSchedule < start.toDate());
+        bookings = bookings.filter(booking => booking.returnSchedule > start.toDate());
+        start.add(1000 * 60 ** 2 * 24);
+    }
+    res.json({
+        status: "success",
+        dates,
+    });
+});
+
+
+/**
+ * @swagger
+ * /schedule/submission:
+ *      get: 
+ *          parameters: 
+ *              - $ref: "#/components/parameters/x-access-token"
+ *          consumes: 
+ *              - application/json
+ *          responses:
+ *              '200':
+ *                  content:
+ *                       application/json:
+ *                          schema: 
+ *                              type: object
+ *                              properties: 
+ *                                  dates: 
+ *                                      type: object
+ *                                      additionalProperties:
+ *                                          $ref: "#/components/schemas/Submission"
+ *
+ */
+router.get("/bookings", async (req, res) => {
+    const start = now();
+    const end = now();
+    end.add(1000 * 60 ** 2 * 24 * 30);
+    let submissions = await prisma.submission.findMany({
+        include: {
+            user: { select: PUBLIC_FIELDS },
+            model: true,
+        },
+        where: {
+            pickupSchedule: {
+                not: null,
+                lt: end.toDate(),
+                gt: start.toDate(),
+            }
+        }
+    }) as Array<Submission & { pickupSchedule: Date; }>;
+
+    const dates: { [k: string]: Submission[]; } = {};
+    while (start < end) {
+        dates[start.format("Y-M-D")] = submissions.filter(submission => submission.pickupSchedule < start.toDate());
+        submissions = submissions.filter(submission => submission.pickupSchedule > start.toDate());
+        start.add(1000 * 60 ** 2 * 24);
+    }
+    res.json({
+        status: "success",
+        dates,
+    });
+});
 
 /**
  * @swagger
@@ -199,14 +306,14 @@ function matches(schedule: Schedule, start: moment.Moment, end: moment.Moment) {
 
 function block(date: moment.Moment): number {
     switch (date.hours()) {
-    case 8: return 0;
-    case 10: return 1;
-    case 11: return 2;
-    case 14: return 3;
-    case 15: return 5;
-    case 17: return 6;
-    case 18: return 7;
-    default: return 8;
+        case 8: return 0;
+        case 10: return 1;
+        case 11: return 2;
+        case 14: return 3;
+        case 15: return 5;
+        case 17: return 6;
+        case 18: return 7;
+        default: return 8;
     }
 }
 
@@ -259,6 +366,14 @@ function increment(date: moment.Moment) {
     } else {
         date.add(1.5 * 60 ** 2 * 1000);
     }
+}
+function now(): Moment {
+    const start = moment().tz("America/Santiago");
+    start.hours(0);
+    start.minutes(0);
+    start.seconds(0);
+    start.milliseconds(0);
+    return start;
 }
 
 export default router;

@@ -1,5 +1,6 @@
 #!/bin/bash
 
+npm i
 npx prisma migrate deploy
 npx prisma generate
 if [ $NODE_ENV = "production" ]
