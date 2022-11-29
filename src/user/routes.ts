@@ -488,8 +488,11 @@ router.post("/validate", async (req, res) => {
 router.patch("/", user(), async (req: Request, res) => {
     // if you are staff or you are editting your own profile
     try {
-        if (req.user?.isStaff || req.user?.id == req.body.id) {
+        if (req.user?.isAdmin || req.user?.id == req.body.id) {
             delete req.body.email;
+            if (req.user?.isAdmin === false) {
+                delete req.body.isAdmin;
+            }
             const password = req.body.password ? await argon2.hash(req.body.password) : undefined;
             const updated = await prisma.user.update({
                 where: {
@@ -512,7 +515,7 @@ router.patch("/", user(), async (req: Request, res) => {
  * @swagger
  * /user/{id}:
  *     delete: 
- *      description: Deletes the user. Only staff members can delete users. 
+ *      description: Deletes the user. Only admin members can delete users. 
  *      parameters: 
  *        - $ref: '#/components/parameters/userId' 
  *        - $ref: '#/components/parameters/x-access-token' 
