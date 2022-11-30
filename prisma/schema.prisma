@@ -25,6 +25,7 @@ model User {
     createdAt            DateTime         @default(now())
     isValidated          Boolean          @default(false)
     rut                  String           @default("")
+    gender               String?
     passport             String           @default("")
     unidadAcademica      String           @default("")
     campus               String           @default("")

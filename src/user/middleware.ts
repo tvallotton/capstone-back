@@ -164,8 +164,13 @@ export const PUBLIC_FIELDS = {
     "city": true,
     "birthday": true,
     "occupancy": true,
+    "campus": true,
     "unidadAcademica": true,
     "submissions": true,
     "bookings": true,
+    "gender": true,
     "signature": true,
+    "meansOfTransport": true,
+    "tripsPerWeek": true,
+    "howDidYouHearAboutUs": true,
 };
