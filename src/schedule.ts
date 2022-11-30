@@ -81,6 +81,14 @@ router.put("/", user({ adminsOnly: true }), async (req, res) => {
  *      get: 
  *          parameters: 
  *              - $ref: "#/components/parameters/x-access-token"
+ *              - in: query
+ *                name: year
+ *                schema:
+ *                  type: number*              
+ *              - in: query
+ *                name: month
+ *                schema:
+ *                  type: number
  *          consumes: 
  *              - application/json
  *          responses:
@@ -96,12 +104,12 @@ router.put("/", user({ adminsOnly: true }), async (req, res) => {
  *                                          $ref: "#/components/schemas/Booking"
  *
  */
-router.get("/bookings", user({ adminsOnly: true }), async (req, res) => {
-    const offset = Number(req.query.offset) || 0;
-    const start = now(offset);
-    const end = now(offset + 1000 * 60 ** 2 * 24 * 31);
+router.get("/booking", user({ adminsOnly: true }), async (req, res) => {
+    const { year, month } = req.query;
+    const start = now(Number(year), Number(month));
+    const end = start.clone();
+    end.add(1, "months");
 
-    end.add(1000 * 60 ** 2 * 24 * 30);
     let bookings = await prisma.booking.findMany({
         include: {
             user: { select: PUBLIC_FIELDS },
@@ -121,7 +129,7 @@ router.get("/bookings", user({ adminsOnly: true }), async (req, res) => {
 
     const dates: { [k: string]: Booking[]; } = {};
     while (start < end) {
-        dates[start.format("Y-M-D")] = bookings.filter(booking => booking.returnSchedule < start.toDate());
+        dates[start.format("Y-MM-DD")] = bookings.filter(booking => booking.returnSchedule < start.toDate());
         bookings = bookings.filter(booking => booking.returnSchedule > start.toDate());
         start.add(1000 * 60 ** 2 * 24);
     }
@@ -138,6 +146,14 @@ router.get("/bookings", user({ adminsOnly: true }), async (req, res) => {
  *      get: 
  *          parameters: 
  *              - $ref: "#/components/parameters/x-access-token"
+ *              - in: query
+ *                name: year
+ *                schema:
+ *                  type: number*              
+ *              - in: query
+ *                name: month
+ *                schema:
+ *                  type: number
  *          consumes: 
  *              - application/json
  *          responses:
@@ -154,9 +170,10 @@ router.get("/bookings", user({ adminsOnly: true }), async (req, res) => {
  *
  */
 router.get("/submission", user({ adminsOnly: true }), async (req, res) => {
-    const offset = Number(req.query.offset) || 0;
-    const start = now(offset);
-    const end = now(offset + 1000 * 60 ** 2 * 24 * 31);
+    const { year, month } = req.query;
+    const start = now(Number(year), Number(month));
+    const end = start.clone();
+    end.add(1, "months");
 
     let submissions = await prisma.submission.findMany({
         include: {
@@ -174,7 +191,7 @@ router.get("/submission", user({ adminsOnly: true }), async (req, res) => {
 
     const dates: { [k: string]: Submission[]; } = {};
     while (start < end) {
-        dates[start.format("Y-M-D")] = submissions.filter(submission => submission.pickupSchedule < start.toDate());
+        dates[start.format("Y-MM-DD")] = submissions.filter(submission => submission.pickupSchedule < start.toDate());
         submissions = submissions.filter(submission => submission.pickupSchedule > start.toDate());
         start.add(1000 * 60 ** 2 * 24);
     }
@@ -311,14 +328,14 @@ function matches(schedule: Schedule, start: moment.Moment, end: moment.Moment) {
 
 function block(date: moment.Moment): number {
     switch (date.hours()) {
-    case 8: return 0;
-    case 10: return 1;
-    case 11: return 2;
-    case 14: return 3;
-    case 15: return 5;
-    case 17: return 6;
-    case 18: return 7;
-    default: return 8;
+        case 8: return 0;
+        case 10: return 1;
+        case 11: return 2;
+        case 14: return 3;
+        case 15: return 5;
+        case 17: return 6;
+        case 18: return 7;
+        default: return 8;
     }
 }
 
@@ -372,14 +389,9 @@ function increment(date: moment.Moment) {
         date.add(1.5 * 60 ** 2 * 1000);
     }
 }
-function now(offset: number): Moment {
+function now(year?: number, month?: number): Moment {
     const time = moment().tz("America/Santiago");
-    time.hours(0);
-    time.minutes(0);
-    time.seconds(0);
-    time.milliseconds(0);
-    time.add(offset);
-    return time;
+    return moment(`${year || time.year()}-${month || time.month()}-02`).tz("America/Santiago");
 }
 
 export default router;
