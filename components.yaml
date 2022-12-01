@@ -147,6 +147,8 @@ components:
       properties:
         qrCode:
           type: string
+        userId:
+          type: string
         lights:
           type: integer
         ulock:
@@ -211,8 +213,6 @@ components:
       type: object
       properties:
         bicycleModelId:
-          type: integer
-        userId:
           type: integer
     Submission:
       type: object
