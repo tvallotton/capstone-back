@@ -48,8 +48,52 @@ router.get("/", user({ adminsOnly: true }), async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /exit-form/mine: 
+ *      get: 
+ *          parameters: 
+ *              - $ref: '#/components/parameters/x-access-token'
+ *              - in: query
+ *                name: id
+ *                schema: 
+ *                     type: integer
+ *              - in: query
+ *                name: userId
+ *                schema: 
+ *                     type: integer
+ *              - in: query
+ *                name: bookingId
+ *                schema: 
+ *                     type: integer
+ *          responses: 
+ *              '200': 
+ *                  $ref: '#/components/responses/ExitForm'
+ */
+router.get("/mine", user(), async (req: Request, res) => {
+    const userId = req.user?.id;
+    const exitForm = await prisma.exitForm.findFirst({
+        where: {
+            booking: {
+                userId: Number(userId),
+            }
+        }
+    });
+    if (exitForm) {
+        res.json({ status: "success", exitForm });
+    } else {
+        res.status(404).json(errors.NOT_FOUND);
+    }
+});
 
 
+const spanishFields = {
+    bicycleReview: "¿Cómo evalúas la bicicleta que recibiste?",
+    bicycleModelReview: "¿Cómo evalúas el modelo de bicicleta que recibiste?",
+    accessoryReview: "¿Cómo evalúas los accesorios que recibiste? ",
+    suggestions: "Sugerencias",
+    parkingSpot: "¿En qué cicletero/s sueles estacionar?",
+};
 const requiredFields = [
     "bicycleReview",
     "bicycleModelReview",
@@ -75,15 +119,17 @@ const requiredFields = [
  *          
  */
 router.put("/", user(), async (req: Request, res) => {
+
+
     const userId = Number(req.user?.id);
     const data = req.body;
 
     for (const field of requiredFields) {
-        if (data[field]) {
+        if (data[field] === undefined) {
             return res.json({
-                status: "success",
+                status: "error",
                 en: `missing required field "${field}"`,
-                es: `falta parametro obligatorio "${field}"`,
+                es: `Por favor responda la sección "${spanishFields[field as "suggestions"]}"`,
             });
         }
     }
@@ -93,7 +139,7 @@ router.put("/", user(), async (req: Request, res) => {
     });
     if (exitForm) {
         await prisma.exitForm.updateMany({
-            where: { bookingId: Number(data.bookingId) },
+            where: { booking: { userId } },
             data,
         });
         return res.json({ status: "success", exitForm: { ...exitForm, ...data } });
@@ -103,10 +149,10 @@ router.put("/", user(), async (req: Request, res) => {
         where: { userId }
     });
 
-    if (!booking) {
+    console.log(booking);
+    if (!booking?.id) {
         return res.status(404).json(errors.BOOKING_NOT_FOUND);
     }
-
     exitForm = await prisma.exitForm.create({
         data: { ...data, bookingId: booking.id }
     });

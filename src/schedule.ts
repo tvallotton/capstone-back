@@ -269,29 +269,36 @@ router.put("/date", user(), async (req: Request, res) => {
     const user = req.user;
     assert(user);
     const { date } = req.body;
-
-    if (user.submission) {
-        await prisma.submission.update({
-            data: {
-                pickupSchedule: date,
-            },
-            where: {
-                id: user.submission.id,
-            }
+    try {
+        if (user.submission) {
+            await prisma.submission.update({
+                data: {
+                    pickupSchedule: date,
+                },
+                where: {
+                    id: user.submission.id,
+                }
+            });
+            res.json({ status: "success", date });
+        } else if (user.booking) {
+            await prisma.booking.update({
+                data: {
+                    returnSchedule: date,
+                },
+                where: {
+                    id: user.booking.id,
+                }
+            });
+            res.json({ status: "success", date });
+        } else {
+            res.status(404).json(errors.SUBMISSION_NOT_FOUND);
+        }
+    } catch (e) {
+        res.status(400).json({
+            status: "error",
+            en: "You must select a valid date.",
+            es: "Debe seleccionar una fecha válida.",
         });
-        res.json({ status: "success", date });
-    } else if (user.booking) {
-        await prisma.booking.update({
-            data: {
-                returnSchedule: date,
-            },
-            where: {
-                id: user.booking.id,
-            }
-        });
-        res.json({ status: "success", date });
-    } else {
-        res.status(404).json(errors.SUBMISSION_NOT_FOUND);
     }
 });
 

@@ -73,7 +73,11 @@ async function fetchUser(token: string) {
     const { id } = jwt.verify(token, JWT_SECRET, {}) as { id: number; };
     const user = await prisma.user.findFirst({
         where: { id },
-        include: { bookings: true, submissions: true, history: true }
+        include: {
+            bookings: {
+                include: { bicycle: { include: { model: true } } }
+            }, submissions: { include: { model: true } }, history: true
+        }
     });
     if (!user) {
         return undefined;
