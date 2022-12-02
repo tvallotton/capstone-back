@@ -176,5 +176,10 @@ export const PUBLIC_FIELDS = {
     "signature": true,
     "meansOfTransport": true,
     "tripsPerWeek": true,
+    "passport": true,
+    "BicycleHistory": true,
+    "rut": true,
+    "history": true,
+    "isValidated": true,
     "howDidYouHearAboutUs": true,
 };
