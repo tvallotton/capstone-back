@@ -173,7 +173,7 @@ router.get("/qr-code/:qrCode", user({ staffOnly: true }), async (req, res) => {
  *                 $ref: '#/components/responses/Forbidden'
  */
 router.post("/", user({ staffOnly: true }), async (req, res) => {
-    const { qrCode, status, modelId, ...data } = req.body;
+    const { qrCode, status, modelId, fleet, ...data } = req.body;
     if (!qrCode && !status && !modelId) {
         return res.status(400);
     }
@@ -181,12 +181,12 @@ router.post("/", user({ staffOnly: true }), async (req, res) => {
     try {
         const bicycle = await prisma.bicycle.create({
             data: {
-                qrCode, status, modelId, ...data
+                qrCode, status, modelId, fleet
             }
         });
         res.status(201).json({ "status": "success", bicycle });
     } catch (e) {
-        console.log(e);
+        console.log(e, "data: ", data);
         if (e instanceof PrismaClientKnownRequestError) {
             if (e.code == "P2002") {
                 return res.status(400).json({

@@ -1,6 +1,5 @@
 #!/bin/bash
 
-docker cp src sibico-backend:./src
 npm i
 npx prisma migrate deploy
 npx prisma generate

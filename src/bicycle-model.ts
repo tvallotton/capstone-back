@@ -3,7 +3,6 @@ import { BicycleModel, PrismaClient } from "@prisma/client";
 import { Router } from "express";
 import { user } from "./user/middleware";
 import errors from "./errors";
-import { copyFileSync } from "fs";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 
 const router = Router();
