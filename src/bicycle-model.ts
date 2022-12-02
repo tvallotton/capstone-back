@@ -3,6 +3,8 @@ import { BicycleModel, PrismaClient } from "@prisma/client";
 import { Router } from "express";
 import { user } from "./user/middleware";
 import errors from "./errors";
+import { copyFileSync } from "fs";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -245,6 +247,15 @@ router.delete("/:id", user({ adminsOnly: true }), async (req, res) => {
         });
         res.json({ status: "success", model });
     } catch (e) {
+        if (e instanceof PrismaClientKnownRequestError) {
+            if (e.code == "P2003") {
+                return res.status(400).json({
+                    status: "error",
+                    en: "-",
+                    es: "No se puede eliminar el modelo ya que hay bicicletas que lo referencian."
+                });
+            }
+        }
         res.status(404).json(errors.NOT_FOUND);
     }
 

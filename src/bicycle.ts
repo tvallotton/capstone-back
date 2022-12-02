@@ -177,6 +177,7 @@ router.post("/", user({ staffOnly: true }), async (req, res) => {
     if (!qrCode && !status && !modelId) {
         return res.status(400);
     }
+
     try {
         const bicycle = await prisma.bicycle.create({
             data: {
@@ -185,6 +186,16 @@ router.post("/", user({ staffOnly: true }), async (req, res) => {
         });
         res.status(201).json({ "status": "success", bicycle });
     } catch (e) {
+        console.log(e);
+        if (e instanceof PrismaClientKnownRequestError) {
+            if (e.code == "P2002") {
+                return res.status(400).json({
+                    status: "error",
+                    en: "",
+                    es: "El código no es único.",
+                });
+            }
+        }
         res.status(400).json(errors.BAD_REQUEST);
     }
 });

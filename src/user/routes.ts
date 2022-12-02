@@ -505,7 +505,9 @@ router.patch("/", user(), async (req: Request, res) => {
         } else {
             res.status(403).json(errors.UNAUTHORIZED);
         }
-    } catch (_) {
+
+    } catch (e) {
+        console.log(e);
         res.status(400).json(errors.BAD_REQUEST);
     }
 });
