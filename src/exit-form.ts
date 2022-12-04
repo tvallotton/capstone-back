@@ -6,46 +6,23 @@ import { user, Request } from "./user/middleware";
 const prisma = new PrismaClient();
 const router = Router();
 
+
 /**
  * @swagger
  * /exit-form: 
  *      get: 
  *          parameters: 
  *              - $ref: '#/components/parameters/x-access-token'
- *              - in: query
- *                name: id
- *                schema: 
- *                     type: integer
- *              - in: query
- *                name: userId
- *                schema: 
- *                     type: integer
- *              - in: query
- *                name: bookingId
- *                schema: 
- *                     type: integer
  *          responses: 
  *              '200': 
- *                  $ref: '#/components/responses/ExitForm'
+ *                  content:
+ *                     application/json:
+ *                     $ref: 
+ *                       $ref: '#/components/schemas/ExitForm'
  */
 router.get("/", user({ adminsOnly: true }), async (req, res) => {
-    const { id, userId, bookingId } = req.query;
-    const exitForm = await prisma.exitForm.findFirst({
-        where: {
-            id: Number(id) || undefined,
-            booking: {
-                id: Number(bookingId) || undefined,
-                userId: Number(userId) || undefined,
-            }
-        }
-    });
-    if (!(id || userId || bookingId)) {
-        res.status(500).json(errors.MISSING_ID);
-    } else if (exitForm) {
-        res.json({ status: "success", exitForm });
-    } else {
-        res.status(404).json(errors.NOT_FOUND);
-    }
+    const exitForms = await prisma.exitForm.findMany();
+    res.json({ status: "success", exitForms });
 });
 
 /**
