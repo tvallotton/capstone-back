@@ -17,7 +17,6 @@ const router = Router();
  *              '200': 
  *                  content:
  *                     application/json:
- *                     $ref: 
  *                       $ref: '#/components/schemas/ExitForm'
  */
 router.get("/", user({ adminsOnly: true }), async (req, res) => {
