@@ -1,7 +1,9 @@
 import { Booking, PrismaClient } from "@prisma/client";
 import { Router } from "express";
 import { user, Request, PUBLIC_FIELDS } from "./user/middleware";
+import { distance, meanOfTransport } from "./kpi";
 import errors from "./errors";
+import moment from "moment-timezone";
 
 
 const router = Router();
@@ -268,7 +270,7 @@ router.patch("/", user({ adminsOnly: true }), async (req, res) => {
  * @swagger
  * /booking/terminate: 
  *      post:
- *          description: This enpoint can be used with either a qrCode or a booking id.
+ *          description: This enpoint can be used with either a qrCode or a bicycle id.
  *          parameters: 
  *              - $ref: '#/components/parameters/x-access-token'
  *          consumes: 
@@ -298,24 +300,10 @@ router.patch("/", user({ adminsOnly: true }), async (req, res) => {
  */
 router.post("/terminate", async (req, res) => {
     const { qrCode, id } = req.body;
-
-    const { count } = await prisma.booking.updateMany({
-        where: {
-            bicycle: { qrCode, id, },
-            end: null,
-            exitForm: { some: {} }
-        },
-        data: { end: new Date() },
-    });
-    if (count) {
-        return res.json({ "status": "success" });
-    }
-
     const booking = await prisma.booking.findFirst({
         where: { bicycle: { qrCode, } },
-        include: { exitForm: true }
+        include: { exitForm: true, user: true }
     });
-
     if (booking == null) {
         return res.status(404).json(errors.NOT_FOUND);
     }
@@ -325,7 +313,26 @@ router.post("/terminate", async (req, res) => {
     if (booking.end) {
         return res.status(400).json(errors.BOOKING_ALREADY_TERMINATED);
     }
-    res.status(500).json(errors.UNKOWN_ERROR);
+
+    const elapsed = moment(booking.start).diff(moment());
+    const mOT = meanOfTransport(booking.user.meansOfTransport);
+    const d = distance(booking.user.city);
+    const trips = booking.user.tripsPerWeek || 0;
+    const carbonFootprint = d * mOT * trips * elapsed / 1000 / 60 ** 2 / 24 / 7;
+    const { count } = await prisma.booking.updateMany({
+        where: {
+            bicycle: { qrCode, id, },
+        },
+        data: {
+            end: new Date(),
+            carbonFootprint,
+        },
+    });
+    if (count) {
+        return res.json({ "status": "success" });
+    } else {
+        return res.status(500).json(errors.UNKOWN_ERROR);
+    }
 });
 
 /**

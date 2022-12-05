@@ -53,9 +53,9 @@ router.get("/", async (req, res) => {
  */
 router.put("/", user({ adminsOnly: true }), async (req, res) => {
     try {
-        const array = [];
+        const array: boolean[][] = [];
         for (let i = 0; i < 6; i++) {
-            const row = [];
+            const row: boolean[] = [];
             for (let j = 0; j < 8; j++) {
                 row.push(Boolean(req.body[i][j]));
             }
@@ -322,7 +322,7 @@ function forBooking(booking: Booking, schedule: Schedule) {
 
 function matches(schedule: Schedule, start: moment.Moment, end: moment.Moment) {
     const array = schedule.array as boolean[][];
-    const matches = [];
+    const matches: string[] = [];
     for (normalize(start); start < end; increment(start)) {
         const day = array[start.day() - 1];
         if (day[block(start)]) {

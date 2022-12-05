@@ -115,17 +115,16 @@ router.put("/", user(), async (req: Request, res) => {
     });
     if (exitForm) {
         await prisma.exitForm.updateMany({
-            where: { booking: { userId } },
+            where: { booking: { userId, end: null } },
             data,
         });
         return res.json({ status: "success", exitForm: { ...exitForm, ...data } });
     }
 
     const booking = await prisma.booking.findFirst({
-        where: { userId }
+        where: { userId, end: null }
     });
 
-    console.log(booking);
     if (!booking?.id) {
         return res.status(404).json(errors.BOOKING_NOT_FOUND);
     }

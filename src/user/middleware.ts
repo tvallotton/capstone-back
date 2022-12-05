@@ -134,7 +134,7 @@ export function missingData(user: User) {
         "occupancy",
         "unidadAcademica",
     ];
-    const missing = [];
+    const missing: string[] = [];
     for (const key of keys) {
         const value = user[key];
         if (value == "") {

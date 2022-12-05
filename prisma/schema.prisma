@@ -70,20 +70,21 @@ model Submission {
 }
 
 model Booking {
-    id             Int        @id @default(autoincrement())
-    user           User       @relation(fields: [userId], references: [id])
-    userId         Int
-    bicycle        Bicycle    @relation(fields: [bicycleId], references: [id])
-    bicycleId      Int
-    start          DateTime   @default(now())
-    end            DateTime?
-    returnSchedule DateTime?
-    duration       Int        @default(3)
-    ulock          Int        @default(1)
-    lights         Int        @default(1)
-    reflector      Int        @default(1)
-    helmet         Int        @default(1)
-    exitForm       ExitForm[]
+    id              Int        @id @default(autoincrement())
+    user            User       @relation(fields: [userId], references: [id])
+    userId          Int
+    bicycle         Bicycle    @relation(fields: [bicycleId], references: [id])
+    bicycleId       Int
+    start           DateTime   @default(now())
+    end             DateTime?
+    returnSchedule  DateTime?
+    carbonFootprint Float      @default(0.0)
+    duration        Int        @default(3)
+    ulock           Int        @default(1)
+    lights          Int        @default(1)
+    reflector       Int        @default(1)
+    helmet          Int        @default(1)
+    exitForm        ExitForm[]
 }
 
 model BicycleHistory {
