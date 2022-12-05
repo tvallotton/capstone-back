@@ -299,19 +299,20 @@ router.patch("/", user({ adminsOnly: true }), async (req, res) => {
  *                 $ref: '#/components/responses/Forbidden'
  */
 router.post("/terminate", async (req, res) => {
-    const { qrCode, id } = req.body;
+    const { qrCode } = req.body;
     const booking = await prisma.booking.findFirst({
-        where: { bicycle: { qrCode, } },
+        where: { bicycle: { qrCode }, end: null },
         include: { exitForm: true, user: true }
     });
     if (booking == null) {
+        const terminated = await prisma.booking.findFirst({ where: { bicycle: { qrCode } } });
+        if (terminated) {
+            return res.status(400).json(errors.BOOKING_ALREADY_TERMINATED);
+        }
         return res.status(404).json(errors.NOT_FOUND);
     }
-    if (booking.exitForm) {
+    if (!booking.exitForm) {
         return res.status(400).json(errors.MISSING_EXIT_FORM);
-    }
-    if (booking.end) {
-        return res.status(400).json(errors.BOOKING_ALREADY_TERMINATED);
     }
 
     const elapsed = moment(booking.start).diff(moment());
@@ -320,9 +321,7 @@ router.post("/terminate", async (req, res) => {
     const trips = booking.user.tripsPerWeek || 0;
     const carbonFootprint = d * mOT * trips * elapsed / 1000 / 60 ** 2 / 24 / 7;
     const { count } = await prisma.booking.updateMany({
-        where: {
-            bicycle: { qrCode, id, },
-        },
+        where: { id: booking.id },
         data: {
             end: new Date(),
             carbonFootprint,

@@ -52,6 +52,7 @@ router.get("/mine", user(), async (req: Request, res) => {
         where: {
             booking: {
                 userId: Number(userId),
+                end: null,
             }
         }
     });
@@ -111,14 +112,15 @@ router.put("/", user(), async (req: Request, res) => {
     }
 
     let exitForm = await prisma.exitForm.findFirst({
-        where: { booking: { userId } }
+        where: { booking: { userId, end: null } }
     });
+    console.log();
     if (exitForm) {
-        await prisma.exitForm.updateMany({
+        const count = await prisma.exitForm.updateMany({
             where: { booking: { userId, end: null } },
             data,
         });
-        return res.json({ status: "success", exitForm: { ...exitForm, ...data } });
+        return res.json({ status: "success", exitForm: { ...exitForm, ...data }, count, exitForm2: exitForm });
     }
 
     const booking = await prisma.booking.findFirst({
