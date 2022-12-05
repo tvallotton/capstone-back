@@ -182,8 +182,8 @@ const BOOKING_ALREADY_TERMINATED = {
 
 const BOOKING_NOT_FOUND = {
     "status": "error",
-    "en": "You have not active bookings.",
-    "es": "No tienes reservas activas."
+    "en": "The reservation could not be found.",
+    "es": "No se encontró la reserva."
 };
 
 const CANNOT_DELETE_LENT_BICYCLE = {
@@ -207,6 +207,13 @@ const OUT_OF_SERVICE = {
     "es": "Sibico se encuentra actualmente fuera de servicio."
 };
 
+const MISSING_FILE = {
+    "status": "error",
+    "code": "MISSING_FILE",
+    "es": "Debe seleccionar un archivo.",
+    "en": "You must select a file.",
+};
+
 export default {
     USER_ALREADY_EXISTS, NOT_FOUND, UNAUTHENTICATED,
     UNREGISTERED_USER, INVALID_EMAIL, INVALID_PASSWORD,
@@ -216,5 +223,6 @@ export default {
     EMAIL_COULD_NOT_BE_SENT, SUBMISSION_NOT_FOUND, BICYCLE_ALREADY_LENT,
     USER_ALREADY_BORROWS, UNKOWN_ERROR_CREATE_USER, INCOMPLETE_USER_INFO,
     USER_ALREADY_SUBMITTED, MISSING_EXIT_FORM, BOOKING_ALREADY_TERMINATED,
-    BOOKING_NOT_FOUND, CANNOT_DELETE_LENT_BICYCLE, EXPECTED_MATRIX, OUT_OF_SERVICE
+    BOOKING_NOT_FOUND, CANNOT_DELETE_LENT_BICYCLE, EXPECTED_MATRIX, OUT_OF_SERVICE,
+    MISSING_FILE
 };

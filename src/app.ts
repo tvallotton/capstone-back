@@ -17,6 +17,7 @@ const PORT = process.env["PORT"] || 5001;
 const app = express();
 
 app.use(cors());
+
 app.use("/", express.json());
 app.use("/user/", user);
 app.use("/user/history", userHistory);
@@ -27,6 +28,7 @@ app.use("/bicycle/history", bicycleHistory);
 app.use("/booking", booking);
 app.use("/exit-form", exitForm);
 app.use("/schedule", schedule);
+app.use("/images", express.static("./images"));
 app.use("/", docs);
 
 app.listen(PORT, () => {

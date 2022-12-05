@@ -2,6 +2,7 @@ version: "3.7"
 services:
   sibico-backend:
     environment:
+      - PUBLIC_IP=localhost
       - NODE_ENV=development
       - DATABASE_URL=postgresql://postgres:postgres@sibico-postgres/sibico?schema=public
     env_file: .env

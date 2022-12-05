@@ -1,9 +1,17 @@
-
 import { BicycleModel, PrismaClient } from "@prisma/client";
 import { Router } from "express";
 import { user } from "./user/middleware";
 import errors from "./errors";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
+import multer from "multer";
+
+
+const PORT = process.env["PORT"];
+const PUBLIC_IP = process.env["PUBLIC_IP"];
+
+function backend_url() {
+    return `http://${PUBLIC_IP}:${PORT}`;
+}
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -185,6 +193,54 @@ router.post("/", user({ adminsOnly: true }), async (req, res) => {
     }
 });
 
+const upload = multer({ dest: "./images" });
+/** 
+ * @swagger
+ * /bicycle-model/upload/{id}:
+ *   put:
+ *     summary: Uploads an image.
+ *     consumes:
+ *       - multipart/form-data
+ *     parameters:
+ *       - $ref: '#/components/parameters/x-access-token'
+ *       - in: path
+ *         name: id
+ *         type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *           multipart/form-data:
+ *                schema:
+ *                    type: string
+ *                    format: binary
+ *     responses: 
+ *         '200': 
+ *             content:
+ *                 application/json: 
+ *                     schema:
+ *                         type: object
+ *                         properties: 
+ *                              status:
+ *                                  type: string
+ */
+router.put("/upload/:id", user({ adminsOnly: true }), async (req, res, next) => {
+    const { id } = req.params;
+    const model = await prisma.bicycleModel.findFirst({ where: { id: Number(id), } });
+    if (model) {
+        return next();
+    }
+    res.status(404).json(errors.BOOKING_NOT_FOUND);
+}, upload.single("image"), async (req, res) => {
+    const { id } = req.params;
+    if (!req.file) {
+        return res.status(400).json(errors.MISSING_FILE);
+    }
+    await prisma.bicycleModel.update({
+        data: { image: `${backend_url()}/images/${req.file?.filename}`, },
+        where: { id: Number(id) }
+    });
+    res.json({ status: "success", });
+});
 
 /**
  * @swagger
