@@ -5,9 +5,6 @@ import errors from "./errors";
 import { PUBLIC_FIELDS, Request, user } from "./user/middleware";
 import moment, { Moment } from "moment-timezone";
 
-
-const max = (a: number, b: number) => a > b ? a : b;
-
 export const router = Router();
 const prisma = new PrismaClient();
 
@@ -29,6 +26,7 @@ router.get("/", async (req, res) => {
     const schedule = query?.array || Array(6).fill(Array(8).fill(false));
     res.json({ status: "success", schedule });
 });
+
 /**
  * @swagger
  * /schedule:
@@ -222,12 +220,8 @@ router.get("/available", user(), async (req: Request, res) => {
         return res.status(503).json(errors.OUT_OF_SERVICE);
     }
 
-    if (user.submission) {
-        const dates = forSubmission(user.submission, schedule);
-        return res.json({ status: "success", dates });
-    }
-    else if (user.booking) {
-        const dates = forBooking(user.booking, schedule);
+    if (user.submission || user.booking) {
+        const dates = available(schedule);
         return res.json({ status: "success", dates });
     } else {
         res.status(400).json(errors.SUBMISSION_NOT_FOUND);
@@ -304,19 +298,10 @@ router.put("/date", user(), async (req: Request, res) => {
 
 const windowPeriod = 1000 * 60 ** 2 * 24 * 7 * 3;
 
-function forSubmission(submission: Submission, schedule: Schedule) {
+function available(schedule: Schedule) {
     const now = new Date();
     const end = Number(now) + windowPeriod;
     return matches(schedule, moment(), moment(end));
-}
-
-function forBooking(booking: Booking, schedule: Schedule) {
-    const duration = booking.duration * 1000 * 60 ** 2 * 24 * 30;
-    const now = Number(new Date());
-    const bookingStart = Number(booking.start);
-    const end = max(now + windowPeriod, bookingStart + duration);
-    const start = end - windowPeriod;
-    return matches(schedule, moment(start), moment(end));
 }
 
 
@@ -338,11 +323,12 @@ function block(date: moment.Moment): number {
     case 8: return 0;
     case 10: return 1;
     case 11: return 2;
-    case 14: return 3;
+    case 13: return 3; 
+    case 14: return 4;
     case 15: return 5;
     case 17: return 6;
     case 18: return 7;
-    default: return 8;
+    default: return 7;
     }
 }
 
@@ -360,9 +346,12 @@ function normalize(date: moment.Moment) {
     } else if (t < 11.5) {
         date.hours(10);
         date.minutes(0);
-    } else if (t < 14) {
+    } else if (t < 13) {
         date.hours(11);
-        date = date.minutes(30);
+        date.minutes(30);
+    } else if (t < 14) {
+        date.hours(13);
+        date = date.minutes(0);
     } else if (t < 15.5) {
         date.hours(14);
         date.minutes(0);
@@ -383,7 +372,7 @@ function normalize(date: moment.Moment) {
 }
 
 function increment(date: moment.Moment) {
-    if (date.hour() == 11) {
+    if (date.hour() == 13) {
         date.hours(14);
         date.minutes(0);
 
