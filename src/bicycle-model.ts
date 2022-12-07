@@ -72,8 +72,11 @@ router.get("/", async (req, res) => {
 router.get("/available", async (req, res) => {
     const stockPerModel = await prisma.bicycle.groupBy({
         by: ["modelId"],
+        where: {
+            status: "HABILITADA",
+        },
         _count: {
-            id: true,
+            qrCode: true,
         }
     });
     const submissionsPerModel = await prisma.submission.groupBy({
@@ -91,22 +94,32 @@ router.get("/available", async (req, res) => {
         },
         _count: { id: true }
     });
+    const quantities: { [k: string]: number; } = {};
+
+    for (const model of stockPerModel) {
+        quantities[model.modelId] = model._count.qrCode;
+    }
+
     // We subtract the ones that were submitted. 
     for (const remove of submissionsPerModel) {
         for (const model of stockPerModel) {
-            model._count.id -= remove._count.id;
+            model._count.qrCode -= remove._count.id;
         }
     }
     // And we subtract the ones that are already booked. 
     for (const remove of bookingsPerModel) {
         for (const model of stockPerModel) {
-            model._count.id -= remove._count.id;
+            model._count.qrCode -= remove._count.id;
         }
     }
     const avaliable = stockPerModel
-        .filter((model) => model._count.id > 0)
+        .filter((model) => model._count.qrCode > 0)
         .map((model) => model.modelId);
-
+    console.log("submissionsPerModel", submissionsPerModel);
+    console.log("bookingsPerModel", bookingsPerModel);
+    console.log("stockPerModel", stockPerModel);
+    console.log("quantities", stockPerModel
+        .filter((model) => model._count.qrCode > 0));
     const models = await prisma.bicycleModel.findMany({
         where: {
             id: {
@@ -304,10 +317,11 @@ router.delete("/:id", user({ adminsOnly: true }), async (req, res) => {
     } catch (e) {
         if (e instanceof PrismaClientKnownRequestError) {
             if (e.code == "P2003") {
+                console.log(e);
                 return res.status(400).json({
                     status: "error",
                     en: "-",
-                    es: "No se puede eliminar el modelo ya que hay bicicletas que lo referencian."
+                    es: "No se puede eliminar el modelo ya que hay bicicletas o solicitudes que lo referencian."
                 });
             }
         }
@@ -317,4 +331,5 @@ router.delete("/:id", user({ adminsOnly: true }), async (req, res) => {
 });
 
 
-export default router; 
+export default router;
+

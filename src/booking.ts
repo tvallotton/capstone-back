@@ -363,6 +363,9 @@ router.post("/terminate", async (req, res) => {
 router.delete("/:id", user({ adminsOnly: true }), async (req, res) => {
     const { id } = req.params;
     try {
+        await prisma.exitForm.deleteMany({
+            where: { bookingId: Number(id), }
+        });
         const booking = await prisma.booking.delete({
             where: {
                 id: Number(id) || undefined
@@ -370,6 +373,7 @@ router.delete("/:id", user({ adminsOnly: true }), async (req, res) => {
         });
         res.json({ status: "success", booking });
     } catch (e) {
+        console.log(e);
         res.status(404).json(errors.NOT_FOUND);
     }
 });

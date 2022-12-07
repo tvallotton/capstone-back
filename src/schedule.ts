@@ -220,7 +220,7 @@ router.get("/available", user(), async (req: Request, res) => {
         return res.status(503).json(errors.OUT_OF_SERVICE);
     }
 
-    if (user.submission || user.booking) {
+    if (user.submission || user.booking) {
         const dates = available(schedule);
         return res.json({ status: "success", dates });
     } else {
@@ -323,7 +323,7 @@ function block(date: moment.Moment): number {
     case 8: return 0;
     case 10: return 1;
     case 11: return 2;
-    case 13: return 3; 
+    case 13: return 3;
     case 14: return 4;
     case 15: return 5;
     case 17: return 6;
