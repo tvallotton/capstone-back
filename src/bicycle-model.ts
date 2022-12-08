@@ -94,12 +94,6 @@ router.get("/available", async (req, res) => {
         },
         _count: { id: true }
     });
-    const quantities: { [k: string]: number; } = {};
-
-    for (const model of stockPerModel) {
-        quantities[model.modelId] = model._count.qrCode;
-    }
-
     // We subtract the ones that were submitted. 
     for (const remove of submissionsPerModel) {
         for (const model of stockPerModel) {
@@ -119,11 +113,7 @@ router.get("/available", async (req, res) => {
     const avaliable = stockPerModel
         .filter((model) => model._count.qrCode > 0)
         .map((model) => model.modelId);
-    console.log("submissionsPerModel", submissionsPerModel);
-    console.log("bookingsPerModel", bookingsPerModel);
-    console.log("stockPerModel", stockPerModel);
-    console.log("quantities", stockPerModel
-        .filter((model) => model._count.qrCode > 0));
+
     const models = await prisma.bicycleModel.findMany({
         where: {
             id: {
