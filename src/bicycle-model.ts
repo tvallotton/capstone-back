@@ -103,13 +103,17 @@ router.get("/available", async (req, res) => {
     // We subtract the ones that were submitted. 
     for (const remove of submissionsPerModel) {
         for (const model of stockPerModel) {
-            model._count.qrCode -= remove._count.id;
+            if (model.modelId == remove.bicycleModelId) {
+                model._count.qrCode -= remove._count.id;
+            }
         }
     }
     // And we subtract the ones that are already booked. 
     for (const remove of bookingsPerModel) {
         for (const model of stockPerModel) {
-            model._count.qrCode -= remove._count.id;
+            if (model.modelId == remove.modelId) {
+                model._count.qrCode -= remove._count.id;
+            }
         }
     }
     const avaliable = stockPerModel
